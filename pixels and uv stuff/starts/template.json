@@ -1,0 +1,8 @@
+{
+  "name": "muscle_name",
+  "starting_points": "[(x1, y1), (x2, y2)]",
+  "starting_colors": {"hex_value": "Idk", "hex_value2": "idk2"},
+  "max_X": "[(correlates to starting point 1), (correlates to starting point 2)]",
+  "max_Y": "[(correlates to starting point 1), (correlates to starting point 2)]"
+
+}

@@ -1,2 +1,3 @@
 /pixels and uv stuff/geometry_files/*
 *.json
+!pixels and uv stuff/starts/template.json

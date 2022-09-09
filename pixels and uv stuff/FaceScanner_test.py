@@ -3,50 +3,78 @@ import math
 import multiprocessing
 import time
 from TriangleDecomposer import TriangleDecomposer
+import threading
 
 
 class FaceScanner:
     def __init__(self):
-        print("Loading in faces")
         # these are all arrays!!!!!!!!!
-        self.faces = self.read_in_faces()
-        print("Loading normals")
-        self.normals = self.read_in_normals()
-        print("Loading uvs")
-        self.uvs = self.read_in_geometry_uvs()
-        print("Loading targets")
-        self.target_uvs = self.read_in_target_uvs()
+        # self.faces = self.read_in_faces()
+        # self.normals = self.read_in_normals()
+        # self.uvs = self.read_in_geometry_uvs()
+        # self.target_uvs = self.read_in_target_uvs()
+        self.read_in_faces()
+        self.read_in_normals()
+        self.read_in_geometry_uvs()
+        self.read_in_target_uvs()
         # this will be the dictionary that contains all points and which triangle they belong to
         # key = (x, y) in pixels
         # value = index of face that holds the uvs
         # since (0, 0) repeats a lot to start we're just gonna manually create it so we can just ignore it later
+        # self.read_in_files()
         self.point_to_triangle = {"(0, 0)": 0}
 
+
+    # apparently in our use case threading to read in files is absolutely useless
+    def read_in_files(self):
+        t1 = threading.Thread(target=self.read_in_faces)
+        t2 = threading.Thread(target=self.read_in_normals)
+        t3 = threading.Thread(target=self.read_in_geometry_uvs)
+        t4 = threading.Thread(target=self.read_in_target_uvs)
+        t1.start()
+        t2.start()
+        t3.start()
+        t4.start()
+        t1.join()
+        t2.join()
+        t3.join()
+        t4.join()
+
+
     def read_in_faces(self):
+        print("Loading in faces")
         with open('geometry_files/geometry_faces.json', 'r') as file:
             data = file.read()
-        return json.loads(data)['faces']
+        self.faces = json.loads(data)['faces']
+
 
     def read_in_normals(self):
+        print("Loading normals")
         with open('geometry_files/geometry_normals.json', 'r') as file:
             data = file.read()
-        return json.loads(data)['normals']
+        self.normals = json.loads(data)['normals']
+
 
     def read_in_geometry_uvs(self):
+        print("Loading geometry uvs")
         with open('geometry_files/geometry_uvs.json', 'r') as file:
             data = file.read()
-        return json.loads(data)['uvs']
+        self.uvs = json.loads(data)['uvs']
+
 
     def read_in_target_uvs(self):
+        print("Loading targets")
         with open('geometry_files/target_uvs.json', 'r') as file:
             data = file.read()
-        return json.loads(data)['uvs']
+        self.target_uvs = json.loads(data)['uvs']
+
 
     def read_in_points(self):
         with open('all_points.json', 'r') as file:
             print("length of points", len(self.point_to_triangle))
             data = file.read()
         return json.loads(data)
+
 
     def decompose_all_triangles(self):
         print("Decomposing all triangles into points!")
@@ -79,6 +107,7 @@ class FaceScanner:
             print("dumping to points file")
             json.dump(self.point_to_triangle, fp)
 
+
     def find_faces_of_target_uvs(self):
         face_results = []
         print("Loading points...")
@@ -102,7 +131,7 @@ class FaceScanner:
 
         with open('faces_found_fast.json', 'w') as fp:
             print("result length", len(face_results))
-            json.dump({"results":face_results}, fp)
+            json.dump({"results": face_results}, fp)
 
 
 def uvs_to_pixels(u, v):
@@ -113,7 +142,6 @@ def uvs_to_pixels(u, v):
     # since 0, 0 is at the bottom left! very important
     y = math.floor((v - 1) * -MAX_HEIGHT)
     return x, y
-
 
 
 def processor_controller():
@@ -205,13 +233,16 @@ def isPtInTriangle(p, p0, p1, p2):
 
 
 if __name__ == "__main__":
+    start = time.time()
     test = FaceScanner()
-    print("Finished reading in geometries...")
+    end = time.time()
+    print()
+    print(f"Finished reading in geometries...Took {end - start} seconds")
     start = time.time()
     # create all the points within the class
-    # test.decompose_all_triangles()
+    test.decompose_all_triangles()
     # then search through target_uvs
     test.find_faces_of_target_uvs()
     end = time.time()
     print(end - start)
-    print(f"Full task too {(end - start)/60} minutes")
+    print(f"Full task took {(end - start)/60} minutes")
