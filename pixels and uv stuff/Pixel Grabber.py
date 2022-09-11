@@ -17,9 +17,9 @@ class PixelGrabber:
     def read_in_muscle_starts(self):
         print("Loading in muscle starts...")
         # testing line
-        with open('starts/test_template.json', 'r') as file:
+        # with open('starts/test_template.json', 'r') as file:
         # this is the normal one to be used
-        # with open('starts/muscle_starts.json', 'r') as file:
+        with open('starts/muscle_starts.json', 'r') as file:
             data = file.read()
         return json.loads(data)
 
@@ -96,69 +96,6 @@ class PixelGrabber:
         print(len(accepted_pixels))
         return accepted_pixels
 
-    # TODO needs to take in starting colors, maxs and mins
-    # def DFS(self, starting_coords, acceptable_colors, min_X, min_Y, max_X, max_Y):
-    #     x, y = starting_coords
-    #     pixel_rgb = self.coords_dict[(x, y)]
-    #     # IMPORTANT why the fuck is it reading in the blue value one color off from intellij's thing
-    #     # maybe a bit of an optimization or a waste of time not sure
-    #     acceptable_colors_dict = {}
-    #     for rgb in acceptable_colors:
-    #         acceptable_colors_dict[tuple(rgb)] = True
-    #     # color = (220, 156, 190)
-    #     # acceptable_colors = {color: True}
-    #     queue = []
-    #     # important that this is a dict it's much faster!
-    #     visited = {}
-    #     accepted_pixels = []
-    #     # add it to the queue and the visited
-    #     queue.append(starting_coords)
-    #     # idk what value to store it's arbitrary
-    #     visited[starting_coords] = pixel_rgb
-    #     accepted_pixels.append(starting_coords)
-    #     while queue:
-    #         # queue is just a tuple list of coords
-    #         current_coords = queue.pop(0)
-    #         x, y = current_coords
-    #         pixel_rgb = self.coords_dict[(x, y)]
-    #         # print(queue)
-    #         # print(pixel_rgb)
-    #         # print(color)
-    #         # bottom left row+1, col - 1
-    #         if not (x + 1 >= self.max_width) and not (y - 1 < 0):
-    #             self.DFS_helper((x + 1, y - 1), pixel_rgb, acceptable_colors, queue, visited, accepted_pixels)
-    #         # left col - 1
-    #         if not (y - 1 < 0):
-    #             self.DFS_helper((x, y - 1), pixel_rgb, acceptable_colors, queue, visited, accepted_pixels)
-    #
-    #         # top left row-1, col-1
-    #         if not (x - 1 < 0) and not (y - 1 < 0):
-    #             self.DFS_helper((x - 1, y - 1), pixel_rgb, acceptable_colors, queue, visited, accepted_pixels)
-    #
-    #         # top
-    #         if not (x - 1 < 0):
-    #             self.DFS_helper((x - 1, y), pixel_rgb, acceptable_colors, queue, visited, accepted_pixels)
-    #
-    #         # top right row-1, col +1
-    #         if not (x - 1 < 0) and not (y + 1 >= self.max_height):
-    #             self.DFS_helper((x - 1, y + 1), pixel_rgb, acceptable_colors, queue, visited, accepted_pixels)
-    #
-    #         # right row, col +1
-    #         if not (y + 1 >= self.max_height):
-    #             self.DFS_helper((x, y + 1), pixel_rgb, acceptable_colors, queue, visited, accepted_pixels)
-    #
-    #         # bottom right row+1, col+1
-    #         if not (x + 1 >= self.max_width) and not (y + 1 >= self.max_height):
-    #             self.DFS_helper((x + 1, y + 1), pixel_rgb, acceptable_colors, queue, visited, accepted_pixels)
-    #
-    #         # bottom row+1, col
-    #         if not (x + 1 >= self.max_width):
-    #             self.DFS_helper((x + 1, y), pixel_rgb, acceptable_colors, queue, visited, accepted_pixels)
-    #     # return revealed which should be all matching pixels within range
-    #     print("visited vs revealed")
-    #     print(len(visited.values()))
-    #     print(len(accepted_pixels))
-    #     return accepted_pixels
     # this is the helper function for the search algorithm to make it more readable
     def DFS_helper(self, current_coords, rgb, acceptable_colors: dict, queue, visited: dict, revealed):
         if current_coords not in visited:
