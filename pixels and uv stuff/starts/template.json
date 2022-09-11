@@ -1,8 +1,16 @@
 {
-  "name": "muscle_name",
-  "starting_points": "[(x1, y1), (x2, y2)]",
-  "starting_colors": {"hex_value": "Idk", "hex_value2": "idk2"},
-  "max_X": "[(correlates to starting point 1), (correlates to starting point 2)]",
-  "max_Y": "[(correlates to starting point 1), (correlates to starting point 2)]"
-
+"muscle_name":
+{
+  "label": "the shortened label on the body itself",
+  //  multiple starting points means the muscle is divided up in seperate parts
+  "starting_points": [[x1, y2], [x2, y2]],
+  // this is the starting color also multiple in case it has that weird stripped pattern or something else
+  "acceptable_colors_rgb": [[143, 143, 144], [143, 143, 143]],
+  // the following can be left blank if it doesn't bleed into a muscle with the same color
+  // if no max or min needs to be specified let's default to 0 for min and 4096 for max
+  "min_X": [(correlates to starting point 1), (correlates to starting point 2)],
+  "max_X": [(correlates to starting point 1), (correlates to starting point 2)],
+  "min_Y": [(correlates to starting point 1), (correlates to starting point 2)]
+  "max_Y": [(correlates to starting point 1), (correlates to starting point 2)]
+  }
 }

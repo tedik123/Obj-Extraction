@@ -1,3 +1,5 @@
-/pixels and uv stuff/geometry_files/*
+#/pixels and uv stuff/geometry_files/*
 *.json
-!pixels and uv stuff/starts/template.json
+!pixels and uv stuff/starts/*.json
+pixels and uv stuff/outputs/*
+!pixels and uv stuff/outputs/.gitkeep

@@ -3,43 +3,22 @@ import math
 import multiprocessing
 import time
 from TriangleDecomposer import TriangleDecomposer
-import threading
 
 
-class FaceScanner:
-    def __init__(self):
+class PixelToFace:
+
+    def __init__(self, target_file_path):
         # these are all arrays!!!!!!!!!
-        # self.faces = self.read_in_faces()
-        # self.normals = self.read_in_normals()
-        # self.uvs = self.read_in_geometry_uvs()
-        # self.target_uvs = self.read_in_target_uvs()
+        self.target_file_path = target_file_path
         self.read_in_faces()
         self.read_in_normals()
         self.read_in_geometry_uvs()
-        self.read_in_target_uvs()
+        self.read_in_target_pixels()
         # this will be the dictionary that contains all points and which triangle they belong to
         # key = (x, y) in pixels
         # value = index of face that holds the uvs
         # since (0, 0) repeats a lot to start we're just gonna manually create it so we can just ignore it later
-        # self.read_in_files()
         self.point_to_triangle = {"(0, 0)": 0}
-
-
-    # apparently in our use case threading to read in files is absolutely useless
-    def read_in_files(self):
-        t1 = threading.Thread(target=self.read_in_faces)
-        t2 = threading.Thread(target=self.read_in_normals)
-        t3 = threading.Thread(target=self.read_in_geometry_uvs)
-        t4 = threading.Thread(target=self.read_in_target_uvs)
-        t1.start()
-        t2.start()
-        t3.start()
-        t4.start()
-        t1.join()
-        t2.join()
-        t3.join()
-        t4.join()
-
 
     def read_in_faces(self):
         print("Loading in faces")
@@ -47,13 +26,11 @@ class FaceScanner:
             data = file.read()
         self.faces = json.loads(data)['faces']
 
-
     def read_in_normals(self):
         print("Loading normals")
         with open('geometry_files/geometry_normals.json', 'r') as file:
             data = file.read()
         self.normals = json.loads(data)['normals']
-
 
     def read_in_geometry_uvs(self):
         print("Loading geometry uvs")
@@ -61,20 +38,25 @@ class FaceScanner:
             data = file.read()
         self.uvs = json.loads(data)['uvs']
 
-
+    # OLD when we we converted the picture pixels to UVs but we don't need to do that anymore
     def read_in_target_uvs(self):
-        print("Loading targets")
+        print("Loading target uvs")
         with open('geometry_files/target_uvs.json', 'r') as file:
             data = file.read()
-        self.target_uvs = json.loads(data)['uvs']
+        # self.target_uvs = json.loads(data)['uvs']
 
+    def read_in_target_pixels(self):
+        print("Loading target pixels")
+        with open(self.target_file_path, 'r') as file:
+            data = file.read()
+        self.target_pixels = json.loads(data)
 
     def read_in_points(self):
-        with open('all_points.json', 'r') as file:
+        print("Loading points...")
+        with open('outputs/all_points_from_model.json', 'r') as file:
             print("length of points", len(self.point_to_triangle))
             data = file.read()
         return json.loads(data)
-
 
     def decompose_all_triangles(self):
         print("Decomposing all triangles into points!")
@@ -102,36 +84,38 @@ class FaceScanner:
                     #     print("cringe")
 
         # then let's save all the points to a json
-        with open('all_points.json', 'w') as fp:
+        with open('outputs/all_points_from_model.json', 'w') as fp:
             print("length of points", len(self.point_to_triangle))
             print("dumping to points file")
             json.dump(self.point_to_triangle, fp)
 
-
-    def find_faces_of_target_uvs(self):
-        face_results = []
-        print("Loading points...")
+    def find_faces_of_targets(self):
+        self.muscle_faces = {}
         points_dict = self.read_in_points()
         print("Searching points for targets...")
-        for target_uv in self.target_uvs:
-            # TODO need to convert these to pixel coordinates!!!
-            target_uv = (uvs_to_pixels(target_uv[0], target_uv[1]))
-            target_uv = str(target_uv)
-            print(target_uv)
-            uv_does_exist = points_dict.get(target_uv, None)
-            print(uv_does_exist)
-            if uv_does_exist:
-                p0 = self.faces[uv_does_exist]["a"]
-                p1 = self.faces[uv_does_exist]["b"]
-                p2 = self.faces[uv_does_exist]["c"]
-                face_results.append(p0)
-                face_results.append(p1)
-                face_results.append(p2)
+        for muscle_name, targets in self.target_pixels.items():
+            face_results = []
+            for target in targets:
+                # need to convert these to pixel coordinates if using UVs as targets!!!
+                # target = (uvs_to_pixels(target[0], target[1]))
+                target = str(tuple(target))
+                uv_does_exist = points_dict.get(target, None)
+                if not uv_does_exist:
+                    print(target)
+                    # print(uv_does_exist)
+                if uv_does_exist:
+                    p0 = self.faces[uv_does_exist]["a"]
+                    p1 = self.faces[uv_does_exist]["b"]
+                    p2 = self.faces[uv_does_exist]["c"]
+                    face_results.append(p0)
+                    face_results.append(p1)
+                    face_results.append(p2)
+            self.muscle_faces[muscle_name] = face_results
         # print(face_results)
-
-        with open('faces_found_fast.json', 'w') as fp:
-            print("result length", len(face_results))
-            json.dump({"results": face_results}, fp)
+        # TODO match faces to muscle name or label whichever we want
+        with open('outputs/faces_found_by_muscles.json', 'w') as fp:
+            print("Muscles faces length", len(self.muscle_faces))
+            json.dump(self.muscle_faces, fp)
 
 
 def uvs_to_pixels(u, v):
@@ -143,69 +127,11 @@ def uvs_to_pixels(u, v):
     y = math.floor((v - 1) * -MAX_HEIGHT)
     return x, y
 
-
-def processor_controller():
-    data = FaceScanner()
-    # need manager so the shared variable can be updated properly
-    # a normal dict will NOT work!
-    manager = multiprocessing.Manager()
-    # this is the amount of faces/normals/uvs there are
-    # MAX_VALUE = 664284
-    MAX_VALUE = 235872  # this is the number of TARGET uvs
-    # I can probs move this up to 8 or 9 since each one takes about 10.4%
-    process_count = 9  # i had it at 10 before but 6 should be better since less switching
-    work_per_thread = MAX_VALUE / process_count
-    processes = [None] * process_count
-    results = manager.dict()
-    for i in range(process_count):
-        min_val = int(i * work_per_thread)
-        max_val = int((i + 1) * work_per_thread)
-        print(f"Process {i}, start:", min_val)
-        print(f"Process {i}, end:", max_val)
-        print("diff", max_val - min_val)
-        # target uvs need to be divided, this might skip values...i'm not sure i think it's okay?
-        target_uvs = data.target_uvs[min_val:max_val]
-        print(len(data.target_uvs))
-        processes[i] = multiprocessing.Process(target=find_faces_of_target_uvs,
-                                               args=(target_uvs, data.faces, data.normals, data.uvs, results, i))
-        processes[i].start()
-
-    for i in range(process_count):
-        processes[i].join()
-
-    with open('faces_found_fast.json', 'w') as fp:
-        print("result length", len(results))
-        json.dump(dict(results), fp)
-
-
-def find_faces_of_target_uvs(target_uvs, faces, normals, uvs, results, index):
-    print(f"Process {index} ends at {len(target_uvs)} UVs.")
-    progress = 0
-    # create the class and run the test within bounds
-    face_result = []
-    counter = 0
-    for target_uv in target_uvs:
-        target_uv = {"x": target_uv[0], "y": target_uv[1]}
-        if counter % 8736 == 0:
-            print(f"{time.time()} Process {index} is {progress}/3 of the way through")
-            progress += 1
-        for i in range(len(faces)):
-            uv0 = uvs[i]["a"]
-            uv1 = uvs[i]["b"]
-            uv2 = uvs[i]["c"]
-            if isPtInTriangle(target_uv, uv0, uv1, uv2):
-                p0 = faces[i]["a"]
-                p1 = faces[i]["b"]
-                p2 = faces[i]["c"]
-                face_result.append(p0)
-                face_result.append(p1)
-                face_result.append(p2)
-                break
-        counter += 1
-    # print(face_result)
-    results[str(index)] = face_result
-
-
+# This is a standard barycentric coordinate function.
+# I don't know how this works...
+# I think it checks if a point is all to one side of each line
+# does it matter in which orientation things are?
+# https://stackoverflow.com/questions/20248076/how-do-i-check-if-a-point-is-inside-a-triangle-on-the-line-is-ok-too
 def isPtInTriangle(p, p0, p1, p2):
     x0 = p["x"]
     y0 = p["y"]
@@ -233,16 +159,20 @@ def isPtInTriangle(p, p0, p1, p2):
 
 
 if __name__ == "__main__":
+    TARGET_FILE = 'outputs/pixels_by_muscles.json'
     start = time.time()
-    test = FaceScanner()
+    pixel_to_faces = PixelToFace(TARGET_FILE)
     end = time.time()
     print()
     print(f"Finished reading in geometries...Took {end - start} seconds")
     start = time.time()
+
     # create all the points within the class
-    test.decompose_all_triangles()
+    # IMPORTANT you can comment this out if it's already been done!
+    pixel_to_faces.decompose_all_triangles()
+
     # then search through target_uvs
-    test.find_faces_of_target_uvs()
+    pixel_to_faces.find_faces_of_targets()
     end = time.time()
     print(end - start)
-    print(f"Full task took {(end - start)/60} minutes")
+    print(f"Full task took {(end - start) / 60} minutes")
