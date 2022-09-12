@@ -41,7 +41,7 @@ class TriangleDecomposer:
         y = math.floor((v - 1) * -self.MAX_HEIGHT)
         return x, y
 
-    # https://stackoverflow.com/questions/328107/how-can-you-determine-a-point-is-between-two-other-points-on-a-line-segment
+    # https://stackoverflow.com/questions/37181829/determining-all-discrete-points-inside-a-triangle
     # this is I believe is called triangle rasterization
     def insideTriangle(self):
         # xs = np.array((x1, x2, x3), dtype=float)
