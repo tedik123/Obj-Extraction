@@ -145,7 +145,7 @@ class PixelGrabber:
         image_pixels = img.load()
         for muscle_name, pixels in self.pixels_by_muscle.items():
             print("pixels length test", len(pixels))
-            print("pixel type", type(pixels[0]))
+            # print("pixel type", type(pixels[0]))
             for pixel in pixels:
                 image_pixels[pixel] = ImageColor.getcolor(color, "RGB")
         img.save('outputs/pixel_change_test.png')

@@ -95,6 +95,9 @@ class PixelToFace:
         print("Searching points for targets...")
         for muscle_name, targets in self.target_pixels.items():
             face_results = []
+            normals_result = []
+            # I don't think we care about uvs
+            # uvs_result = []
             for target in targets:
                 # need to convert these to pixel coordinates if using UVs as targets!!!
                 # target = (uvs_to_pixels(target[0], target[1]))
@@ -110,7 +113,15 @@ class PixelToFace:
                     face_results.append(p0)
                     face_results.append(p1)
                     face_results.append(p2)
-            self.muscle_faces[muscle_name] = face_results
+                    # n0 = self.normals[uv_does_exist]["a"]
+                    # n1 = self.normals[uv_does_exist]["b"]
+                    # n2 = self.normals[uv_does_exist]["c"]
+                    # normals_result.append(n0)
+                    # normals_result.append(n1)
+                    # normals_result.append(n2)
+            # self.muscle_faces[muscle_name] = {"vertices": face_results, "normals": normals_result}
+            self.muscle_faces[muscle_name] = {"vertices": face_results}
+
         # print(face_results)
         # TODO match faces to muscle name or label whichever we want
         with open('outputs/faces_found_by_muscles.json', 'w') as fp:
@@ -169,7 +180,7 @@ if __name__ == "__main__":
 
     # create all the points within the class
     # IMPORTANT you can comment this out if it's already been done!
-    pixel_to_faces.decompose_all_triangles()
+    # pixel_to_faces.decompose_all_triangles()
 
     # then search through target_uvs
     pixel_to_faces.find_faces_of_targets()
