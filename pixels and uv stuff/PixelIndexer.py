@@ -87,7 +87,10 @@ class PixelIndexer:
             print(f"Writing {muscle_name}.obj file!")
             file.write("#Custom Object for fun-times-saga2\n")
             file.write(f'#Name: {muscle_name}\n')
+            # object
             file.write(f'o {muscle_name}\n')
+            # then group name
+            file.write(f'g {muscle_name}\n')
             # first write the vertices that are UNIQUE!
             for vertex, value in vertex_map.items():
                 file.write(f'v {vertex[0]} {vertex[1]} {vertex[2]}\n')
