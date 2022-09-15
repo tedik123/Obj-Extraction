@@ -9,7 +9,7 @@ class PixelIndexer:
         self.faces_found_file_path = 'outputs/faces_found_by_muscles.json'
         self.faces_found_by_muscles = None
         self.read_in_faces_found_by_muscles()
-        self.muscle_names = []
+        self.muscle_names = muscle_names
 
     def read_in_faces_found_by_muscles(self):
         print("Reading in faces by muscles")
