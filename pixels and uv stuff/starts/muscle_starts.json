@@ -8,5 +8,55 @@
   "max_X": [4096, 4096],
   "min_Y": [0, 0],
   "max_Y": [4096, 4096]
+  },
+  "Biceps Brachii":
+  {
+  "label": "BB",
+  "starting_points": [[427, 227], [3000, 2825]],
+  "acceptable_colors_rgb": [[200, 156, 219], [201, 157, 220], [200, 159, 219], [201, 164, 218], [200, 161, 218], [201, 160, 218], [199, 157,220], [202, 156,220]],
+  "min_X": [0, 0],
+  "max_X": [4096, 4096],
+  "min_Y": [0, 0],
+  "max_Y": [4096, 4096]
+  },
+  "Pectoralis Major":
+  {
+  "label": "PM",
+  "starting_points": [[576, 2591], [1000, 2475]],
+  "acceptable_colors_rgb": [[218, 157, 156], [220, 156, 156]],
+  "min_X": [0, 0],
+  "max_X": [4096, 4096],
+  "min_Y": [0, 0],
+  "max_Y": [4096, 4096]
+  },
+  "Triceps":
+  {
+  "label": "T",
+  "starting_points": [[150, 800], [3333, 2493]],
+  "acceptable_colors_rgb": [[157, 200, 219]],
+  "min_X": [0, 0],
+  "max_X": [4096, 4096],
+  "min_Y": [0, 0],
+  "max_Y": [4096, 4096]
+  },
+  "Rectus Femoris":
+  {
+  "label": "RF",
+  "starting_points": [[3649, 829], [1813, 1677]],
+  "acceptable_colors_rgb": [[189, 219, 157]],
+  "min_X": [0, 0],
+  "max_X": [4096, 4096],
+  "min_Y": [0, 0],
+  "max_Y": [4096, 4096]
+  },
+  "Gluteus Maximus":
+  {
+  "label": "GMa",
+  "starting_points": [[2238, 2200]],
+  "acceptable_colors_rgb": [[220, 156, 156], [218,157, 156]],
+  "min_X": [0, 0],
+  "max_X": [4096, 4096],
+  "min_Y": [0, 0],
+  "max_Y": [4096, 4096]
   }
 }

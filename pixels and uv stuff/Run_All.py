@@ -27,8 +27,8 @@ if __name__ == "__main__":
     # IMPORTANT unless you're testing something you can just leave it
     TARGET_FILE = 'outputs/pixels_by_muscles.json'
     # if you only want to run certain scripts you can change accordingly here
-    RUN_PIXEL_GRABBER = False
-    RUN_PIXEL_TO_FACE = False
+    RUN_PIXEL_GRABBER = True
+    RUN_PIXEL_TO_FACE = True
     RUN_PIXEL_INDEXER = True
 
     start0 = time.time()

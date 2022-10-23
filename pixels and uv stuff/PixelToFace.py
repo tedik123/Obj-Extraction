@@ -38,7 +38,7 @@ class PixelToFace:
             data = file.read()
         self.uvs = json.loads(data)['uvs']
 
-    # OLD when we we converted the picture pixels to UVs but we don't need to do that anymore
+    # OLD when we converted the picture pixels to UVs but we don't need to do that anymore
     def read_in_target_uvs(self):
         print("Loading target uvs")
         with open('geometry_files/target_uvs.json', 'r') as file:

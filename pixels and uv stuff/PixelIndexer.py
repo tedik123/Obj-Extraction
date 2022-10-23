@@ -83,14 +83,16 @@ class PixelIndexer:
 
     def create_obj_file(self, muscle_name, vertex_map, index_tuple_list):
         # https://en.wikipedia.org/wiki/Wavefront_.obj_file
+        muscle_name_stripped = str(muscle_name).replace(" ", "")
         with open(f'outputs/OBJ files/{muscle_name}.obj', 'w') as file:
             print(f"Writing {muscle_name}.obj file!")
             file.write("#Custom Object for fun-times-saga2\n")
+            # .obj files don't allow spaces for names!
             file.write(f'#Name: {muscle_name}\n')
             # object
-            file.write(f'o {muscle_name}\n')
+            file.write(f'o {muscle_name_stripped}\n')
             # then group name
-            file.write(f'g {muscle_name}\n')
+            file.write(f'g {muscle_name_stripped}\n')
             # first write the vertices that are UNIQUE!
             for vertex, value in vertex_map.items():
                 file.write(f'v {vertex[0]} {vertex[1]} {vertex[2]}\n')
