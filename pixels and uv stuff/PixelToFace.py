@@ -10,6 +10,7 @@ class PixelToFace:
     def __init__(self, target_file_path):
         # these are all arrays!!!!!!!!!
         self.target_file_path = target_file_path
+        # FIXME I could use async for these tasks so the load is faster
         self.read_in_faces()
         self.read_in_normals()
         self.read_in_geometry_uvs()
