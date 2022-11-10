@@ -1,0 +1,6 @@
+1. Download the exercise data as a csv and put i in the CSV to JSON folder named as "exercise_data.csv"
+2. Run csv_to_json_muscles.py
+3. Run data_database.py with the code you want to send the CSV data to the server.
+
+
+                                        THE END
