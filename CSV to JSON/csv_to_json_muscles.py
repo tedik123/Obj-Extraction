@@ -23,7 +23,8 @@ def convert_csv_to_json():
                     # these headers will be indexed by the column row so that we know what column name we're on
                     headers_list.append(col_value)
                 else:
-                    muscles_data = formatter(exercise, exercise_name, muscles_data, headers_list, row_index, col_index, col_value)
+                    muscles_data = formatter(exercise, exercise_name, muscles_data, headers_list, row_index, col_index,
+                                             col_value)
                     exercise_data = exercise_data | exercise
         # print(exercise_data)
         print(muscles_data)
@@ -32,14 +33,14 @@ def convert_csv_to_json():
     print("Finished.")
 
 
-
 def write_to_files(muscles_data, exercise_data):
     with open("exercise_data.json", "w") as outfile:
         json.dump(exercise_data, outfile)
     with open("muscles_data.json", "w") as outfile:
         json.dump(muscles_data, outfile)
 
-#FIXME muscles data shouldn't be returned like this i don't think it's gross
+
+# FIXME muscles data shouldn't be returned like this i don't think it's gross
 # because it's inconsistent with how exercise works
 def formatter(exercise, exercise_name, muscles_data, headers_list, row_index, col_index, col_value: str):
     # print(headers_list, row_index, col_index, col_value)
@@ -60,18 +61,18 @@ def formatter(exercise, exercise_name, muscles_data, headers_list, row_index, co
             secondary_muscles = convert_csv_string_to_array(col_value)
             exercise_contents["secondary_muscles"] += secondary_muscles
             for muscle_name in secondary_muscles:
-                muscles_data =add_data_to_muscles(muscles_data, exercise_name, muscle_name, "secondary_exercises")
+                muscles_data = add_data_to_muscles(muscles_data, exercise_name, muscle_name, "secondary_exercises")
         case "Tertiary Muscles":
             tertiary_muscles = convert_csv_string_to_array(col_value)
             exercise_contents["tertiary_muscles"] += tertiary_muscles
             for muscle_name in tertiary_muscles:
-                muscles_data =add_data_to_muscles(muscles_data, exercise_name, muscle_name, "tertiary_exercises")
+                muscles_data = add_data_to_muscles(muscles_data, exercise_name, muscle_name, "tertiary_exercises")
         case "Risked Areas":
             risked_areas = convert_csv_string_to_array(col_value)
             exercise_contents["risked_areas"] += risked_areas
-        case "External Link":
-            # assumes one value, can be changed
-            exercise_contents["external_link"] = col_value
+        case "External Links":
+            links = convert_csv_string_to_array(col_value)
+            exercise_contents["external_links"] = links
         case "Description":
             exercise_contents["description"] = col_value
         # default case
@@ -106,13 +107,13 @@ def add_data_to_muscles(muscles_data: dict, exercise_name: str, muscle_name: str
 def exercise_template(exercise_name):
     return {
         exercise_name: {
-            "exercise_name": exercise_name,
-            "external_link": "link",
+            "name": exercise_name,
+            "description": "",
             "primary_muscles": [],
             "secondary_muscles": [],
             "tertiary_muscles": [],
             "risked_areas": [],
-            "description": ""
+            "external_links": []
         }
     }
 
