@@ -45,7 +45,8 @@ def write_to_files(muscles_data, exercise_data):
 def formatter(exercise, exercise_name, muscles_data, headers_list, row_index, col_index, col_value: str):
     # print(headers_list, row_index, col_index, col_value)
     header = headers_list[col_index]
-    exercise_contents = exercise[exercise_name]
+    # make it capitalized to start as well
+    exercise_contents = exercise[exercise_name.title()]
 
     # print(header)
     match header:
@@ -84,6 +85,8 @@ def formatter(exercise, exercise_name, muscles_data, headers_list, row_index, co
 
 # converts a string to an array of values
 def convert_csv_string_to_array(col_value: str):
+    # makes each word start with a capital letter
+    col_value = col_value.title()
     string_array = col_value.split(",")
     string_array = [primary.strip() for primary in string_array]
     # print(string_array)
