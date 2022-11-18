@@ -72,7 +72,8 @@ def formatter(exercise, exercise_name, muscles_data, headers_list, row_index, co
             risked_areas = convert_csv_string_to_array(col_value)
             exercise_contents["risked_areas"] += risked_areas
         case "External Links":
-            links = convert_csv_string_to_array(col_value)
+            # make sure not to change the formatting of links as they can be case-sensitive
+            links = convert_csv_string_to_array(col_value, True)
             exercise_contents["external_links"] = links
         case "Description":
             exercise_contents["description"] = col_value
@@ -84,9 +85,10 @@ def formatter(exercise, exercise_name, muscles_data, headers_list, row_index, co
 
 
 # converts a string to an array of values
-def convert_csv_string_to_array(col_value: str):
-    # makes each word start with a capital letter
-    col_value = col_value.title()
+def convert_csv_string_to_array(col_value: str, ignoreTitleCase=False):
+    if not ignoreTitleCase:
+        # makes each word start with a capital letter
+        col_value = col_value.title()
     string_array = col_value.split(",")
     string_array = [primary.strip() for primary in string_array]
     # print(string_array)
