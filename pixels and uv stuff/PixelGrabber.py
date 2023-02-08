@@ -61,9 +61,12 @@ class PixelGrabber:
         # maybe a bit of an optimization or a waste of time not sure
         acceptable_colors_dict = {}
         for rgb in acceptable_colors:
+            #TODO add rgb range here plus the tolerance check!
             acceptable_colors_dict[tuple(rgb)] = True
         # also add white as an acceptable color for the letter labels so there's not a hole
         acceptable_colors_dict[(255, 254, 255)] = True
+        acceptable_colors_dict[(255, 255, 255)] = True
+        acceptable_colors_dict[(254, 255, 255)] = True
         # color = (220, 156, 190)
         # acceptable_colors = {color: True}
         queue = []

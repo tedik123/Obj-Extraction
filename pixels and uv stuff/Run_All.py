@@ -23,7 +23,12 @@ def create_file_names_list():
 
 if __name__ == "__main__":
     # IMPORTANT  this is an array of strings, if it's empty it will do all of them
+    muscle_names_to_test = ["Vastus Medialis", "Vastus Lateralis", "Trapezius", "Teres Minor", "Teres Major"]
+    # grab last two for testing
+    muscle_names_to_test = muscle_names_to_test[-3:]
     muscle_names_to_test = []
+
+    # default_pixel_deviation = 1
     # IMPORTANT unless you're testing something you can just leave it
     TARGET_FILE = 'outputs/pixels_by_muscles.json'
     # if you only want to run certain scripts you can change accordingly here
