@@ -28,19 +28,21 @@ if __name__ == "__main__":
     muscle_names_to_test = muscle_names_to_test[-3:]
     muscle_names_to_test = []
 
-    # default_pixel_deviation = 1
+    # if there's a fade or variation in color you will want to raise this to loosen what is an acceptable color
+    default_pixel_deviation = 0
+
     # IMPORTANT unless you're testing something you can just leave it
     TARGET_FILE = 'outputs/pixels_by_muscles.json'
     # if you only want to run certain scripts you can change accordingly here
     RUN_PIXEL_GRABBER = True
-    RUN_PIXEL_TO_FACE = True
-    RUN_PIXEL_INDEXER = True
+    RUN_PIXEL_TO_FACE = False
+    RUN_PIXEL_INDEXER = False
 
     start0 = time.time()
     if RUN_PIXEL_GRABBER:
         # first create the object which simply loads in the diffuse.jpg and relevant data
         # also reads in the muscle starts
-        pixel_grabber = PixelGrabber(muscle_names_to_test)
+        pixel_grabber = PixelGrabber(muscle_names_to_test, default_pixel_deviation)
         # then run the actual pixel_grabber algo
         pixel_grabber.run_pixel_grabber()
         # to save the pixels by muscle
