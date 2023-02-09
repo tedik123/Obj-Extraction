@@ -294,12 +294,13 @@
   "Flexor Digitorum Longus":
   {
   "label": "FDL",
-  "starting_points": [[2173, 1701],[192, 1188],[140,1274],[33,1337]],
-  "acceptable_colors_rgb":[],
+  "starting_points": [[216, 1184],[2161, 1726]],
+  "acceptable_colors_rgb":[[171,219,157]],
   "min_X": [0, 0, 0, 0],
   "max_X": [4096, 4096, 4096, 4096],
   "min_Y": [0, 0, 0, 0],
-  "max_Y": [4096, 4096, 4096, 4096]
+  "max_Y": [4096, 4096, 4096, 4096],
+    "pixel_deviation": 10
   },
   "Gracilis":
   {
@@ -340,16 +341,6 @@
   "label": "In",
   "starting_points": [[2002, 3488],[2548, 3516]],
   "acceptable_colors_rgb": [[156,173,219]],
-  "min_X": [0, 0],
-  "max_X": [4096, 4096],
-  "min_Y": [0, 0],
-  "max_Y": [4096, 4096]
-  },
-  "Iliotibial Tract":
-  {
-  "label": "IT",
-  "starting_points": [],
-  "acceptable_colors_rgb": [],
   "min_X": [0, 0],
   "max_X": [4096, 4096],
   "min_Y": [0, 0],
