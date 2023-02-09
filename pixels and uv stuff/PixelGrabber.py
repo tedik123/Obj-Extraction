@@ -1,4 +1,5 @@
 import json
+import sys
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed, ProcessPoolExecutor
 
@@ -176,10 +177,10 @@ class PixelGrabber:
     # TODO so you can do multiple colors at a time
     # takes in a HEX VALUE FOR COLOR! use '#hex_value'
     def change_pixels_test(self, color='#000000'):
-        img = Image.open('../images/diffuse.jpg')
+        img = Image.open(self.texture_file)
         image_pixels = img.load()
         for muscle_name, pixels in self.pixels_by_muscle.items():
-            print(f"{muscle_name}: pixels length test", len(pixels))
+            print(f"{muscle_name}: pixels length test", len(pixels), flush=True)
             # print("pixel type", type(pixels[0]))
             for pixel in pixels:
                 image_pixels[pixel] = ImageColor.getcolor(color, "RGB")
@@ -313,12 +314,15 @@ if __name__ == "__main__":
     #  to save the pixels by muscle
     # you can specify an output file name as an argument if you want (optional)
     futures = [executor.submit(pixel_grabber.save_pixels_by_muscles, "pixels_by_muscles.json")]
+    # pixel_grabber.save_pixels_by_muscles() # run for better print statements without process pool
 
     # if you are testing, you can visualize the changes with the change_pixels_test
     # you can specify a specific hex color default is '#000000'
     futures = [executor.submit(pixel_grabber.change_pixels_test, '#000000')]
 
+    # pixel_grabber.change_pixels_test() # run for better print statements without process pool
     executor.shutdown(wait=True, cancel_futures=False)
+    print("Finished saving pixel change test file and pixel by muscle.json file")
     end = time.time()
     print()
     print(f"Finished finding pixels...Took {end - start} seconds")

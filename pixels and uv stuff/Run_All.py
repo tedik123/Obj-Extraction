@@ -1,5 +1,6 @@
 import json
 import time
+from concurrent.futures import ProcessPoolExecutor
 from os import listdir, getcwd
 from os.path import isfile, join
 from PixelToFace import PixelToFace
@@ -49,14 +50,33 @@ if __name__ == "__main__":
         # first create the object which simply loads in the diffuse.jpg and relevant data
         # also reads in the muscle starts
         pixel_grabber = PixelGrabber(muscle_names_to_test, default_pixel_deviation)
+        # allows for a wider white range to capture more of the label, disable it if too aggressive
+        # pixel_grabber.disable_wide_white_range()
+
+        # this is for the future processes
+        executor = ProcessPoolExecutor(max_workers=2)
+        # although this takes forever it is not worth optimizing as it is a task that must be waited on
+        # before anything else is run
+        pixel_grabber.set_and_create_image_data()
+
+        # creates the range of acceptable colors by muscle
+        pixel_grabber.create_acceptable_colors_by_muscle()
+
         # then run the actual pixel_grabber algo
         pixel_grabber.run_pixel_grabber()
-        # to save the pixels by muscle
+
+        #  to save the pixels by muscle
         # you can specify an output file name as an argument if you want (optional)
-        pixel_grabber.save_pixels_by_muscles()
-        # if you are testing, you can visualize the changes with
+        futures = [executor.submit(pixel_grabber.save_pixels_by_muscles, "pixels_by_muscles.json")]
+        # pixel_grabber.save_pixels_by_muscles() # run for better print statements without process pool
+
+        # if you are testing, you can visualize the changes with the change_pixels_test
         # you can specify a specific hex color default is '#000000'
-        pixel_grabber.change_pixels_test()
+        futures = [executor.submit(pixel_grabber.change_pixels_test, '#000000')]
+        # pixel_grabber.change_pixels_test() # run for better print statements without process pool
+
+        executor.shutdown(wait=True, cancel_futures=False)
+        print("Finished saving pixel change test file and pixel by muscle.json file")
 
         end = time.time()
         print()
