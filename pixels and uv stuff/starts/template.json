@@ -8,17 +8,13 @@
   "acceptable_colors_rgb": [[143, 143, 144], [143, 143, 143]],
   // the following can be left blank if it doesn't bleed into a muscle with the same color
   // if no max or min needs to be specified let's default to 0 for min and 4096 for max
+  //  this array length for min and maxes MUST be equal to the amount of starting points!
   "min_X": [(correlates to starting point 1), (correlates to starting point 2)],
   "max_X": [(correlates to starting point 1), (correlates to starting point 2)],
   "min_Y": [(correlates to starting point 1), (correlates to starting point 2)]
   "max_Y": [(correlates to starting point 1), (correlates to starting point 2)],
   // disables the default wide white range and
   "wide_white_range": false,
-   // must be greater than 0 and will only be used for this muscle, do not set it too high or you will have chaotic results
-  "pixel_deviation": 2
-  "max_Y": [(correlates to starting point 1), (correlates to starting point 2)],
-  // disables the default wide white range and
-  "wide_white_range": false
    // must be greater than 0 and will only be used for this muscle, do not set it too high or you will have chaotic results
   "pixel_deviation": 2
   }

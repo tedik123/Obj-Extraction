@@ -18,6 +18,7 @@ class PixelGrabber:
 
     def disable_wide_white_range(self):
         self.wide_white_range = False
+
     def read_in_muscle_starts(self):
         print("Loading in muscle starts...")
         # testing line
@@ -56,10 +57,17 @@ class PixelGrabber:
             # the length of arrays starting_points, mins, and maxes must all be equal
             muscle_pixels = []
             for i, point in enumerate(starting_points):
-                min_X = muscle_data["min_X"][i]
-                min_Y = muscle_data["min_Y"][i]
-                max_X = muscle_data["max_X"][i]
-                max_Y = muscle_data["max_Y"][i]
+                min_X, min_Y = 0, 0
+                # we get the max width from the pic
+                max_X, max_Y = self.max_width, self.max_height
+                if "min_X" in muscle_data:
+                    min_X = muscle_data["min_X"][i]
+                if "min_Y" in muscle_data:
+                    min_Y = muscle_data["min_Y"][i]
+                if "max_X" in muscle_data:
+                    max_X = muscle_data["max_X"][i]
+                if "max_Y" in muscle_data:
+                    max_Y = muscle_data["max_Y"][i]
                 # this is a list of lists of rgb_values
                 acceptable_colors = muscle_data["acceptable_colors_rgb"]
                 # combine results into one big array
@@ -69,11 +77,13 @@ class PixelGrabber:
             self.pixels_by_muscle[muscle_name] = muscle_pixels
 
     # this is the searching algorithm for neighboring pixels that match
-    def DFS(self, starting_coords, acceptable_colors, min_X, min_Y, max_X, max_Y, allowed_pixel_deviation, allow_wide_white_range):
+    def DFS(self, starting_coords, acceptable_colors, min_X, min_Y, max_X, max_Y, allowed_pixel_deviation,
+            allow_wide_white_range):
         x, y = starting_coords
         pixel_rgb = self.coords_dict[(x, y)]
         # maybe a bit of an optimization or a waste of time not sure
-        acceptable_colors_dict = self.create_acceptable_colors(acceptable_colors, allow_wide_white_range, allowed_pixel_deviation )
+        acceptable_colors_dict = self.create_acceptable_colors(acceptable_colors, allow_wide_white_range,
+                                                               allowed_pixel_deviation)
         # color = (220, 156, 190)
         # acceptable_colors = {color: True}
         queue = []
@@ -187,7 +197,7 @@ class PixelGrabber:
         return coords_dict, width, height, mode, pixels
 
     # returns a dictionary of acceptable color rgbs
-    def create_acceptable_colors(self, acceptable_colors,enable_wide_white_range,pixel_tolerance_range: int = 0):
+    def create_acceptable_colors(self, acceptable_colors, enable_wide_white_range, pixel_tolerance_range: int = 0):
         acceptable_colors_dict = {}
         # also add white as an acceptable color for the letter labels so there's not a hole
         if enable_wide_white_range:

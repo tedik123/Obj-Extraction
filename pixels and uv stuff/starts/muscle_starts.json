@@ -3,62 +3,38 @@
 {
   "label": "D",
   "starting_points": [[155, 2164], [1377, 2355]],
-  "acceptable_colors_rgb": [[220, 156, 190]],
-  "min_X": [0, 0],
-  "max_X": [4096, 4096],
-  "min_Y": [0, 0],
-  "max_Y": [4096, 4096]
+  "acceptable_colors_rgb": [[220, 156, 190]]
   },
   "Biceps Brachii":
   {
   "label": "BB",
   "starting_points": [[427, 227], [3000, 2825]],
-  "acceptable_colors_rgb": [[200, 156, 219], [201, 157, 220], [200, 159, 219], [201, 164, 218], [200, 161, 218], [201, 160, 218], [199, 157,220], [202, 156,220]],
-  "min_X": [0, 0],
-  "max_X": [4096, 4096],
-  "min_Y": [0, 0],
-  "max_Y": [4096, 4096]
+  "acceptable_colors_rgb": [[200, 156, 219], [201, 157, 220], [200, 159, 219], [201, 164, 218], [200, 161, 218], [201, 160, 218], [199, 157,220], [202, 156,220]]
   },
   "Pectoralis Major":
   {
   "label": "PM",
   "starting_points": [[576, 2591], [1000, 2475]],
   "acceptable_colors_rgb": [[218, 157, 156], [220, 156, 156]],
-  "min_X": [0, 0],
-  "max_X": [4096, 4096],
-  "min_Y": [0, 0],
-  "max_Y": [4096, 4096],
   "wide_white_range": false
   },
   "Triceps":
   {
   "label": "T",
   "starting_points": [[150, 800], [3333, 2493]],
-  "acceptable_colors_rgb": [[157, 200, 219]],
-  "min_X": [0, 0],
-  "max_X": [4096, 4096],
-  "min_Y": [0, 0],
-  "max_Y": [4096, 4096]
+  "acceptable_colors_rgb": [[157, 200, 219]]
   },
   "Rectus Femoris":
   {
   "label": "RF",
   "starting_points": [[3649, 829], [1813, 1677]],
-  "acceptable_colors_rgb": [[189, 219, 157]],
-  "min_X": [0, 0],
-  "max_X": [4096, 4096],
-  "min_Y": [0, 0],
-  "max_Y": [4096, 4096]
+  "acceptable_colors_rgb": [[189, 219, 157]]
   },
   "Gluteus Maximus":
   {
   "label": "GMa",
   "starting_points": [[2238, 2200]],
   "acceptable_colors_rgb": [[220, 156, 156], [218,157, 156]],
-  "min_X": [0, 0],
-  "max_X": [4096, 4096],
-  "min_Y": [0, 0],
-  "max_Y": [4096, 4096],
   "wide_white_range": false
   },
 
@@ -66,61 +42,37 @@
   {
   "label": "VM",
   "starting_points": [[1337, 1819], [3140, 800]],
-  "acceptable_colors_rgb": [[157, 200, 219], [155, 200, 219], [159, 200, 220]],
-  "min_X": [0, 0],
-  "max_X": [4096, 4096],
-  "min_Y": [0, 0],
-  "max_Y": [4096, 4096]
+  "acceptable_colors_rgb": [[157, 200, 219], [155, 200, 219], [159, 200, 220]]
   },
   "Vastus Lateralis":
   {
   "label": "VL",
   "starting_points": [[1557, 1564], [3553, 1000]],
-  "acceptable_colors_rgb": [[155, 176, 219], [157, 176, 219], [160, 177, 220]],
-  "min_X": [0, 0],
-  "max_X": [4096, 4096],
-  "min_Y": [0, 0],
-  "max_Y": [4096, 4096]
+  "acceptable_colors_rgb": [[155, 176, 219], [157, 176, 219], [160, 177, 220]]
   },
   "Trapezius":
   {
   "label": "Tr",
   "starting_points": [[2149, 3681], [2475, 3811], [2031, 3596],[2444, 3585]],
-  "acceptable_colors_rgb": [[220, 156, 156], [218, 157, 156], [218, 157, 156], [218, 156, 156]],
-  "min_X": [0, 0, 0, 0],
-  "max_X": [4096, 4096, 4096,4096],
-  "min_Y": [0, 0, 0, 0],
-  "max_Y": [4096, 4096, 4096, 4096]
+  "acceptable_colors_rgb": [[220, 156, 156], [218, 157, 156], [218, 157, 156], [218, 156, 156]]
   },
   "Teres Minor":
   {
   "label": "TMi",
   "starting_points": [[2595, 3479], [1887, 3480]],
-  "acceptable_colors_rgb": [[175, 156, 220], [174, 155, 219], [175, 157, 219], [173, 157, 219]],
-  "min_X": [0, 0],
-  "max_X": [4096, 4096],
-  "min_Y": [0, 0],
-  "max_Y": [4096, 4096]
+  "acceptable_colors_rgb": [[175, 156, 220], [174, 155, 219], [175, 157, 219], [173, 157, 219]]
   },
   "Teres Major":
   {
   "label": "TMa",
   "starting_points": [[1855, 3417], [2559, 3395] ],
-  "acceptable_colors_rgb": [[156, 219, 210], [157, 218, 210]],
-  "min_X": [0, 0],
-  "max_X": [4096, 4096],
-  "min_Y": [0, 0],
-  "max_Y": [4096, 4096]
+  "acceptable_colors_rgb": [[156, 219, 210], [157, 218, 210]]
   },
   "Tensor Fasciae Lata":
   {
   "label": "TFL",
   "starting_points": [[1284, 3561], [359, 3548]],
   "acceptable_colors_rgb": [[164,218,156], [165,219,157]],
-  "min_X": [0, 0],
-  "max_X": [4096, 4096],
-  "min_Y": [0, 0],
-  "max_Y": [4096, 4096],
   "pixel_deviation": 6
   },
   "Tibialis Anterior":
@@ -128,41 +80,25 @@
   "label": "TA",
   "starting_points": [[731, 1620], [2385, 1194]],
   "acceptable_colors_rgb":[[171,219,157]],
-  "min_X": [0, 0],
-  "max_X": [4096, 4096],
-  "min_Y": [0, 0],
-  "max_Y": [4096, 4096],
   "pixel_deviation": 6
   },
   "Soleus":
   {
   "label": "So",
   "starting_points": [[344, 1170], [429, 1439], [2309, 1697],[2315, 1401]],
-  "acceptable_colors_rgb":[[175,156,220],[177,159,219]],
-  "min_X": [0, 0, 0, 0],
-  "max_X": [4096, 4096, 4096, 4096],
-  "min_Y": [0, 0, 0, 0],
-  "max_Y": [4096, 4096, 4096, 4096]
+  "acceptable_colors_rgb":[[175,156,220],[177,159,219]]
   },
   "Semitendinosus":
   {
   "label": "Se",
   "starting_points": [[1595, 1005],[3615, 1590]],
-  "acceptable_colors_rgb":[[157,194,220]],
-  "min_X": [0, 0],
-  "max_X": [4096, 4096],
-  "min_Y": [0, 0],
-  "max_Y": [4096, 4096]
+  "acceptable_colors_rgb":[[157,194,220]]
   },
   "Serratus Anterior":
   {
   "label": "Se",
   "starting_points": [[272, 2823], [1380, 2789]],
   "acceptable_colors_rgb":[[233,145,161],[231,153,166],[233,151,165],[230,147,167],[235,144,159], [228, 147, 164], [222, 146, 168], [200, 148, 182], [216, 146, 173]],
-  "min_X": [0, 0],
-  "max_X": [4096, 4096],
-  "min_Y": [0, 0],
-  "max_Y": [4096, 4096],
     "pixel_deviation": 4
   },
   "Rectus Abdominis":
@@ -170,10 +106,6 @@
   "label": "RA",
   "starting_points": [[831, 3396],[783, 3169],[878, 3144],[875, 2984],[776, 2981],[779, 2837],[897, 2809]],
   "acceptable_colors_rgb":[[216,142,179],[216,153,182],[214,147,180], [255, 255, 255], [212, 169, 189], [210, 189, 198], [212, 175, 192]],
-  "min_X": [0, 0,0,0,0,0, 0],
-  "max_X": [4096, 4096,4096, 4096,4096, 4096,4096],
-  "min_Y": [0, 0,0,0,0,0, 0],
-  "max_Y": [4096, 4096,4096, 4096,4096, 4096,4096],
   "pixel_deviation": 10
   },
   "Rhomboids":
@@ -181,10 +113,6 @@
   "label": "R",
   "starting_points": [[2089, 3349],[2382, 3354], [2405, 3357]],
   "acceptable_colors_rgb":[[175,156,220]],
-  "min_X": [0, 0, 0],
-  "max_X": [4096,4096, 4096],
-  "min_Y": [0, 0, 0],
-  "max_Y": [4096, 4096, 4096],
     "wide_white_range": false,
     "pixel_deviation": 10
   },
@@ -193,103 +121,32 @@
   "label": "PTe",
   "starting_points": [[3086, 3153],[717, 388], [630, 299],[2974, 3085]],
   "acceptable_colors_rgb":[[156,179,220],[162,182,219]],
-  "min_X": [0, 0, 0, 0],
-  "max_X": [4096, 4096, 4096,4096],
-  "min_Y": [0, 0, 0, 0],
-  "max_Y": [4096, 4096, 4096, 4096],
   "pixel_deviation": 5
   },
    "Palmaris Longus":
   {
   "label": "PLo",
   "starting_points": [[749, 921],[3605, 3039]],
-  "acceptable_colors_rgb":[[156,173,219]],
-  "min_X": [0, 0 ],
-  "max_X": [4096, 4096],
-  "min_Y": [0, 0 ],
-  "max_Y": [4096, 4096]
-  },
-
-  "Vastus Medialis":
-  {
-  "label": "VM",
-  "starting_points": [[1337, 1819], [3140, 800]],
-  "acceptable_colors_rgb": [[157, 200, 219], [155, 200, 219], [159, 200, 220]],
-  "min_X": [0, 0],
-  "max_X": [4096, 4096],
-  "min_Y": [0, 0],
-  "max_Y": [4096, 4096]
-  },
-  "Vastus Lateralis":
-  {
-  "label": "VL",
-  "starting_points": [[1557, 1564], [3553, 1000]],
-  "acceptable_colors_rgb": [[155, 176, 219], [157, 176, 219], [160, 177, 220]],
-  "min_X": [0, 0],
-  "max_X": [4096, 4096],
-  "min_Y": [0, 0],
-  "max_Y": [4096, 4096]
-  },
-  "Trapezius":
-  {
-  "label": "Tr",
-  "starting_points": [[2149, 3681], [2475, 3811], [2031, 3596],[2444, 3585]],
-  "acceptable_colors_rgb": [[220, 156, 156], [218, 157, 156], [218, 157, 156], [218, 156, 156]],
-  "min_X": [0, 0, 0, 0],
-  "max_X": [4096, 4096, 4096,4096],
-  "min_Y": [0, 0, 0, 0],
-  "max_Y": [4096, 4096, 4096, 4096]
-  },
-  "Teres Minor":
-  {
-  "label": "TMi",
-  "starting_points": [[2595, 3479], [1887, 3480]],
-  "acceptable_colors_rgb": [[175, 156, 220], [174, 155, 219], [175, 157, 219], [173, 157, 219]],
-  "min_X": [0, 0],
-  "max_X": [4096, 4096],
-  "min_Y": [0, 0],
-  "max_Y": [4096, 4096]
-  },
-  "Teres Major":
-  {
-  "label": "TMa",
-  "starting_points": [[1855, 3417], [2559, 3395] ],
-  "acceptable_colors_rgb": [[156, 219, 210], [157, 218, 210]],
-  "min_X": [0, 0],
-  "max_X": [4096, 4096],
-  "min_Y": [0, 0],
-  "max_Y": [4096, 4096]
+  "acceptable_colors_rgb":[[156,173,219]]
   },
   "Flexor Carpi Ulnaris":
   {
   "label": "FCU",
   "starting_points": [[605,845], [3520,3230]],
   "acceptable_colors_rgb": [[156,219,200],[174,216,202]],
-  "min_X": [0, 0],
-  "max_X": [4096, 4096],
-  "min_Y": [0, 0],
-  "max_Y": [4096, 4096],
     "pixel_deviation": 10
   },
   "Flexor Carpi Radialis":
   {
   "label": "FCR",
   "starting_points": [[850,350], [3100,3300]],
-  "acceptable_colors_rgb": [[182,156,219]],
-  "min_X": [0, 0],
-  "max_X": [4096, 4096],
-  "min_Y": [0, 0],
-  "max_Y": [4096, 4096]
+  "acceptable_colors_rgb": [[182,156,219]]
   },
   "Flexor Digitorum Superficialis":
   {
   "label": "FDS",
   "starting_points": [[980, 473],[1012, 406],[1048, 343],[3117, 3461],[3161, 3433],[3248, 3481]],
   "acceptable_colors_rgb": [[216,157,221],[212,181,215],[215,169,216]],
-  "min_X": [0, 0, 0,0, 0, 0],
-  "max_X": [4096, 4096,4096,4096, 4096,4096],
-  "min_Y": [0, 0, 0,0, 0, 0],
-  "max_Y": [4096, 4096, 4096,4096, 4096,4096],
     "pixel_deviation": 10
   },
   "Flexor Digitorum Longus":
@@ -297,10 +154,6 @@
   "label": "FDL",
   "starting_points": [[216, 1184],[2161, 1726]],
   "acceptable_colors_rgb":[[171,219,157]],
-  "min_X": [0, 0, 0, 0],
-  "max_X": [4096, 4096, 4096, 4096],
-  "min_Y": [0, 0, 0, 0],
-  "max_Y": [4096, 4096, 4096, 4096],
     "pixel_deviation": 10
   },
   "Gracilis":
@@ -308,10 +161,6 @@
   "label": "G",
   "starting_points": [[1365, 846],[3411, 1778]],
   "acceptable_colors_rgb": [[219,156,211],[218,158,210]],
-  "min_X": [0, 0, 0],
-  "max_X": [4096, 4096,4096],
-  "min_Y": [0, 0, 0],
-  "max_Y": [4096, 4096, 4096],
     "pixel_deviation": 6
   },
 
@@ -320,10 +169,6 @@
   "label": "Ga",
   "starting_points": [[2725, 1674],[788, 1350]],
   "acceptable_colors_rgb": [[219,156,211],[219,156,209]],
-  "min_X": [0, 0],
-  "max_X": [4096, 4096],
-  "min_Y": [0, 0],
-  "max_Y": [4096, 4096],
     "pixel_deviation": 9
   },
   "Iliopsoas":
@@ -331,10 +176,6 @@
   "label": "I",
   "starting_points": [[660, 3674],[1032, 3689]],
   "acceptable_colors_rgb": [[164,218,156]],
-  "min_X": [0, 0],
-  "max_X": [4096, 4096],
-  "min_Y": [0, 0],
-  "max_Y": [4096, 4096],
     "pixel_deviation": 15
   },
   "Infraspinatus":
@@ -342,31 +183,19 @@
   "label": "In",
   "starting_points": [[2002, 3488],[2548, 3516]],
   "acceptable_colors_rgb": [[156,173,219]],
-  "min_X": [0, 0],
-  "max_X": [4096, 4096],
-  "min_Y": [0, 0],
-  "max_Y": [4096, 4096],
   "wide_white_range": false
   },
   "Latissimus Dorsi":
   {
   "label": "LD",
   "starting_points": [[1997, 3136],[2591, 3141]],
-  "acceptable_colors_rgb": [[200,156,219]],
-  "min_X": [0, 0],
-  "max_X": [4096, 4096],
-  "min_Y": [0, 0],
-  "max_Y": [4096, 4096]
+  "acceptable_colors_rgb": [[200,156,219]]
   },
   "Levator Scapulae":
   {
   "label": "LS",
   "starting_points": [[598, 2027],[1080, 2039]],
   "acceptable_colors_rgb": [[157,218,219]],
-  "min_X": [0, 0],
-  "max_X": [4096, 4096],
-  "min_Y": [0, 0],
-  "max_Y": [4096, 4096],
     "pixel_deviation": 15
   },
 
@@ -375,10 +204,6 @@
   "label": "Pe",
   "starting_points": [[701, 3902],[983, 3902]],
   "acceptable_colors_rgb": [[210,156,218]],
-  "min_X": [0, 0],
-  "max_X": [4096, 4096],
-  "min_Y": [0, 0],
-  "max_Y": [4096, 4096],
     "pixel_deviation": 12
   },
   "Peroneus Longus":
@@ -386,10 +211,6 @@
   "label": "PL",
   "starting_points": [[816, 1506],[2697, 1267]],
   "acceptable_colors_rgb": [[219,156,211]],
-  "min_X": [0, 0],
-  "max_X": [4096, 4096],
-  "min_Y": [0, 0],
-  "max_Y": [4096, 4096],
     "pixel_deviation": 6
   }
 }
