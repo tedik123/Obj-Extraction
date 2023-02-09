@@ -154,7 +154,7 @@ class PixelGrabber:
         img = Image.open('../images/diffuse.jpg')
         image_pixels = img.load()
         for muscle_name, pixels in self.pixels_by_muscle.items():
-            print("pixels length test", len(pixels))
+            print(f"{muscle_name}: pixels length test", len(pixels))
             # print("pixel type", type(pixels[0]))
             for pixel in pixels:
                 image_pixels[pixel] = ImageColor.getcolor(color, "RGB")

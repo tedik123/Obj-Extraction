@@ -26,15 +26,13 @@ if __name__ == "__main__":
     muscle_names_to_test = ["Flexor Carpi Ulnaris","Flexor Carpi Radialis","Flexor Digitorum Superficialis","Flexor Digitorum Longus","Gracilis","Gastrocnemius","Iliopsoas","Infraspinatus","Iliotibial Tract","Latissimus Dorsi","Levator Scapulae","Pectineus","Peroneus Longus"]
     #["Flexor Carpi Ulnaris","Flexor Carpi Radialis","Flexor Digitorum Superficialis","Flexor Digitorum Longus","Gracilis","Gastrocnemius","Iliopsoas","Infraspinatus","Iliotibial Tract","Latissimus Dorsi","Levator Scapulae","Pectineus","Peroneus Longus"]
 
-    # if there's a fade or variation in color you will want to raise this to loosen what is an acceptable color
-    default_pixel_deviation = 3
-
     muscle_names_to_test = ["Vastus Medialis", "Vastus Lateralis", "Trapezius",
                             "Teres Minor", "Teres Major", "Tensor Fasciae Lata",
                             "Tibialis Anterior", "Soleus", "Semitendinosus", "Serratus Anterior", "Rectus Abdominis",
                             "Rhomboids", "Pronator Teres", "Palmaris Longus"]
     # grab last two for testing
     muscle_names_to_test = muscle_names_to_test[-1:]
+    muscle_names_to_test = []
 
     # if there's a fade or variation in color you will want to raise this to loosen what is an acceptable color
     default_pixel_deviation = 3
