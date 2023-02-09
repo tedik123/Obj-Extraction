@@ -311,11 +311,13 @@ if __name__ == "__main__":
     # then run the actual pixel_grabber algo
     pixel_grabber.run_pixel_grabber()
 
+    print("Saving pixels by muscles file!")
     #  to save the pixels by muscle
     # you can specify an output file name as an argument if you want (optional)
     futures = [executor.submit(pixel_grabber.save_pixels_by_muscles, "pixels_by_muscles.json")]
     # pixel_grabber.save_pixels_by_muscles() # run for better print statements without process pool
 
+    print("Running change pixels test!")
     # if you are testing, you can visualize the changes with the change_pixels_test
     # you can specify a specific hex color default is '#000000'
     futures = [executor.submit(pixel_grabber.change_pixels_test, '#000000')]
