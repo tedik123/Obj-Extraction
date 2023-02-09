@@ -11,6 +11,10 @@
   "min_X": [(correlates to starting point 1), (correlates to starting point 2)],
   "max_X": [(correlates to starting point 1), (correlates to starting point 2)],
   "min_Y": [(correlates to starting point 1), (correlates to starting point 2)]
-  "max_Y": [(correlates to starting point 1), (correlates to starting point 2)]
+  "max_Y": [(correlates to starting point 1), (correlates to starting point 2)],
+  // disables the default wide white range and
+  "wide_white_range": false
+   // must be greater than 0 and will only be used for this muscle, do not set it too high or you will have chaotic results
+  "pixel_deviation": 2
   }
 }

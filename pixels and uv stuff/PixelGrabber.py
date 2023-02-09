@@ -7,13 +7,17 @@ from PIL import Image, ImageColor
 class PixelGrabber:
     # if muscle name is none we do all them otherwise it's all of them
     # takes in an array of muscle names to do
-    def __init__(self, muscle_names=None):
+    def __init__(self, muscle_names=None, pixel_deviation=0):
+        self.pixel_deviation = pixel_deviation
+        self.wide_white_range = True
         self.muscle_starts = self.read_in_muscle_starts()
         self.texture_file = '../images/diffuse.jpg'
         self.muscle_names = muscle_names
         print("Grabbing pixels and rgbs....")
         self.coords_dict, self.max_width, self.max_height, self.mode, self.pixels = self.get_pixel_coords()
 
+    def disable_wide_white_range(self):
+        self.wide_white_range = False
     def read_in_muscle_starts(self):
         print("Loading in muscle starts...")
         # testing line
@@ -39,6 +43,16 @@ class PixelGrabber:
             print(f"Starting run for DFS for muscle {muscle_name}")
             label = muscle_data["label"]
             starting_points = muscle_data["starting_points"]
+            # we need to check if a muscle start has a different pixel tolerance
+            # assumes an int
+            allowed_pixel_deviation = self.pixel_deviation
+            if "pixel_deviation" in muscle_data:
+                allowed_pixel_deviation = muscle_data["pixel_deviation"]
+            if type(allowed_pixel_deviation) is not int or allowed_pixel_deviation < 0:
+                raise Exception(f"Pixel tolerance or deviation must be greater than 0, this failed on {muscle_name}")
+            allow_wide_white_range = self.wide_white_range
+            if "wide_white_range" in muscle_data:
+                allow_wide_white_range = muscle_data["wide_white_range"]
             # the length of arrays starting_points, mins, and maxes must all be equal
             muscle_pixels = []
             for i, point in enumerate(starting_points):
@@ -49,21 +63,17 @@ class PixelGrabber:
                 # this is a list of lists of rgb_values
                 acceptable_colors = muscle_data["acceptable_colors_rgb"]
                 # combine results into one big array
-                muscle_pixels += self.DFS(tuple(point), acceptable_colors, min_X, min_Y, max_X, max_Y)
+                muscle_pixels += self.DFS(tuple(point), acceptable_colors, min_X, min_Y, max_X, max_Y,
+                                          allowed_pixel_deviation, allow_wide_white_range)
                 print("len muscle", len(muscle_pixels))
             self.pixels_by_muscle[muscle_name] = muscle_pixels
 
     # this is the searching algorithm for neighboring pixels that match
-    def DFS(self, starting_coords, acceptable_colors, min_X, min_Y, max_X, max_Y):
+    def DFS(self, starting_coords, acceptable_colors, min_X, min_Y, max_X, max_Y, allowed_pixel_deviation, allow_wide_white_range):
         x, y = starting_coords
         pixel_rgb = self.coords_dict[(x, y)]
-        # IMPORTANT why the fuck is it reading in the blue value one color off from intellij's thing
         # maybe a bit of an optimization or a waste of time not sure
-        acceptable_colors_dict = {}
-        for rgb in acceptable_colors:
-            acceptable_colors_dict[tuple(rgb)] = True
-        # also add white as an acceptable color for the letter labels so there's not a hole
-        acceptable_colors_dict[(255, 254, 255)] = True
+        acceptable_colors_dict = self.create_acceptable_colors(acceptable_colors, allow_wide_white_range, allowed_pixel_deviation )
         # color = (220, 156, 190)
         # acceptable_colors = {color: True}
         queue = []
@@ -176,6 +186,49 @@ class PixelGrabber:
                 # print(x, y, f"#{r:02x}{g:02x}{b:02x}")
         return coords_dict, width, height, mode, pixels
 
+    # returns a dictionary of acceptable color rgbs
+    def create_acceptable_colors(self, acceptable_colors,enable_wide_white_range,pixel_tolerance_range: int = 0):
+        acceptable_colors_dict = {}
+        # also add white as an acceptable color for the letter labels so there's not a hole
+        if enable_wide_white_range:
+            acceptable_colors_dict[(254, 255, 252)] = True
+            acceptable_colors_dict[(255, 255, 252)] = True
+            acceptable_colors_dict[(255, 255, 253)] = True
+            acceptable_colors_dict[(254, 255, 255)] = True
+            acceptable_colors_dict[(255, 254, 255)] = True
+        # default white
+        acceptable_colors_dict[(255, 255, 254)] = True
+        acceptable_colors_dict[(255, 255, 255)] = True
+
+        # if there's no tolerance ignore just use the given colors
+        if pixel_tolerance_range == 0:
+            for rgb in acceptable_colors:
+                acceptable_colors_dict[tuple(rgb)] = True
+        else:
+            for rgb in acceptable_colors:
+                self.create_close_enough_values(rgb, pixel_tolerance_range, acceptable_colors_dict)
+        return acceptable_colors_dict
+
+    # creates the range of RGB values acceptable and stores it in the dict provided nothing is returned
+    def create_close_enough_values(self, rgb_values, tolerance_range, dict_to_store, max_acceptable_range=256,
+                                   min_acceptable_range=0):
+        # this gives us the proper range including the middle coordinate we want
+        min_ranges = [x - tolerance_range for x in rgb_values]
+        max_ranges = [x + tolerance_range + 1 for x in rgb_values]
+        min_ranges = [min_acceptable_range if x < min_acceptable_range else x for x in min_ranges]
+        max_ranges = [max_acceptable_range if x > max_acceptable_range else x for x in max_ranges]
+        # print(min_ranges)
+        # print(max_ranges)
+
+        max_r, max_g, max_b = max_ranges
+        min_r, min_g, min_b = min_ranges
+
+        for r in range(min_r, max_r):
+            for g in range(min_g, max_g):
+                for b in range(min_b, max_b):
+                    current_result = (r, g, b)
+                    dict_to_store[current_result] = True
+
     # ignore this because it returns a dictionary which we don't want
     def convert_pixel_coords_to_uv(self, coords: dict, width, height):
         # u is width, v is height
@@ -209,9 +262,14 @@ if __name__ == "__main__":
     start = time.time()
     # IMPORTANT  this is an array of strings, if it's empty it will do all of them
     muscle_names_to_test = []
+
+    # if there's a fade or variation in color you will want to raise this to loosen what is an acceptable color
+    default_pixel_deviation = 0
     # first create the object which simply loads in the diffuse.jpg and relevant data
     # also reads in the muscle starts
-    pixel_grabber = PixelGrabber(muscle_names_to_test)
+    pixel_grabber = PixelGrabber(muscle_names_to_test, default_pixel_deviation)
+    # allows for a wider white range to capture more of the label, disable it if too aggressive
+    # pixel_grabber.disable_wide_white_range()
     # then run the actual pixel_grabber algo
     pixel_grabber.run_pixel_grabber()
     # to save the pixels by muscle
@@ -224,4 +282,3 @@ if __name__ == "__main__":
     end = time.time()
     print()
     print(f"Finished finding pixels...Took {end - start} seconds")
-
