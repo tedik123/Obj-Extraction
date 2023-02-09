@@ -4,3 +4,4 @@
 pixels and uv stuff/outputs/OBJ files/*
 !pixels and uv stuff/outputs/OBJ files/.gitkeep
 pixels and uv stuff/outputs/*.png
+**/__pycache__/
