@@ -29,6 +29,16 @@ if __name__ == "__main__":
     # if there's a fade or variation in color you will want to raise this to loosen what is an acceptable color
     default_pixel_deviation = 3
 
+    muscle_names_to_test = ["Vastus Medialis", "Vastus Lateralis", "Trapezius",
+                            "Teres Minor", "Teres Major", "Tensor Fasciae Lata",
+                            "Tibialis Anterior", "Soleus", "Semitendinosus", "Serratus Anterior", "Rectus Abdominis",
+                            "Rhomboids", "Pronator Teres", "Palmaris Longus"]
+    # grab last two for testing
+    muscle_names_to_test = muscle_names_to_test[-1:]
+
+    # if there's a fade or variation in color you will want to raise this to loosen what is an acceptable color
+    default_pixel_deviation = 3
+
     # IMPORTANT unless you're testing something you can just leave it
     TARGET_FILE = 'outputs/pixels_by_muscles.json'
     # if you only want to run certain scripts you can change accordingly here
