@@ -39,19 +39,15 @@ class PixelToFace:
             data = file.read()
         self.uvs = json.loads(data)['uvs']
 
-    # OLD when we converted the picture pixels to UVs but we don't need to do that anymore
-    def read_in_target_uvs(self):
-        print("Loading target uvs")
-        with open('geometry_files/target_uvs.json', 'r') as file:
-            data = file.read()
-        # self.target_uvs = json.loads(data)['uvs']
 
     def read_in_target_pixels(self):
         print("Loading target pixels")
         with open(self.target_file_path, 'r') as file:
             data = file.read()
-        self.target_pixels = json.loads(data)
+        self.target_pixels_by_name = json.loads(data)
 
+    # this is a dictionary of pixel coordinates (x,y) that map to the obj face
+    # produced by the triangle decomposer
     def read_in_points(self):
         print("Loading points...")
         with open('outputs/all_points_from_model.json', 'r') as file:
@@ -94,7 +90,7 @@ class PixelToFace:
         self.muscle_faces = {}
         points_dict = self.read_in_points()
         print("Searching points for targets...")
-        for muscle_name, targets in self.target_pixels.items():
+        for muscle_name, targets in self.target_pixels_by_name.items():
             face_results = []
             normals_result = []
             # I don't think we care about uvs

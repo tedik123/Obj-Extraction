@@ -2,6 +2,7 @@ import json
 import sys
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed, ProcessPoolExecutor
+from concurrent.futures._base import wait
 
 from PIL import Image, ImageColor
 
@@ -194,6 +195,7 @@ class PixelGrabber:
             print("length of pixels by muscles", len(self.pixels_by_muscle))
             json.dump(self.pixels_by_muscle, fp)
             print("Finished saving pixels by muscles json file.")
+            fp.flush()
 
     # this grabs each pixel coordinate and uses a tuple pair as key
     # and the value is the r, g, b at that pixel
@@ -314,14 +316,14 @@ if __name__ == "__main__":
     print("Saving pixels by muscles file!")
     #  to save the pixels by muscle
     # you can specify an output file name as an argument if you want (optional)
-    futures = [executor.submit(pixel_grabber.save_pixels_by_muscles, "pixels_by_muscles.json")]
+    futures = [executor.submit(pixel_grabber.save_pixels_by_muscles)]
     # pixel_grabber.save_pixels_by_muscles() # run for better print statements without process pool
 
     print("Running change pixels test!")
     # if you are testing, you can visualize the changes with the change_pixels_test
     # you can specify a specific hex color default is '#000000'
-    futures = [executor.submit(pixel_grabber.change_pixels_test, '#000000')]
-
+    futures.append(executor.submit(pixel_grabber.change_pixels_test, '#000000'))
+    wait(futures)
     # pixel_grabber.change_pixels_test() # run for better print statements without process pool
     executor.shutdown(wait=True, cancel_futures=False)
     print("Finished saving pixel change test file and pixel by muscle.json file")
