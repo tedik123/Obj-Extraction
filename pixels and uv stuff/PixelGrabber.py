@@ -1,8 +1,10 @@
 import json
 import sys
 import time
-from concurrent.futures import ThreadPoolExecutor, as_completed, ProcessPoolExecutor
-from concurrent.futures._base import wait
+# from concurrent.futures import ThreadPoolExecutor, as_completed, ProcessPoolExecutor
+from concurrent.futures.process import ProcessPoolExecutor
+
+# from concurrent.futures._base import wait
 
 from PIL import Image, ImageColor
 
@@ -178,6 +180,7 @@ class PixelGrabber:
     # TODO so you can do multiple colors at a time
     # takes in a HEX VALUE FOR COLOR! use '#hex_value'
     def change_pixels_test(self, color='#000000'):
+        print("CHANGING SOMETHING", flush=True)
         img = Image.open(self.texture_file)
         image_pixels = img.load()
         for muscle_name, pixels in self.pixels_by_muscle.items():
@@ -189,6 +192,7 @@ class PixelGrabber:
         print("Finished saving change pixel test image.")
 
     def save_pixels_by_muscles(self, output_file_name='pixels_by_muscles.json'):
+        print("SAVING PIXELS OR TRYING TO WHO KNOWS")
         with open("outputs/" + output_file_name, 'w') as fp:
             # uvs_list = list(uv_dict.values())
             # print("uvs_list", len(uvs_list))
@@ -297,12 +301,13 @@ if __name__ == "__main__":
     default_pixel_deviation = 3
     # first create the object which simply loads in the diffuse.jpg and relevant data
     # also reads in the muscle starts
-    pixel_grabber = PixelGrabber(muscle_names_to_test, default_pixel_deviation)
     # allows for a wider white range to capture more of the label, disable it if too aggressive
     # pixel_grabber.disable_wide_white_range()
+    pixel_grabber = PixelGrabber(muscle_names_to_test, default_pixel_deviation)
 
     # this is for the future processes
     executor = ProcessPoolExecutor(max_workers=2)
+
     # although this takes forever it is not worth optimizing as it is a task that must be waited on
     # before anything else is run
     pixel_grabber.set_and_create_image_data()
@@ -323,7 +328,7 @@ if __name__ == "__main__":
     # if you are testing, you can visualize the changes with the change_pixels_test
     # you can specify a specific hex color default is '#000000'
     futures.append(executor.submit(pixel_grabber.change_pixels_test, '#000000'))
-    wait(futures)
+    # wait(futures)
     # pixel_grabber.change_pixels_test() # run for better print statements without process pool
     executor.shutdown(wait=True, cancel_futures=False)
     print("Finished saving pixel change test file and pixel by muscle.json file")

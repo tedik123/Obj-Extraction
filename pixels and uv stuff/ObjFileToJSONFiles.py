@@ -1,3 +1,5 @@
+import json
+
 class ObjToJSON:
     def __init__(self):
         self.obj_file_path = "obj files/Anatomy.OBJ"
@@ -8,6 +10,8 @@ class ObjToJSON:
         # this just stores indices to all the other vertices, normals, and uvs
         # also I don't think this needs to start at None but just to be consistent
         self.faces_pointers = [None]
+        # this will actually store the vertex and stuff
+        self.faces_data = [None]
 
     def read_in_OBJ_file(self):
         # vertex
@@ -47,7 +51,7 @@ class ObjToJSON:
                     case _:
                         print("default")
         # print(self.vertices)
-        print(self.uvs)
+        # print(self.uvs)
         # print(self.faces)
 
     # vertex line is the string line containing the vertex information
@@ -78,20 +82,89 @@ class ObjToJSON:
         }
         for pairs in face:
             pairs = pairs.split("/")
-            # means there's at least 3 v1,vt1,vn1
-            # but could also be v1,None, vn1 ignoring that for now
+            # means there's at most 3 v1,vt1,vn1
+            # but could also be v1,None, vn1 ignoring that for now with the v1//vn1 syntax
+            face_format["vertex_index"].append(int(pairs[0]))
+            if len(pairs) > 1:
+                face_format["uvs_index"].append(int(pairs[1]))
             if len(pairs) > 2:
-                face_format["vertex_index"].append(pairs[0])
-                face_format["uvs_index"].append(pairs[1])
                 face_format["normals_index"].append(pairs[2])
-            elif len(pairs) > 1:
-                face_format["vertex_index"].append(pairs[0])
-                face_format["uvs_index"].append(pairs[1])
-            else:
-                face_format["vertex_index"].append(pairs[0])
+
         self.faces_pointers.append(face_format)
+
+    # this actually stores the vertex values and such for the faces instead of just indices
+    def insert_face_data(self):
+        for face_data in self.faces_pointers[1:]:
+            face = {
+                "vertices": [],
+                "uvs": [],
+                "normals": []
+            }
+            for vertex_index in face_data["vertex_index"]:
+                face["vertices"].append(self.vertices[vertex_index])
+
+            for uv_index in face_data["uvs_index"]:
+                face["uvs"].append(self.uvs[uv_index])
+
+            for normal_index in face_data["normals_index"]:
+                face["normals"].append(self.normals[normal_index])
+            self.faces_data.append(face)
+        print(self.faces_data)
+
+    # here it splits the faces, normals, and uvs into seperate files
+    def create_json_files(self):
+        normals_data = {"normals": []}
+        uvs_data = {"uvs": []}
+        # these are dumb formats I know. I should change it later
+        uv_format = \
+            {
+                "a": {
+                    "x": 0,
+                    "y": 0
+                },
+                "b": {
+                    "x": 0,
+                    "y": 0
+                },
+                "c": {
+                    "x": 0,
+                    "y": 0
+                }
+            }
+        normal_format = \
+            {
+                "a": [],
+                "b": [],
+                "c": []
+            }
+        self.create_and_save_face_data()
+
+    # stores the vertices making up each face in the right format
+    def create_and_save_face_data(self):
+        output_file_name = "geometry_files/geometry_faces.json"
+        face_data = {"faces": []}
+        vertex_data = \
+            {
+                "a": [],
+                "b": [],
+                "c": []
+            }
+        for face in self.faces_data:
+            vertices = face["vertices"]
+            # save the vertex data in the right format
+            # this might cause issues later if data doesn't get overwritten properly same with uvs and normals
+            vertex_data["a"] = vertices[0]
+            vertex_data["b"] = vertices[1]
+            vertex_data["c"] = vertices[2]
+            face_data["faces"].append(vertex_data)
+        print("Writing face data to json file.")
+        with open("outputs/" + output_file_name, 'w') as fp:
+            json.dump(face_data, fp)
+        print("Finished writing face data!")
+
 
 
 if __name__ == "__main__":
     obj_to_json = ObjToJSON()
     obj_to_json.read_in_OBJ_file()
+    obj_to_json.insert_face_data()
