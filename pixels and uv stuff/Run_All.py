@@ -53,8 +53,6 @@ if __name__ == "__main__":
         # allows for a wider white range to capture more of the label, disable it if too aggressive
         # pixel_grabber.disable_wide_white_range()
 
-        # this is for the future processes
-        executor = ProcessPoolExecutor(max_workers=2)
         # although this takes forever it is not worth optimizing as it is a task that must be waited on
         # before anything else is run
         pixel_grabber.set_and_create_image_data()
@@ -68,17 +66,13 @@ if __name__ == "__main__":
         print("Saving pixels by muscles file!")
         #  to save the pixels by muscle
         # you can specify an output file name as an argument if you want (optional)
-        futures = [executor.submit(pixel_grabber.save_pixels_by_muscles, "pixels_by_muscles.json")]
-        # pixel_grabber.save_pixels_by_muscles() # run for better print statements without process pool
+        pixel_grabber.save_pixels_by_muscles()
 
         print("Running change pixels test!")
         # if you are testing, you can visualize the changes with the change_pixels_test
         # you can specify a specific hex color default is '#000000'
-        futures = [executor.submit(pixel_grabber.change_pixels_test, '#000000')]
-        # pixel_grabber.change_pixels_test() # run for better print statements without process pool
 
-        executor.shutdown(wait=True, cancel_futures=False)
-        print("Finished saving pixel change test file and pixel by muscle.json file")
+        pixel_grabber.change_pixels_test() # run for better print statements without process pool
 
         end = time.time()
         print()
