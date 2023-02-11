@@ -10,6 +10,11 @@ class PixelToFace:
     def __init__(self, target_file_path):
         # these are all arrays!!!!!!!!!
         self.target_file_path = target_file_path
+
+        # where all the json files are for the geometry faces and uvs
+        # self.json_data_directory = "geometry_files/"
+        self.json_data_directory = "outputs/geometry_files"
+
         # FIXME I could use async for these tasks so the load is faster
         self.read_in_faces()
         self.read_in_normals()
@@ -23,19 +28,22 @@ class PixelToFace:
 
     def read_in_faces(self):
         print("Loading in faces")
-        with open('geometry_files/geometry_faces.json', 'r') as file:
+        with open(f'{self.json_data_directory}/geometry_faces.json', 'r') as file:
             data = file.read()
         self.faces = json.loads(data)['faces']
 
     def read_in_normals(self):
         print("Loading normals")
-        with open('geometry_files/geometry_normals.json', 'r') as file:
-            data = file.read()
-        self.normals = json.loads(data)['normals']
+        try:
+            with open(f'{self.json_data_directory}/geometry_normals.json', 'r') as file:
+                data = file.read()
+            self.normals = json.loads(data)['normals']
+        except FileNotFoundError:
+            print("Couldn't find geometry normals file, ignoring it!")
 
     def read_in_geometry_uvs(self):
         print("Loading geometry uvs")
-        with open('geometry_files/geometry_uvs.json', 'r') as file:
+        with open(f'{self.json_data_directory}/geometry_uvs.json', 'r') as file:
             data = file.read()
         self.uvs = json.loads(data)['uvs']
 
@@ -177,7 +185,7 @@ if __name__ == "__main__":
 
     # create all the points within the class
     # IMPORTANT you can comment this out if it's already been done!
-    # pixel_to_faces.decompose_all_triangles()
+    pixel_to_faces.decompose_all_triangles()
 
     # then search through target_uvs
     pixel_to_faces.find_faces_of_targets()

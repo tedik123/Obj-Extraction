@@ -306,7 +306,7 @@ if __name__ == "__main__":
     pixel_grabber = PixelGrabber(muscle_names_to_test, default_pixel_deviation)
 
     # this is for the future processes
-    executor = ProcessPoolExecutor(max_workers=2)
+    # executor = ProcessPoolExecutor(max_workers=2)
 
     # although this takes forever it is not worth optimizing as it is a task that must be waited on
     # before anything else is run
@@ -321,16 +321,16 @@ if __name__ == "__main__":
     print("Saving pixels by muscles file!")
     #  to save the pixels by muscle
     # you can specify an output file name as an argument if you want (optional)
-    futures = [executor.submit(pixel_grabber.save_pixels_by_muscles)]
-    # pixel_grabber.save_pixels_by_muscles() # run for better print statements without process pool
+    # futures = [executor.submit(pixel_grabber.save_pixels_by_muscles)]
+    pixel_grabber.save_pixels_by_muscles() # run for better print statements without process pool
 
     print("Running change pixels test!")
     # if you are testing, you can visualize the changes with the change_pixels_test
     # you can specify a specific hex color default is '#000000'
-    futures.append(executor.submit(pixel_grabber.change_pixels_test, '#000000'))
+    # futures.append(executor.submit(pixel_grabber.change_pixels_test, '#000000'))
     # wait(futures)
-    # pixel_grabber.change_pixels_test() # run for better print statements without process pool
-    executor.shutdown(wait=True, cancel_futures=False)
+    pixel_grabber.change_pixels_test() # run for better print statements without process pool
+    # executor.shutdown(wait=True, cancel_futures=False)
     print("Finished saving pixel change test file and pixel by muscle.json file")
     end = time.time()
     print()

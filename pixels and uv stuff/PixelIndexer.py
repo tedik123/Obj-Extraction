@@ -110,7 +110,7 @@ if __name__ == "__main__":
     end = time.time()
     print()
     print(f"Finished reading in faces...Took {end - start} seconds")
-    start = time.time()
+    # start = time.time()
     # this creates and writes to file
     indexer.create_indexed_faces()
     end = time.time()
