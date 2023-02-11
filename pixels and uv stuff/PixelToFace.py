@@ -181,7 +181,7 @@ if __name__ == "__main__":
     end = time.time()
     print()
     print(f"Finished reading in geometries...Took {end - start} seconds")
-    start = time.time()
+    start1 = time.time()
 
     # create all the points within the class
     # IMPORTANT you can comment this out if it's already been done!
@@ -190,5 +190,6 @@ if __name__ == "__main__":
     # then search through target_uvs
     pixel_to_faces.find_faces_of_targets()
     end = time.time()
-    print(end - start)
+    print(f"Triangle decompose and finding faces took {end-start} seconds.")
+    print()
     print(f"Full task took {(end - start) / 60} minutes")
