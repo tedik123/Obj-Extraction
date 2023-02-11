@@ -1,12 +1,6 @@
 import json
-import sys
 import time
-from concurrent.futures import as_completed
-# from concurrent.futures import ThreadPoolExecutor, as_completed, ProcessPoolExecutor
 from concurrent.futures.process import ProcessPoolExecutor
-# from concurrent.futures.thread import ThreadPoolExecutor
-
-# from concurrent.futures._base import wait
 
 from PIL import Image, ImageColor
 

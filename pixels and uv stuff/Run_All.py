@@ -1,7 +1,7 @@
 import json
 import time
 from concurrent.futures import ProcessPoolExecutor
-from os import listdir, getcwd
+from os import listdir
 from os.path import isfile, join
 from PixelToFace import PixelToFace
 from PixelGrabber import PixelGrabber
