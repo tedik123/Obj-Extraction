@@ -11,5 +11,5 @@ pixels and uv stuff/outputs/*.png
 pixels and uv stuff/outputs/geometry_files/*
 !pixels and uv stuff/outputs/geometry_files/.gitkeep
 
-pixels and uv stuff/geometry_files
-!pixels and uv stuff/geometry_files/.gitkeep
+pixels and uv stuff/obj files/**
+!pixels and uv stuff/obj files/.gitkeep
