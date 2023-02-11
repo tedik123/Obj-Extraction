@@ -1,8 +1,10 @@
 import json
 import sys
 import time
+from concurrent.futures import as_completed
 # from concurrent.futures import ThreadPoolExecutor, as_completed, ProcessPoolExecutor
 from concurrent.futures.process import ProcessPoolExecutor
+# from concurrent.futures.thread import ThreadPoolExecutor
 
 # from concurrent.futures._base import wait
 
@@ -22,7 +24,7 @@ class PixelGrabber:
         self.acceptable_colors_by_muscle = {}
 
     # opens the texture image and gets all the pixels and width as well the rgb by pixel coordinate
-    def set_and_create_image_data(self, thread_count=None):
+    def set_and_create_image_data(self):
         print("Grabbing pixels and rgbs....")
         self.coords_dict, self.max_width, self.max_height, self.mode, self.pixels = self.get_pixel_coords()
 
@@ -292,6 +294,33 @@ class PixelGrabber:
         return uvs_list
 
 
+# these two need to be static functions because how processes need
+# to pickle data as it's returned, and if it's in a class
+# like it was before it fails the pickling process
+def run_change_pixels_test(texture_file, pixels_by_muscle, color='#000000'):
+    print("CHANGING SOMETHING", flush=True)
+    img = Image.open(texture_file)
+    image_pixels = img.load()
+    for muscle_name, pixels in pixels_by_muscle.items():
+        print(f"{muscle_name}: pixels length test", len(pixels), flush=True)
+        # print("pixel type", type(pixels[0]))
+        for pixel in pixels:
+            image_pixels[pixel] = ImageColor.getcolor(color, "RGB")
+    img.save('outputs/pixel_change_test.png')
+    print("Finished saving change pixel test image.", flush=True)
+
+
+def save_pixels_by_muscles(pixels_by_muscle, output_file_name='pixels_by_muscles.json'):
+    print("Saving pixels by muscles", flush=True)
+    with open("outputs/" + output_file_name, 'w') as fp:
+        # uvs_list = list(uv_dict.values())
+        # print("uvs_list", len(uvs_list))
+        print("length of pixels by muscles", len(pixels_by_muscle), flush=True)
+        json.dump(pixels_by_muscle, fp)
+        print("Finished saving pixels by muscles json file.", flush=True)
+        fp.flush()
+
+
 if __name__ == "__main__":
     start = time.time()
     # IMPORTANT  this is an array of strings, if it's empty it will do all of them
@@ -306,7 +335,7 @@ if __name__ == "__main__":
     pixel_grabber = PixelGrabber(muscle_names_to_test, default_pixel_deviation)
 
     # this is for the future processes
-    # executor = ProcessPoolExecutor(max_workers=2)
+    executor = ProcessPoolExecutor(max_workers=2)
 
     # although this takes forever it is not worth optimizing as it is a task that must be waited on
     # before anything else is run
@@ -318,19 +347,27 @@ if __name__ == "__main__":
     # then run the actual pixel_grabber algo
     pixel_grabber.run_pixel_grabber()
 
-    print("Saving pixels by muscles file!")
+    # print("Saving pixels by muscles file!")
     #  to save the pixels by muscle
     # you can specify an output file name as an argument if you want (optional)
-    # futures = [executor.submit(pixel_grabber.save_pixels_by_muscles)]
-    pixel_grabber.save_pixels_by_muscles() # run for better print statements without process pool
+    output_file_name = "pixels_by_muscles.json"
+    futures = [executor.submit(save_pixels_by_muscles, pixel_grabber.pixels_by_muscle, output_file_name)]
+    # pixel_grabber.save_pixels_by_muscles() # run for better print statements without process pool
 
-    print("Running change pixels test!")
+    # print("Running change pixels test!")
     # if you are testing, you can visualize the changes with the change_pixels_test
     # you can specify a specific hex color default is '#000000'
-    # futures.append(executor.submit(pixel_grabber.change_pixels_test, '#000000'))
+    hex_color = '#000000'
+    futures.append(
+        executor.submit(run_change_pixels_test, pixel_grabber.texture_file, pixel_grabber.pixels_by_muscle,
+                        hex_color))
+    # for future in as_completed(futures):
+    #     print("finished")
+
+    # print(futures[0].result())
     # wait(futures)
-    pixel_grabber.change_pixels_test() # run for better print statements without process pool
-    # executor.shutdown(wait=True, cancel_futures=False)
+    # pixel_grabber.change_pixels_test() # run for better print statements without process pool
+    executor.shutdown(wait=True, cancel_futures=False)
     print("Finished saving pixel change test file and pixel by muscle.json file")
     end = time.time()
     print()
