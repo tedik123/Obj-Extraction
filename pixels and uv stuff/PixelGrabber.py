@@ -8,11 +8,11 @@ from PIL import Image, ImageColor
 class PixelGrabber:
     # if muscle name is none we do all them otherwise it's all of them
     # takes in an array of muscle names to do
-    def __init__(self, muscle_names=None, pixel_deviation=0):
+    def __init__(self, muscle_names=None, pixel_deviation=0, texture_file_path=None):
         self.pixel_deviation = pixel_deviation
         self.wide_white_range = True
         self.muscle_starts = self.read_in_muscle_starts()
-        self.texture_file = '../images/diffuse.jpg'
+        self.texture_file = 'obj textures/diffuse.jpg'
         self.muscle_names = muscle_names
         self.coords_dict, self.max_width, self.max_height, self.mode, self.pixels = None, None, None, None, None
         self.acceptable_colors_by_muscle = {}
@@ -214,6 +214,7 @@ class PixelGrabber:
                 # in case your image has an alpha channel
                 # r, g, b, a = pixels[x, y]
                 # print(x, y, f"#{r:02x}{g:02x}{b:02x}")
+        img.close()
         return coords_dict, width, height, mode, pixels
 
     # returns a dictionary of acceptable color rgbs
@@ -292,7 +293,7 @@ class PixelGrabber:
 # to pickle data as it's returned, and if it's in a class
 # like it was before it fails the pickling process
 def run_change_pixels_test(texture_file, pixels_by_muscle, color='#000000'):
-    print("CHANGING SOMETHING", flush=True)
+    print("Running pixel change test!")
     img = Image.open(texture_file)
     image_pixels = img.load()
     for muscle_name, pixels in pixels_by_muscle.items():
@@ -322,7 +323,7 @@ if __name__ == "__main__":
 
     # if there's a fade or variation in color you will want to raise this to loosen what is an acceptable color
     default_pixel_deviation = 3
-    # first create the object which simply loads in the diffuse.jpg and relevant data
+    # first create the object which simply loads in the texture picture and relevant data
     # also reads in the muscle starts
     # allows for a wider white range to capture more of the label, disable it if too aggressive
     # pixel_grabber.disable_wide_white_range()
