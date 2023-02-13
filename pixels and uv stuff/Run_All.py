@@ -1,5 +1,6 @@
 import json
 import time
+from concurrent.futures import ProcessPoolExecutor
 from os import listdir, getcwd
 from os.path import isfile, join
 from PixelToFace import PixelToFace
@@ -23,7 +24,17 @@ def create_file_names_list():
 
 if __name__ == "__main__":
     # IMPORTANT  this is an array of strings, if it's empty it will do all of them
-    muscle_names_to_test = ["Anconeus"]
+    # muscle_names_to_test = ["Flexor Carpi Ulnaris","Flexor Carpi Radialis","Flexor Digitorum Superficialis","Flexor Digitorum Longus","Gracilis","Gastrocnemius","Iliopsoas","Infraspinatus","Iliotibial Tract","Latissimus Dorsi","Levator Scapulae","Pectineus","Peroneus Longus"]
+    #["Flexor Carpi Ulnaris","Flexor Carpi Radialis","Flexor Digitorum Superficialis","Flexor Digitorum Longus","Gracilis","Gastrocnemius","Iliopsoas","Infraspinatus","Iliotibial Tract","Latissimus Dorsi","Levator Scapulae","Pectineus","Peroneus Longus"]
+
+    # muscle_names_to_test = []
+    # # grab last two for testing
+    # muscle_names_to_test = muscle_names_to_test[-1:]
+    muscle_names_to_test = []
+
+    # if there's a fade or variation in color you will want to raise this to loosen what is an acceptable color
+    default_pixel_deviation = 3
+
     # IMPORTANT unless you're testing something you can just leave it
     TARGET_FILE = 'outputs/pixels_by_muscles.json'
     # if you only want to run certain scripts you can change accordingly here
@@ -35,15 +46,30 @@ if __name__ == "__main__":
     if RUN_PIXEL_GRABBER:
         # first create the object which simply loads in the diffuse.jpg and relevant data
         # also reads in the muscle starts
-        pixel_grabber = PixelGrabber(muscle_names_to_test)
+        pixel_grabber = PixelGrabber(muscle_names_to_test, default_pixel_deviation)
+        # allows for a wider white range to capture more of the label, disable it if too aggressive
+        # pixel_grabber.disable_wide_white_range()
+
+        # although this takes forever it is not worth optimizing as it is a task that must be waited on
+        # before anything else is run
+        pixel_grabber.set_and_create_image_data()
+
+        # creates the range of acceptable colors by muscle
+        pixel_grabber.create_acceptable_colors_by_muscle()
+
         # then run the actual pixel_grabber algo
         pixel_grabber.run_pixel_grabber()
-        # to save the pixels by muscle
+
+        print("Saving pixels by muscles file!")
+        #  to save the pixels by muscle
         # you can specify an output file name as an argument if you want (optional)
         pixel_grabber.save_pixels_by_muscles()
-        # if you are testing, you can visualize the changes with
+
+        print("Running change pixels test!")
+        # if you are testing, you can visualize the changes with the change_pixels_test
         # you can specify a specific hex color default is '#000000'
-        pixel_grabber.change_pixels_test()
+
+        pixel_grabber.change_pixels_test() # run for better print statements without process pool
 
         end = time.time()
         print()
