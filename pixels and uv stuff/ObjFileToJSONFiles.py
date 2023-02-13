@@ -3,8 +3,8 @@ import time
 
 
 class ObjToJSON:
-    def __init__(self):
-        self.obj_file_path = "obj files/Anatomy.OBJ"
+    def __init__(self, obj_file_path):
+        self.obj_file_path = obj_file_path
         # set to None so values start at 1 instead of 0 like normal
         self.vertices = [None]
         self.normals = [None]
@@ -203,8 +203,8 @@ class ObjToJSON:
 
 if __name__ == "__main__":
     start = time.time()
-
-    obj_to_json = ObjToJSON()
+    base_obj_file_path = "obj files/Anatomy.OBJ"
+    obj_to_json = ObjToJSON(base_obj_file_path)
     obj_to_json.read_in_OBJ_file()
     obj_to_json.insert_face_data()
     obj_to_json.create_json_files()

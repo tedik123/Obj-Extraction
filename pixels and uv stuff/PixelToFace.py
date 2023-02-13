@@ -95,10 +95,10 @@ class PixelToFace:
             json.dump(self.point_to_triangle, fp)
 
     def find_faces_of_targets(self):
-        self.muscle_faces = {}
+        self.label_faces = {}
         points_dict = self.read_in_points()
         print("Searching points for targets...")
-        for muscle_name, targets in self.target_pixels_by_name.items():
+        for label_name, targets in self.target_pixels_by_name.items():
             face_results = []
             normals_result = []
             # I don't think we care about uvs
@@ -124,14 +124,14 @@ class PixelToFace:
                     # normals_result.append(n0)
                     # normals_result.append(n1)
                     # normals_result.append(n2)
-            # self.muscle_faces[muscle_name] = {"vertices": face_results, "normals": normals_result}
-            self.muscle_faces[muscle_name] = {"vertices": face_results}
+            # self.label_faces[label_name] = {"vertices": face_results, "normals": normals_result}
+            self.label_faces[label_name] = {"vertices": face_results}
 
         # print(face_results)
-        # TODO match faces to muscle name or label whichever we want
-        with open('outputs/faces_found_by_muscles.json', 'w') as fp:
-            print("Muscles faces length", len(self.muscle_faces))
-            json.dump(self.muscle_faces, fp)
+        # TODO match faces to label name or label whichever we want
+        with open('outputs/faces_found_by_labels.json', 'w') as fp:
+            print("labels faces length", len(self.label_faces))
+            json.dump(self.label_faces, fp)
 
 
 def uvs_to_pixels(u, v):
@@ -175,7 +175,7 @@ def isPtInTriangle(p, p0, p1, p2):
 
 
 if __name__ == "__main__":
-    TARGET_FILE = 'outputs/pixels_by_muscles.json'
+    TARGET_FILE = 'outputs/pixels_by_labels.json'
     start = time.time()
     pixel_to_faces = PixelToFace(TARGET_FILE)
     end = time.time()

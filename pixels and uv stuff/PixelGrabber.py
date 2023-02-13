@@ -6,17 +6,17 @@ from PIL import Image, ImageColor
 
 
 class PixelGrabber:
-    # if muscle name is none we do all them otherwise it's all of them
-    # takes in an array of muscle names to do
-    def __init__(self, texture_file_path, muscle_names=None, pixel_deviation=0, ):
+    # if label name is none we do all them otherwise it's all of them
+    # takes in an array of label names to do
+    def __init__(self, texture_file_path, label_names=None, pixel_deviation=0, ):
         self.pixel_deviation = pixel_deviation
         self.wide_white_range = True
-        self.muscle_starts = self.read_in_muscle_starts()
+        self.label_starts = self.read_in_label_starts()
         # self.texture_file = 'obj textures/diffuse.jpg'
         self.texture_file = texture_file_path
-        self.muscle_names = muscle_names
+        self.label_names = label_names
         self.coords_dict, self.max_width, self.max_height, self.mode, self.pixels = None, None, None, None, None
-        self.acceptable_colors_by_muscle = {}
+        self.acceptable_colors_by_label = {}
 
     # opens the texture image and gets all the pixels and width as well the rgb by pixel coordinate
     def set_and_create_image_data(self):
@@ -26,75 +26,75 @@ class PixelGrabber:
     def disable_wide_white_range(self):
         self.wide_white_range = False
 
-    def read_in_muscle_starts(self):
-        print("Loading in muscle starts...")
+    def read_in_label_starts(self):
+        print("Loading in label starts...")
         # testing line
         # with open('starts/test_template.json', 'r') as file:
         # this is the normal one to be used
-        with open('starts/muscle_starts.json', 'r') as file:
+        with open('starts/label_starts.json', 'r') as file:
             data = file.read()
         return json.loads(data)
 
-    # creates the range of acceptable colors by muscle and stores it in a dictionary where the key is the muscle
-    def create_acceptable_colors_by_muscle(self):
+    # creates the range of acceptable colors by label and stores it in a dictionary where the key is the label
+    def create_acceptable_colors_by_label(self):
         print("Creating color ranges...")
-        for muscle_name, muscle_data in self.muscle_starts.items():
+        for label_name, label_data in self.label_starts.items():
             allowed_pixel_deviation = self.pixel_deviation
-            # we need to check if a muscle start has a different pixel tolerance
+            # we need to check if a label start has a different pixel tolerance
             # assumes an int
-            if "pixel_deviation" in muscle_data:
-                allowed_pixel_deviation = muscle_data["pixel_deviation"]
+            if "pixel_deviation" in label_data:
+                allowed_pixel_deviation = label_data["pixel_deviation"]
             if type(allowed_pixel_deviation) is not int or allowed_pixel_deviation < 0:
-                raise Exception(f"Pixel tolerance or deviation must be greater than 0, this failed on {muscle_name}")
+                raise Exception(f"Pixel tolerance or deviation must be greater than 0, this failed on {label_name}")
             allow_wide_white_range = self.wide_white_range
-            if "wide_white_range" in muscle_data:
-                allow_wide_white_range = muscle_data["wide_white_range"]
+            if "wide_white_range" in label_data:
+                allow_wide_white_range = label_data["wide_white_range"]
             # this is a list of lists of rgb_values
-            acceptable_colors = muscle_data["acceptable_colors_rgb"]
+            acceptable_colors = label_data["acceptable_colors_rgb"]
             # maybe a bit of an optimization or a waste of time not sure
             acceptable_colors_dict = self.create_acceptable_colors(acceptable_colors, allow_wide_white_range,
                                                                    allowed_pixel_deviation)
-            self.acceptable_colors_by_muscle[muscle_name] = acceptable_colors_dict
+            self.acceptable_colors_by_label[label_name] = acceptable_colors_dict
 
-    # for each muscle name it will extract all the pixels belonging to it using the muscle_starts.json
+    # for each label name it will extract all the pixels belonging to it using the label_starts.json
     def run_pixel_grabber(self):
-        # the key will be the muscle_name,
-        # and the value will be the array of pixels that make up the muscle
-        self.pixels_by_muscle = {}
-        # need to extract only the muscles names we want if provided a list
-        if self.muscle_names:
-            change_muscle_starts = {}
-            for muscle_name in self.muscle_names:
-                muscle_data = self.muscle_starts[muscle_name]
-                change_muscle_starts[muscle_name] = muscle_data
-            self.muscle_starts = change_muscle_starts
-        for muscle_name, muscle_data in self.muscle_starts.items():
-            print(f"Starting run for DFS for muscle {muscle_name}")
-            label = muscle_data["label"]
-            starting_points = muscle_data["starting_points"]
+        # the key will be the label_name,
+        # and the value will be the array of pixels that make up the label
+        self.pixels_by_label = {}
+        # need to extract only the labels names we want if provided a list
+        if self.label_names:
+            change_label_starts = {}
+            for label_name in self.label_names:
+                label_data = self.label_starts[label_name]
+                change_label_starts[label_name] = label_data
+            self.label_starts = change_label_starts
+        for label_name, label_data in self.label_starts.items():
+            print(f"Starting run for DFS for label {label_name}")
+            label = label_data["label"]
+            starting_points = label_data["starting_points"]
 
             # the length of arrays starting_points, mins, and maxes must all be equal
-            muscle_pixels = []
+            label_pixels = []
             for i, point in enumerate(starting_points):
                 min_X, min_Y = 0, 0
                 # we get the max width from the pic
                 max_X, max_Y = self.max_width, self.max_height
-                if "min_X" in muscle_data:
-                    min_X = muscle_data["min_X"][i]
-                if "min_Y" in muscle_data:
-                    min_Y = muscle_data["min_Y"][i]
-                if "max_X" in muscle_data:
-                    max_X = muscle_data["max_X"][i]
-                if "max_Y" in muscle_data:
-                    max_Y = muscle_data["max_Y"][i]
+                if "min_X" in label_data:
+                    min_X = label_data["min_X"][i]
+                if "min_Y" in label_data:
+                    min_Y = label_data["min_Y"][i]
+                if "max_X" in label_data:
+                    max_X = label_data["max_X"][i]
+                if "max_Y" in label_data:
+                    max_Y = label_data["max_Y"][i]
 
                 # combine results into one big array
-                muscle_pixels += self.DFS(tuple(point), muscle_name, min_X, min_Y, max_X, max_Y)
-                print("len muscle", len(muscle_pixels))
-            self.pixels_by_muscle[muscle_name] = muscle_pixels
+                label_pixels += self.DFS(tuple(point), label_name, min_X, min_Y, max_X, max_Y)
+                print("len label", len(label_pixels))
+            self.pixels_by_label[label_name] = label_pixels
 
     # this is the searching algorithm for neighboring pixels that match
-    def DFS(self, starting_coords, muscle_name, min_X, min_Y, max_X, max_Y):
+    def DFS(self, starting_coords, label_name, min_X, min_Y, max_X, max_Y):
         x, y = starting_coords
         pixel_rgb = self.coords_dict[(x, y)]
 
@@ -111,7 +111,7 @@ class PixelGrabber:
         # idk what value to store it's arbitrary
         visited[starting_coords] = pixel_rgb
         accepted_pixels.append(starting_coords)
-        acceptable_colors = self.acceptable_colors_by_muscle[muscle_name]
+        acceptable_colors = self.acceptable_colors_by_label[label_name]
         while queue:
             # queue is just a tuple list of coords
             # current_coords = queue.pop(0)
@@ -183,22 +183,22 @@ class PixelGrabber:
         print("CHANGING SOMETHING", flush=True)
         img = Image.open(self.texture_file)
         image_pixels = img.load()
-        for muscle_name, pixels in self.pixels_by_muscle.items():
-            print(f"{muscle_name}: pixels length test", len(pixels), flush=True)
+        for label_name, pixels in self.pixels_by_label.items():
+            print(f"{label_name}: pixels length test", len(pixels), flush=True)
             # print("pixel type", type(pixels[0]))
             for pixel in pixels:
                 image_pixels[pixel] = ImageColor.getcolor(color, "RGB")
         img.save('outputs/pixel_change_test.png')
         print("Finished saving change pixel test image.")
 
-    def save_pixels_by_muscles(self, output_file_name='pixels_by_muscles.json'):
+    def save_pixels_by_labels(self, output_file_name='pixels_by_labels.json'):
         print("SAVING PIXELS OR TRYING TO WHO KNOWS")
         with open("outputs/" + output_file_name, 'w') as fp:
             # uvs_list = list(uv_dict.values())
             # print("uvs_list", len(uvs_list))
-            print("length of pixels by muscles", len(self.pixels_by_muscle))
-            json.dump(self.pixels_by_muscle, fp)
-            print("Finished saving pixels by muscles json file.")
+            print("length of pixels by labels", len(self.pixels_by_label))
+            json.dump(self.pixels_by_label, fp)
+            print("Finished saving pixels by labels json file.")
             fp.flush()
 
     # this grabs each pixel coordinate and uses a tuple pair as key
@@ -296,12 +296,12 @@ class PixelGrabber:
 # these two need to be static functions because how processes need
 # to pickle data as it's returned, and if it's in a class
 # like it was before it fails the pickling process
-def run_change_pixels_test(texture_file, pixels_by_muscle, color='#000000'):
+def run_change_pixels_test(texture_file, pixels_by_label, color='#000000'):
     print("Running pixel change test!")
     img = Image.open(texture_file)
     image_pixels = img.load()
-    for muscle_name, pixels in pixels_by_muscle.items():
-        print(f"{muscle_name}: pixels length test", len(pixels), flush=True)
+    for label_name, pixels in pixels_by_label.items():
+        print(f"{label_name}: pixels length test", len(pixels), flush=True)
         # print("pixel type", type(pixels[0]))
         for pixel in pixels:
             image_pixels[pixel] = ImageColor.getcolor(color, "RGB")
@@ -309,31 +309,31 @@ def run_change_pixels_test(texture_file, pixels_by_muscle, color='#000000'):
     print("Finished saving change pixel test image.", flush=True)
 
 
-def save_pixels_by_muscles(pixels_by_muscle, output_file_name='pixels_by_muscles.json'):
-    print("Saving pixels by muscles", flush=True)
+def save_pixels_by_labels(pixels_by_label, output_file_name='pixels_by_labels.json'):
+    print("Saving pixels by labels", flush=True)
     with open("outputs/" + output_file_name, 'w') as fp:
         # uvs_list = list(uv_dict.values())
         # print("uvs_list", len(uvs_list))
-        print("length of pixels by muscles", len(pixels_by_muscle), flush=True)
-        json.dump(pixels_by_muscle, fp)
-        print("Finished saving pixels by muscles json file.", flush=True)
+        print("length of pixels by labels", len(pixels_by_label), flush=True)
+        json.dump(pixels_by_label, fp)
+        print("Finished saving pixels by labels json file.", flush=True)
         fp.flush()
 
 
 if __name__ == "__main__":
     start = time.time()
     # IMPORTANT  this is an array of strings, if it's empty it will do all of them
-    muscle_names_to_test = []
+    label_names_to_test = []
 
     # if there's a fade or variation in color you will want to raise this to loosen what is an acceptable color
     default_pixel_deviation = 3
 
     texture_file_path = 'obj textures/diffuse.jpg'
     # first create the object which simply loads in the texture picture and relevant data
-    # also reads in the muscle starts
+    # also reads in the label starts
     # allows for a wider white range to capture more of the label, disable it if too aggressive
     # pixel_grabber.disable_wide_white_range()
-    pixel_grabber = PixelGrabber(texture_file_path, muscle_names_to_test, default_pixel_deviation)
+    pixel_grabber = PixelGrabber(texture_file_path, label_names_to_test, default_pixel_deviation)
 
     # this is for the future processes
     executor = ProcessPoolExecutor(max_workers=2)
@@ -342,25 +342,25 @@ if __name__ == "__main__":
     # before anything else is run
     pixel_grabber.set_and_create_image_data()
 
-    # creates the range of acceptable colors by muscle
-    pixel_grabber.create_acceptable_colors_by_muscle()
+    # creates the range of acceptable colors by label
+    pixel_grabber.create_acceptable_colors_by_label()
 
     # then run the actual pixel_grabber algo
     pixel_grabber.run_pixel_grabber()
 
-    # print("Saving pixels by muscles file!")
-    #  to save the pixels by muscle
+    # print("Saving pixels by labels file!")
+    #  to save the pixels by label
     # you can specify an output file name as an argument if you want (optional)
-    output_file_name = "pixels_by_muscles.json"
-    futures = [executor.submit(save_pixels_by_muscles, pixel_grabber.pixels_by_muscle, output_file_name)]
-    # pixel_grabber.save_pixels_by_muscles() # run for better print statements without process pool
+    output_file_name = "pixels_by_labels.json"
+    futures = [executor.submit(save_pixels_by_labels, pixel_grabber.pixels_by_label, output_file_name)]
+    # pixel_grabber.save_pixels_by_labels() # run for better print statements without process pool
 
     # print("Running change pixels test!")
     # if you are testing, you can visualize the changes with the change_pixels_test
     # you can specify a specific hex color default is '#000000'
     hex_color = '#000000'
     futures.append(
-        executor.submit(run_change_pixels_test, pixel_grabber.texture_file, pixel_grabber.pixels_by_muscle,
+        executor.submit(run_change_pixels_test, pixel_grabber.texture_file, pixel_grabber.pixels_by_label,
                         hex_color))
     # for future in as_completed(futures):
     #     print("finished")
@@ -369,7 +369,7 @@ if __name__ == "__main__":
     # wait(futures)
     # pixel_grabber.change_pixels_test() # run for better print statements without process pool
     executor.shutdown(wait=True, cancel_futures=False)
-    print("Finished saving pixel change test file and pixel by muscle.json file")
+    print("Finished saving pixel change test file and pixel by label.json file")
     end = time.time()
     print()
     print(f"Finished finding pixels...Took {end - start} seconds")
