@@ -38,14 +38,19 @@ if __name__ == "__main__":
     # if there's a fade or variation in color you will want to raise this to loosen what is an acceptable color
     default_pixel_deviation = 3
 
+    texture_file_path = 'obj textures/diffuse.jpg'
+    # define the dimensions of the image
+    texture_max_width, texture_max_height = 4096, 4096
+
     # IMPORTANT unless you're testing something you can just leave it
+    # target is what pixels we're trying to find
     TARGET_FILE = 'outputs/pixels_by_muscles.json'
     # if you only want to run certain scripts you can change accordingly here
     RUN_PIXEL_GRABBER = True
     RUN_PIXEL_TO_FACE = True
     RUN_PIXEL_INDEXER = True
 
-    # this triangle decomposer only needs to be run once if the base .obj file is the same!
+    # this triangle decomposer only needs to be run once if the base .obj file is the same! So turn it to false, after!
     RUN_TRIANGLE_DECOMPOSER = True
 
 
@@ -53,7 +58,7 @@ if __name__ == "__main__":
     if RUN_PIXEL_GRABBER:
         # first create the object which simply loads in the diffuse.jpg and relevant data
         # also reads in the muscle starts
-        pixel_grabber = PixelGrabber(muscle_names_to_test, default_pixel_deviation)
+        pixel_grabber = PixelGrabber(muscle_names_to_test, default_pixel_deviation, texture_file_path)
         # allows for a wider white range to capture more of the label, disable it if too aggressive
         # pixel_grabber.disable_wide_white_range()
 
@@ -104,7 +109,7 @@ if __name__ == "__main__":
 
         # create all the points within the obj files
         if RUN_TRIANGLE_DECOMPOSER:
-            pixel_to_faces.decompose_all_triangles()
+            pixel_to_faces.decompose_all_triangles(texture_max_width, texture_max_height)
 
         # then search through target_uvs
         pixel_to_faces.find_faces_of_targets()

@@ -326,11 +326,13 @@ if __name__ == "__main__":
 
     # if there's a fade or variation in color you will want to raise this to loosen what is an acceptable color
     default_pixel_deviation = 3
+
+    texture_file_path = 'obj textures/diffuse.jpg'
     # first create the object which simply loads in the texture picture and relevant data
     # also reads in the muscle starts
     # allows for a wider white range to capture more of the label, disable it if too aggressive
     # pixel_grabber.disable_wide_white_range()
-    pixel_grabber = PixelGrabber(muscle_names_to_test, default_pixel_deviation)
+    pixel_grabber = PixelGrabber(muscle_names_to_test, default_pixel_deviation, texture_file_path)
 
     # this is for the future processes
     executor = ProcessPoolExecutor(max_workers=2)

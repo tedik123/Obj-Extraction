@@ -63,14 +63,14 @@ class PixelToFace:
             data = file.read()
         return json.loads(data)
 
-    def decompose_all_triangles(self):
+    def decompose_all_triangles(self, max_width, max_height):
         print("Decomposing all triangles into points!")
         for index, uv_face in enumerate(self.uvs):
             coord_point_sum = uv_face["a"]["x"] + uv_face["a"]["y"] + uv_face["b"]["x"] + uv_face["b"]["y"] + \
                               uv_face["c"]["x"] + uv_face["b"]["y"]
             # we'll ignore all 0 points which only happens at the beginning in our case
             if coord_point_sum != 0:
-                triangle = TriangleDecomposer(uv_face["a"], uv_face["b"], uv_face["c"], 4096, 4096)
+                triangle = TriangleDecomposer(uv_face["a"], uv_face["b"], uv_face["c"], max_width, max_height)
                 all_points = triangle.get_all_points_of_triangle()
                 # triangle 14299 has points {'x': 2998, 'y': 1801}, {'x': 2998, 'y': 1804}, {'x': 2999, 'y': 1801} and UVS of: {'x': 0.7321699857711792, 'y': 0.560259997844696}, {'x': 0.7320399880409241, 'y': 0.5595099925994873}, {'x': 0.7322999835014343, 'y': 0.5602999925613403}
                 # triangle 14302 has points {'x': 3001, 'y': 1803}, {'x': 3003, 'y': 1802}, {'x': 2999, 'y': 1801} and UVS of: {'x': 0.7327700257301331, 'y': 0.559660017490387}, {'x': 0.7333499789237976, 'y': 0.5600100159645081}, {'x': 0.7322999835014343, 'y': 0.5602999925613403}
