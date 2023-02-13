@@ -7,7 +7,7 @@ from PixelToFace import PixelToFace
 from PixelGrabber import PixelGrabber
 from PixelIndexer import PixelIndexer
 from PixelGrabber import run_change_pixels_test, save_pixels_by_muscles
-
+from ObjFileToJSONFiles import ObjToJSON
 def create_file_names_list():
     ignore_files = [".gitkeep", "human.obj", "file_list.json"]
     mypath = "outputs/OBJ files/"
@@ -58,7 +58,8 @@ if __name__ == "__main__":
     if RUN_PIXEL_GRABBER:
         # first create the object which simply loads in the diffuse.jpg and relevant data
         # also reads in the muscle starts
-        pixel_grabber = PixelGrabber(muscle_names_to_test, default_pixel_deviation, texture_file_path)
+        pixel_grabber = PixelGrabber(texture_file_path, muscle_names_to_test, default_pixel_deviation)
+
         # allows for a wider white range to capture more of the label, disable it if too aggressive
         # pixel_grabber.disable_wide_white_range()
 
@@ -100,7 +101,16 @@ if __name__ == "__main__":
     ### NEW SCRIPT STARTS HERE ###
     if RUN_PIXEL_TO_FACE:
         print("Starting pixels to faces code!")
+
         start = time.time()
+        if RUN_TRIANGLE_DECOMPOSER:
+            # we need this to create the geometry files and again only needs
+            # to be run once, so it's paired with the triangle decomposer
+            obj_to_json = ObjToJSON()
+            obj_to_json.read_in_OBJ_file()
+            obj_to_json.insert_face_data()
+            obj_to_json.create_json_files()
+
         pixel_to_faces = PixelToFace(TARGET_FILE)
         end = time.time()
         print()
@@ -109,6 +119,8 @@ if __name__ == "__main__":
 
         # create all the points within the obj files
         if RUN_TRIANGLE_DECOMPOSER:
+
+            # then break down those geometry files
             pixel_to_faces.decompose_all_triangles(texture_max_width, texture_max_height)
 
         # then search through target_uvs

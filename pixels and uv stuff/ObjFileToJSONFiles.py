@@ -91,7 +91,7 @@ class ObjToJSON:
             if len(pairs) > 1:
                 face_format["uvs_index"].append(int(pairs[1]))
             if len(pairs) > 2:
-                face_format["normals_index"].append(pairs[2])
+                face_format["normals_index"].append(int(pairs[2]))
 
         self.faces_pointers.append(face_format)
 

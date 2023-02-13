@@ -8,11 +8,12 @@ from PIL import Image, ImageColor
 class PixelGrabber:
     # if muscle name is none we do all them otherwise it's all of them
     # takes in an array of muscle names to do
-    def __init__(self, muscle_names=None, pixel_deviation=0, texture_file_path=None):
+    def __init__(self, texture_file_path, muscle_names=None, pixel_deviation=0, ):
         self.pixel_deviation = pixel_deviation
         self.wide_white_range = True
         self.muscle_starts = self.read_in_muscle_starts()
-        self.texture_file = 'obj textures/diffuse.jpg'
+        # self.texture_file = 'obj textures/diffuse.jpg'
+        self.texture_file = texture_file_path
         self.muscle_names = muscle_names
         self.coords_dict, self.max_width, self.max_height, self.mode, self.pixels = None, None, None, None, None
         self.acceptable_colors_by_muscle = {}
@@ -332,7 +333,7 @@ if __name__ == "__main__":
     # also reads in the muscle starts
     # allows for a wider white range to capture more of the label, disable it if too aggressive
     # pixel_grabber.disable_wide_white_range()
-    pixel_grabber = PixelGrabber(muscle_names_to_test, default_pixel_deviation, texture_file_path)
+    pixel_grabber = PixelGrabber(texture_file_path, muscle_names_to_test, default_pixel_deviation)
 
     # this is for the future processes
     executor = ProcessPoolExecutor(max_workers=2)
