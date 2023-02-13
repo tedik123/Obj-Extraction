@@ -1,4 +1,5 @@
 import json
+import time
 
 
 class ObjToJSON:
@@ -201,7 +202,13 @@ class ObjToJSON:
 
 
 if __name__ == "__main__":
+    start = time.time()
+
     obj_to_json = ObjToJSON()
     obj_to_json.read_in_OBJ_file()
     obj_to_json.insert_face_data()
     obj_to_json.create_json_files()
+
+    end = time.time()
+    print()
+    print(f"Finished creating geometry files...Took {end - start} seconds")

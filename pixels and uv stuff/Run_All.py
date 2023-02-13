@@ -129,9 +129,9 @@ if __name__ == "__main__":
         print(end - start)
         print(f"Pixel to face search took {(end - start) / 60} minutes")
 
+    ###################################################################################################################
+    ### NEW SCRIPT STARTS HERE ###
     if RUN_PIXEL_INDEXER:
-        ###################################################################################################################
-        ### NEW SCRIPT STARTS HERE ###
         print()
         print("Starting Pixel Indexer and .obj creation")
         start = time.time()
