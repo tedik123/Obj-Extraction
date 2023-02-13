@@ -13,3 +13,5 @@ pixels and uv stuff/outputs/geometry_files/*
 
 pixels and uv stuff/obj files/**
 !pixels and uv stuff/obj files/.gitkeep
+
+**venv

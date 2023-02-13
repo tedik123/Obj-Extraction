@@ -45,6 +45,10 @@ if __name__ == "__main__":
     RUN_PIXEL_TO_FACE = True
     RUN_PIXEL_INDEXER = True
 
+    # this triangle decomposer only needs to be run once if the base .obj file is the same!
+    RUN_TRIANGLE_DECOMPOSER = True
+
+
     start0 = time.time()
     if RUN_PIXEL_GRABBER:
         # first create the object which simply loads in the diffuse.jpg and relevant data
@@ -98,9 +102,9 @@ if __name__ == "__main__":
         print(f"Finished reading in geometries...Took {end - start} seconds")
         start = time.time()
 
-        # create all the points within the class
-        # IMPORTANT you can comment this out if it's already been done!
-        # pixel_to_faces.decompose_all_triangles()
+        # create all the points within the obj files
+        if RUN_TRIANGLE_DECOMPOSER:
+            pixel_to_faces.decompose_all_triangles()
 
         # then search through target_uvs
         pixel_to_faces.find_faces_of_targets()

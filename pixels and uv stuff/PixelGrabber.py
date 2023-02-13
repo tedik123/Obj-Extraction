@@ -1,7 +1,7 @@
 import json
 import time
 from concurrent.futures.process import ProcessPoolExecutor
-
+from collections import deque
 from PIL import Image, ImageColor
 
 
@@ -99,10 +99,12 @@ class PixelGrabber:
 
         # color = (220, 156, 190)
         # acceptable_colors = {color: True}
-        queue = []
+        # dequeue is a doubly linked list
+        queue = deque()
         # important that this is a dict it's much faster!
         visited = {}
-        accepted_pixels = []
+        # accepted_pixels = []
+        accepted_pixels = deque()
         # add it to the queue and the visited
         queue.append(starting_coords)
         # idk what value to store it's arbitrary
@@ -111,7 +113,8 @@ class PixelGrabber:
         acceptable_colors = self.acceptable_colors_by_muscle[muscle_name]
         while queue:
             # queue is just a tuple list of coords
-            current_coords = queue.pop(0)
+            # current_coords = queue.pop(0)
+            current_coords = queue.popleft()
             x, y = current_coords
             pixel_rgb = self.coords_dict[(x, y)]
             # print(queue)
@@ -132,7 +135,7 @@ class PixelGrabber:
         return accepted_pixels
 
     # this is the helper function for the search algorithm to make it more readable
-    def DFS_helper(self, current_coords, rgb, acceptable_colors: dict, queue, visited: dict, revealed):
+    def DFS_helper(self, current_coords, rgb, acceptable_colors: dict, queue, visited: dict, accepted_pixels):
         if current_coords not in visited:
             visited[current_coords] = rgb
             # if rgb value is not equal to the targeted rgb then we ignore it and don't continue searching from there
@@ -141,7 +144,7 @@ class PixelGrabber:
             # if it's acceptable then add to the queue to continue searching from there as well as you know that it's
             # an acceptable rgb value
             queue.append(current_coords)
-            revealed.append(current_coords)
+            accepted_pixels.append(current_coords)
         return
 
     # simply gets the coordinates points 1 pixel away in all directions, returns a list
