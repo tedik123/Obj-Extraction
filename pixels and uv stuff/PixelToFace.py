@@ -47,7 +47,6 @@ class PixelToFace:
             data = file.read()
         self.uvs = json.loads(data)['uvs']
 
-
     def read_in_target_pixels(self):
         print("Loading target pixels")
         with open(self.target_file_path, 'r') as file:
@@ -98,9 +97,12 @@ class PixelToFace:
         self.label_faces = {}
         points_dict = self.read_in_points()
         print("Searching points for targets...")
+        missed_values = 0
+        pixels_to_find_count = 0
         for label_name, targets in self.target_pixels_by_name.items():
             face_results = []
             normals_result = []
+            pixels_to_find_count += len(targets)
             # I don't think we care about uvs
             # uvs_result = []
             for target in targets:
@@ -110,6 +112,7 @@ class PixelToFace:
                 uv_does_exist = points_dict.get(target, None)
                 if not uv_does_exist:
                     print(target)
+                    missed_values += 1
                     # print(uv_does_exist)
                 if uv_does_exist:
                     p0 = self.faces[uv_does_exist]["a"]
@@ -126,9 +129,11 @@ class PixelToFace:
                     # normals_result.append(n2)
             # self.label_faces[label_name] = {"vertices": face_results, "normals": normals_result}
             self.label_faces[label_name] = {"vertices": face_results}
-
+        print(f"Missed {round((missed_values/pixels_to_find_count)*100, 2)}% of target pixels.")
+        print(f"Missed {missed_values} out of {pixels_to_find_count}, could not find their matching faces.")
         # print(face_results)
         # TODO match faces to label name or label whichever we want
+        print("Creating faces found by labels json file!")
         with open('outputs/faces_found_by_labels.json', 'w') as fp:
             print("labels faces length", len(self.label_faces))
             json.dump(self.label_faces, fp)
@@ -142,6 +147,7 @@ def uvs_to_pixels(u, v):
     # since 0, 0 is at the bottom left! very important
     y = math.floor((v - 1) * -MAX_HEIGHT)
     return x, y
+
 
 # This is a standard barycentric coordinate function.
 # I don't know how this works...
@@ -190,6 +196,6 @@ if __name__ == "__main__":
     # then search through target_uvs
     pixel_to_faces.find_faces_of_targets()
     end = time.time()
-    print(f"Triangle decompose and finding faces took {end-start} seconds.")
+    print(f"Triangle decompose and finding faces took {end - start} seconds.")
     print()
     print(f"Full task took {(end - start) / 60} minutes")
