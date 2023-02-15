@@ -10,21 +10,22 @@ class PixelGrabber:
     # takes in an array of label names to do
     def __init__(self, texture_file_path, label_names=None, pixel_deviation=0, ):
         self.pixel_deviation = pixel_deviation
-        self.wide_white_range = True
+        self.enable_default_color_range = True
         self.label_starts = self.read_in_label_starts()
         # self.texture_file = 'obj textures/diffuse.jpg'
         self.texture_file = texture_file_path
         self.label_names = label_names
         self.coords_dict, self.max_width, self.max_height, self.mode, self.pixels = None, None, None, None, None
         self.acceptable_colors_by_label = {}
+        self.default_acceptable_colors_dict = {}
 
     # opens the texture image and gets all the pixels and width as well the rgb by pixel coordinate
     def set_and_create_image_data(self):
         print("Grabbing pixels and rgbs....")
         self.coords_dict, self.max_width, self.max_height, self.mode, self.pixels = self.get_pixel_coords()
 
-    def disable_wide_white_range(self):
-        self.wide_white_range = False
+    def disable_default_color_range(self):
+        self.enable_default_color_range = False
 
     def read_in_label_starts(self):
         print("Loading in label starts...")
@@ -36,23 +37,30 @@ class PixelGrabber:
         return json.loads(data)
 
     # creates the range of acceptable colors by label and stores it in a dictionary where the key is the label
-    def create_acceptable_colors_by_label(self):
+    # takes in a default color that you want to be acceptable for ALL labels and a pixel deviation for the color
+    # inputted it will not apply that deviation to your rgbs values provided from the json file
+    def create_acceptable_colors_by_label(self, default_acceptable_colors=None, default_acceptable_deviation=0):
         print("Creating color ranges...")
+        # set default range to white +/- 1
+        self.create_default_acceptable_colors(default_acceptable_colors, default_acceptable_deviation)
+
         for label_name, label_data in self.label_starts.items():
             allowed_pixel_deviation = self.pixel_deviation
             # we need to check if a label start has a different pixel tolerance
             # assumes an int
             if "pixel_deviation" in label_data:
                 allowed_pixel_deviation = label_data["pixel_deviation"]
+
             if type(allowed_pixel_deviation) is not int or allowed_pixel_deviation < 0:
                 raise Exception(f"Pixel tolerance or deviation must be greater than 0, this failed on {label_name}")
-            allow_wide_white_range = self.wide_white_range
-            if "wide_white_range" in label_data:
-                allow_wide_white_range = label_data["wide_white_range"]
+            allow_default_color_range = self.enable_default_color_range
+
+            if "enable_default_range" in label_data:
+                allow_default_color_range = label_data["enable_default_range"]
             # this is a list of lists of rgb_values
             acceptable_colors = label_data["acceptable_colors_rgb"]
             # maybe a bit of an optimization or a waste of time not sure
-            acceptable_colors_dict = self.create_acceptable_colors(acceptable_colors, allow_wide_white_range,
+            acceptable_colors_dict = self.create_acceptable_colors(acceptable_colors, allow_default_color_range,
                                                                    allowed_pixel_deviation)
             self.acceptable_colors_by_label[label_name] = acceptable_colors_dict
 
@@ -221,19 +229,36 @@ class PixelGrabber:
         img.close()
         return coords_dict, width, height, mode, pixels
 
+    # this takes in a color that you want all your labels to accept, this is helpful if the label has some sort of
+    # text in the center
+    def create_default_acceptable_colors(self, default_acceptable_colors: list = None, pixel_tolerance_range: int = 0):
+        if default_acceptable_colors is None:
+            self.default_acceptable_colors_dict = {}
+        if pixel_tolerance_range == 0:
+            for rgb in default_acceptable_colors:
+                self.default_acceptable_colors_dict[tuple(rgb)] = True
+        else:
+            # print(default_acceptable_colors)
+            for rgb in default_acceptable_colors:
+                self.create_close_enough_values(rgb, pixel_tolerance_range,
+                                                self.default_acceptable_colors_dict)
+
     # returns a dictionary of acceptable color rgbs
-    def create_acceptable_colors(self, acceptable_colors, enable_wide_white_range, pixel_tolerance_range: int = 0):
+    def create_acceptable_colors(self, acceptable_colors, enable_default_color_range, pixel_tolerance_range: int = 0):
         acceptable_colors_dict = {}
         # also add white as an acceptable color for the letter labels so there's not a hole
-        if enable_wide_white_range:
-            acceptable_colors_dict[(254, 255, 252)] = True
-            acceptable_colors_dict[(255, 255, 252)] = True
-            acceptable_colors_dict[(255, 255, 253)] = True
-            acceptable_colors_dict[(254, 255, 255)] = True
-            acceptable_colors_dict[(255, 254, 255)] = True
-        # default white
-        acceptable_colors_dict[(255, 255, 254)] = True
-        acceptable_colors_dict[(255, 255, 255)] = True
+        # if enable_default_color_range:
+        #     acceptable_colors_dict[(254, 255, 252)] = True
+        #     acceptable_colors_dict[(255, 255, 252)] = True
+        #     acceptable_colors_dict[(255, 255, 253)] = True
+        #     acceptable_colors_dict[(254, 255, 255)] = True
+        #     acceptable_colors_dict[(255, 254, 255)] = True
+        # # default white
+        # acceptable_colors_dict[(255, 255, 254)] = True
+        # acceptable_colors_dict[(255, 255, 255)] = True
+        if enable_default_color_range:
+            # pipe symbol basically zip
+            acceptable_colors_dict |= self.default_acceptable_colors_dict
 
         # if there's no tolerance ignore just use the given colors
         if pixel_tolerance_range == 0:
@@ -329,10 +354,15 @@ if __name__ == "__main__":
     default_pixel_deviation = 3
 
     texture_file_path = 'obj textures/diffuse.jpg'
+
+    # set white as the default acceptable colors
+    default_acceptable_colors = [[255, 255, 255]]
+    deviation_default_colors = 2
+
     # first create the object which simply loads in the texture picture and relevant data
     # also reads in the label starts
-    # allows for a wider white range to capture more of the label, disable it if too aggressive
-    # pixel_grabber.disable_wide_white_range()
+    # allows for a default color range to capture more of the label (if you have it), disable it if too aggressive
+    # pixel_grabber.disable_default_color_range
     pixel_grabber = PixelGrabber(texture_file_path, label_names_to_test, default_pixel_deviation)
 
     # this is for the future processes
@@ -342,8 +372,8 @@ if __name__ == "__main__":
     # before anything else is run
     pixel_grabber.set_and_create_image_data()
 
-    # creates the range of acceptable colors by label
-    pixel_grabber.create_acceptable_colors_by_label()
+    # creates the range of acceptable colors by label, in this case just white basically
+    pixel_grabber.create_acceptable_colors_by_label(default_acceptable_colors, deviation_default_colors)
 
     # then run the actual pixel_grabber algo
     pixel_grabber.run_pixel_grabber()

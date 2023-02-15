@@ -55,6 +55,9 @@ if __name__ == "__main__":
     # this triangle decomposer only needs to be run once if the base .obj file is the same! So turn it to false, after!
     RUN_TRIANGLE_DECOMPOSER = True
 
+    # set white as the default acceptable colors
+    default_acceptable_colors = [[255, 255, 255]]
+    deviation_default_colors = 2
 
     start0 = time.time()
     if RUN_PIXEL_GRABBER:
@@ -62,8 +65,8 @@ if __name__ == "__main__":
         # also reads in the label starts
         pixel_grabber = PixelGrabber(texture_file_path, label_names_to_test, default_pixel_deviation)
 
-        # allows for a wider white range to capture more of the label, disable it if too aggressive
-        # pixel_grabber.disable_wide_white_range()
+        # allows for a default color range to capture more of the label (if you have it), disable it if too aggressive
+        # pixel_grabber.disable_default_color_range()
 
         # this is for the future processes
         executor = ProcessPoolExecutor(max_workers=2)
@@ -71,8 +74,8 @@ if __name__ == "__main__":
         # before anything else is run
         pixel_grabber.set_and_create_image_data()
 
-        # creates the range of acceptable colors by label
-        pixel_grabber.create_acceptable_colors_by_label()
+        # creates the range of acceptable colors by label, in this case just white basically
+        pixel_grabber.create_acceptable_colors_by_label(default_acceptable_colors, deviation_default_colors)
 
         # then run the actual pixel_grabber algo
         pixel_grabber.run_pixel_grabber()
