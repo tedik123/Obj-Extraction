@@ -16,7 +16,7 @@
   "label": "PM",
   "starting_points": [[576, 2591], [1000, 2475]],
   "acceptable_colors_rgb": [[218, 157, 156], [220, 156, 156]],
-  "wide_white_range": false
+  "enable_default_range": false
   },
   "Triceps":
   {
@@ -35,7 +35,7 @@
   "label": "GMa",
   "starting_points": [[2238, 2200]],
   "acceptable_colors_rgb": [[220, 156, 156], [218,157, 156]],
-  "wide_white_range": false
+  "enable_default_range": false
   },
 
   "Vastus Medialis":
@@ -113,7 +113,7 @@
   "label": "R",
   "starting_points": [[2089, 3349],[2382, 3354], [2405, 3357]],
   "acceptable_colors_rgb":[[175,156,220]],
-    "wide_white_range": false,
+    "enable_default_range": false,
     "pixel_deviation": 10
   },
   "Pronator Teres":
@@ -183,7 +183,7 @@
   "label": "In",
   "starting_points": [[2002, 3488],[2548, 3516]],
   "acceptable_colors_rgb": [[156,173,219]],
-  "wide_white_range": false
+  "enable_default_range": false
   },
   "Latissimus Dorsi":
   {

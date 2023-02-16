@@ -4,4 +4,22 @@
 pixels and uv stuff/outputs/OBJ files/*
 !pixels and uv stuff/outputs/OBJ files/.gitkeep
 pixels and uv stuff/outputs/*.png
-**/__pycache__/
+**/__pycache__/**
+/pixels and uv stuff/obj files/**
+/pixels and uv stuff/obj files/*
+!/pixels and uv stuff/obj files/.gitkeep
+/pixels and uv stuff/obj textures/**
+/pixels and uv stuff/obj textures/*
+!/pixels and uv stuff/obj textures/.gitkeep
+
+#
+pixels and uv stuff/outputs/geometry_files/*
+!pixels and uv stuff/outputs/geometry_files/.gitkeep
+
+pixels and uv stuff/obj files/**
+!pixels and uv stuff/obj files/.gitkeep
+__pycache__
+**venv**
+venv
+venv2
+venv-test
