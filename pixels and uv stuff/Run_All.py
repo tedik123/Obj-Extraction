@@ -6,7 +6,8 @@ from os.path import isfile, join
 from PixelToFace import PixelToFace
 from PixelGrabber import PixelGrabber
 from PixelIndexer import PixelIndexer
-
+from PixelGrabber import run_change_pixels_test, save_pixels_by_labels
+from ObjFileToJSONFiles import ObjToJSON
 
 def create_file_names_list():
     ignore_files = [".gitkeep", "human.obj", "file_list.json"]
@@ -16,19 +17,32 @@ def create_file_names_list():
     # onlyfiles.append("Anatomy.OBJ")
     for i, file in enumerate(onlyfiles):
         onlyfiles[i] = file.removesuffix(".obj")
-    json_object = {"muscle_names": onlyfiles}
-    with open("outputs/OBJ files/muscle_list.json", "w") as fh:
+    json_object = {"label_names": onlyfiles}
+    with open("outputs/OBJ files/label_list.json", "w") as fh:
         json.dump(json_object, fh)
-    print("Creating file/muscle list.")
+    print("Creating file/label list.")
 
 
 if __name__ == "__main__":
     # IMPORTANT  this is an array of strings, if it's empty it will do all of them
-    #muscle_names_to_test = ["Flexor Carpi Ulnaris","Flexor Carpi Radialis","Flexor Digitorum Superficialis","Flexor Digitorum Longus","Gracilis","Gastrocnemius","Iliopsoas","Infraspinatus","Latissimus Dorsi","Levator Scapulae","Pectineus","Peroneus Longus"]
+    #label_names_to_test = ["Flexor Carpi Ulnaris","Flexor Carpi Radialis","Flexor Digitorum Superficialis","Flexor Digitorum Longus","Gracilis","Gastrocnemius","Iliopsoas","Infraspinatus","Latissimus Dorsi","Levator Scapulae","Pectineus","Peroneus Longus"]
     #["Flexor Carpi Ulnaris","Flexor Carpi Radialis","Flexor Digitorum Superficialis","Flexor Digitorum Longus","Gracilis","Gastrocnemius","Iliopsoas","Infraspinatus","Iliotibial Tract","Latissimus Dorsi","Levator Scapulae","Pectineus","Peroneus Longus"]
 
+    # label_names_to_test = ["Vastus Medialis", "Vastus Lateralis", "Trapezius",
+    #                         "Teres Minor", "Teres Major", "Tensor Fasciae Lata",
+    #                         "Tibialis Anterior", "Soleus", "Semitendinosus", "Serratus Anterior", "Rectus Abdominis",
+    #                         "Rhomboids", "Pronator Teres", "Palmaris Longus"]
+
+    # label_names_to_test = ["Anconeus", "Adductor Longus", "Adductor Magnus", "Abductor Pollicis Longus", "Brachialis", "Biceps Brachii", "Biceps Femoris", "Brachioradialis", "Coracobrachialis", "Deltoid", "Extensor Carpi Radialis Brevis", "Extensor Carpi Radialis Longus", "Extensor Carpi Ulnaris", "Extensor Digitorum", "Extensor Digitorum Longus", "Extensor Digiti Minimi", "External Oblique", "Extensor Pollicis Brevis", "Erector Spinae"]
     #muscle_names_to_test = ["Anconeus", "Adductor Longus", "Adductor Magnus", "Abductor Pollicis Longus", "Brachialis", "Biceps Brachii", "Biceps Femoris", "Brachioradialis", "Coracobrachialis", "Deltoid", "Extensor Carpi Radialis Brevis", "Extensor Carpi Radialis Longus", "Extensor Carpi Ulnaris", "Extensor Digitorum", "Extensor Digitorum Longus", "Extensor Digiti Minimi", "External Oblique", "Extensor Pollicis Brevis", "Erector Spinae"]
     # # grab last two for testing
+    # label_names_to_test = label_names_to_test[-2:]
+
+    label_names_to_test = []
+
+    texture_file_path = 'obj textures/diffuse.jpg'
+    # define the dimensions of the image
+    texture_max_width, texture_max_height = 4096, 4096
     # muscle_names_to_test = muscle_names_to_test[-1:]
     muscle_names_to_test = ["Gluteus Maximus"]
     # muscle_names_to_test = []
@@ -36,49 +50,62 @@ if __name__ == "__main__":
     # if there's a fade or variation in color you will want to raise this to loosen what is an acceptable color
     default_pixel_deviation = 3
 
-    # IMPORTANT unless you're testing something you can just leave it
-    TARGET_FILE = 'outputs/pixels_by_muscles.json'
+    # set white as the default acceptable colors
+    default_acceptable_colors = [[255, 255, 255]]
+    deviation_default_colors = 2
+
+    base_obj_file_path = "obj files/Anatomy.OBJ"
+
     # if you only want to run certain scripts you can change accordingly here
     RUN_PIXEL_GRABBER = True
     RUN_PIXEL_TO_FACE = True
     RUN_PIXEL_INDEXER = True
 
+    # this triangle decomposer only needs to be run once if the base .obj file is the same! So turn it to false, after!
+    RUN_TRIANGLE_DECOMPOSER = True
+
+    # IMPORTANT unless you're testing something you can just leave it
+    # target is what pixels we're trying to find
+    TARGET_FILE = 'outputs/pixels_by_labels.json'
+
     start0 = time.time()
     if RUN_PIXEL_GRABBER:
         # first create the object which simply loads in the diffuse.jpg and relevant data
-        # also reads in the muscle starts
-        pixel_grabber = PixelGrabber(muscle_names_to_test, default_pixel_deviation)
-        # allows for a wider white range to capture more of the label, disable it if too aggressive
-        # pixel_grabber.disable_wide_white_range()
+        # also reads in the label starts
+        pixel_grabber = PixelGrabber(texture_file_path, label_names_to_test, default_pixel_deviation)
+
+        # allows for a default color range to capture more of the label (if you have it), disable it if too aggressive
+        # pixel_grabber.disable_default_color_range()
 
         # this is for the future processes
-        #executor = ProcessPoolExecutor(max_workers=2)
+        executor = ProcessPoolExecutor(max_workers=2)
         # although this takes forever it is not worth optimizing as it is a task that must be waited on
         # before anything else is run
         pixel_grabber.set_and_create_image_data()
 
-        # creates the range of acceptable colors by muscle
-        pixel_grabber.create_acceptable_colors_by_muscle()
+        # creates the range of acceptable colors by label, in this case just white basically
+        pixel_grabber.create_acceptable_colors_by_label(default_acceptable_colors, deviation_default_colors)
 
         # then run the actual pixel_grabber algo
         pixel_grabber.run_pixel_grabber()
 
-        print("Saving pixels by muscles file!")
-        #  to save the pixels by muscle
+        #  to save the pixels by label
         # you can specify an output file name as an argument if you want (optional)
-        pixel_grabber.save_pixels_by_muscles()
-        #futures = [executor.submit(pixel_grabber.save_pixels_by_muscles, "pixels_by_muscles.json")]
-        pixel_grabber.save_pixels_by_muscles() # run for better print statements without process pool
+        output_file_name = "pixels_by_labels.json"
+        futures = [executor.submit(save_pixels_by_labels, pixel_grabber.pixels_by_label, output_file_name)]
 
-        print("Running change pixels test!")
+        # pixel_grabber.save_pixels_by_labels() # run for better print statements without process pool
+
         # if you are testing, you can visualize the changes with the change_pixels_test
         # you can specify a specific hex color default is '#000000'
-        #futures = [executor.submit(pixel_grabber.change_pixels_test, '#000000')]
-        pixel_grabber.change_pixels_test() # run for better print statements without process pool
+        hex_color = '#000000'
+        futures.append(
+            executor.submit(run_change_pixels_test, pixel_grabber.texture_file, pixel_grabber.pixels_by_label,
+                            hex_color))
+        # pixel_grabber.change_pixels_test() # run for better print statements without process pool
 
-        pixel_grabber.change_pixels_test() # run for better print statements without process pool
-        #executor.shutdown(wait=True, cancel_futures=False)
-        print("Finished saving pixel change test file and pixel by muscle.json file")
+        executor.shutdown(wait=True, cancel_futures=False)
+        print("Finished saving pixel change test file and pixel by label.json file")
 
         end = time.time()
         print()
@@ -88,16 +115,27 @@ if __name__ == "__main__":
     ### NEW SCRIPT STARTS HERE ###
     if RUN_PIXEL_TO_FACE:
         print("Starting pixels to faces code!")
+
         start = time.time()
+        if RUN_TRIANGLE_DECOMPOSER:
+            # we need this to create the geometry files and again only needs
+            # to be run once, so it's paired with the triangle decomposer
+            obj_to_json = ObjToJSON(base_obj_file_path)
+            obj_to_json.read_in_OBJ_file()
+            obj_to_json.insert_face_data()
+            obj_to_json.create_json_files()
+
         pixel_to_faces = PixelToFace(TARGET_FILE)
         end = time.time()
         print()
         print(f"Finished reading in geometries...Took {end - start} seconds")
         start = time.time()
 
-        # create all the points within the class
-        # IMPORTANT you can comment this out if it's already been done!
-        # pixel_to_faces.decompose_all_triangles()
+        # create all the points within the obj files
+        if RUN_TRIANGLE_DECOMPOSER:
+
+            # then break down those geometry files
+            pixel_to_faces.decompose_all_triangles(texture_max_width, texture_max_height)
 
         # then search through target_uvs
         pixel_to_faces.find_faces_of_targets()
@@ -105,13 +143,13 @@ if __name__ == "__main__":
         print(end - start)
         print(f"Pixel to face search took {(end - start) / 60} minutes")
 
+    ###################################################################################################################
+    ### NEW SCRIPT STARTS HERE ###
     if RUN_PIXEL_INDEXER:
-        ###################################################################################################################
-        ### NEW SCRIPT STARTS HERE ###
         print()
         print("Starting Pixel Indexer and .obj creation")
         start = time.time()
-        indexer = PixelIndexer(muscle_names_to_test)
+        indexer = PixelIndexer(label_names_to_test)
         end = time.time()
         print()
         print(f"Finished reading in faces...Took {end - start} seconds")

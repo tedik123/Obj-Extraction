@@ -10,6 +10,11 @@ class PixelToFace:
     def __init__(self, target_file_path):
         # these are all arrays!!!!!!!!!
         self.target_file_path = target_file_path
+
+        # where all the json files are for the geometry faces and uvs
+        # self.json_data_directory = "geometry_files/"
+        self.json_data_directory = "outputs/geometry_files"
+
         # FIXME I could use async for these tasks so the load is faster
         self.read_in_faces()
         self.read_in_normals()
@@ -23,35 +28,33 @@ class PixelToFace:
 
     def read_in_faces(self):
         print("Loading in faces")
-        with open('geometry_files/geometry_faces.json', 'r') as file:
+        with open(f'{self.json_data_directory}/geometry_faces.json', 'r') as file:
             data = file.read()
         self.faces = json.loads(data)['faces']
 
     def read_in_normals(self):
         print("Loading normals")
-        with open('geometry_files/geometry_normals.json', 'r') as file:
-            data = file.read()
-        self.normals = json.loads(data)['normals']
+        try:
+            with open(f'{self.json_data_directory}/geometry_normals.json', 'r') as file:
+                data = file.read()
+            self.normals = json.loads(data)['normals']
+        except FileNotFoundError:
+            print("Couldn't find geometry normals file, ignoring it!")
 
     def read_in_geometry_uvs(self):
         print("Loading geometry uvs")
-        with open('geometry_files/geometry_uvs.json', 'r') as file:
+        with open(f'{self.json_data_directory}/geometry_uvs.json', 'r') as file:
             data = file.read()
         self.uvs = json.loads(data)['uvs']
-
-    # OLD when we converted the picture pixels to UVs but we don't need to do that anymore
-    def read_in_target_uvs(self):
-        print("Loading target uvs")
-        with open('geometry_files/target_uvs.json', 'r') as file:
-            data = file.read()
-        # self.target_uvs = json.loads(data)['uvs']
 
     def read_in_target_pixels(self):
         print("Loading target pixels")
         with open(self.target_file_path, 'r') as file:
             data = file.read()
-        self.target_pixels = json.loads(data)
+        self.target_pixels_by_name = json.loads(data)
 
+    # this is a dictionary of pixel coordinates (x,y) that map to the obj face
+    # produced by the triangle decomposer
     def read_in_points(self):
         print("Loading points...")
         with open('outputs/all_points_from_model.json', 'r') as file:
@@ -59,14 +62,14 @@ class PixelToFace:
             data = file.read()
         return json.loads(data)
 
-    def decompose_all_triangles(self):
+    def decompose_all_triangles(self, max_width, max_height):
         print("Decomposing all triangles into points!")
         for index, uv_face in enumerate(self.uvs):
             coord_point_sum = uv_face["a"]["x"] + uv_face["a"]["y"] + uv_face["b"]["x"] + uv_face["b"]["y"] + \
                               uv_face["c"]["x"] + uv_face["b"]["y"]
             # we'll ignore all 0 points which only happens at the beginning in our case
             if coord_point_sum != 0:
-                triangle = TriangleDecomposer(uv_face["a"], uv_face["b"], uv_face["c"], 4096, 4096)
+                triangle = TriangleDecomposer(uv_face["a"], uv_face["b"], uv_face["c"], max_width, max_height)
                 all_points = triangle.get_all_points_of_triangle()
                 # triangle 14299 has points {'x': 2998, 'y': 1801}, {'x': 2998, 'y': 1804}, {'x': 2999, 'y': 1801} and UVS of: {'x': 0.7321699857711792, 'y': 0.560259997844696}, {'x': 0.7320399880409241, 'y': 0.5595099925994873}, {'x': 0.7322999835014343, 'y': 0.5602999925613403}
                 # triangle 14302 has points {'x': 3001, 'y': 1803}, {'x': 3003, 'y': 1802}, {'x': 2999, 'y': 1801} and UVS of: {'x': 0.7327700257301331, 'y': 0.559660017490387}, {'x': 0.7333499789237976, 'y': 0.5600100159645081}, {'x': 0.7322999835014343, 'y': 0.5602999925613403}
@@ -91,12 +94,15 @@ class PixelToFace:
             json.dump(self.point_to_triangle, fp)
 
     def find_faces_of_targets(self):
-        self.muscle_faces = {}
+        self.label_faces = {}
         points_dict = self.read_in_points()
         print("Searching points for targets...")
-        for muscle_name, targets in self.target_pixels.items():
+        missed_values = 0
+        pixels_to_find_count = 0
+        for label_name, targets in self.target_pixels_by_name.items():
             face_results = []
             normals_result = []
+            pixels_to_find_count += len(targets)
             # I don't think we care about uvs
             # uvs_result = []
             for target in targets:
@@ -106,6 +112,7 @@ class PixelToFace:
                 uv_does_exist = points_dict.get(target, None)
                 if not uv_does_exist:
                     print(target)
+                    missed_values += 1
                     # print(uv_does_exist)
                 if uv_does_exist:
                     p0 = self.faces[uv_does_exist]["a"]
@@ -120,14 +127,16 @@ class PixelToFace:
                     # normals_result.append(n0)
                     # normals_result.append(n1)
                     # normals_result.append(n2)
-            # self.muscle_faces[muscle_name] = {"vertices": face_results, "normals": normals_result}
-            self.muscle_faces[muscle_name] = {"vertices": face_results}
-
+            # self.label_faces[label_name] = {"vertices": face_results, "normals": normals_result}
+            self.label_faces[label_name] = {"vertices": face_results}
+        print(f"Missed {round((missed_values/pixels_to_find_count)*100, 2)}% of target pixels.")
+        print(f"Missed {missed_values} out of {pixels_to_find_count}, could not find their matching faces.")
         # print(face_results)
-        # TODO match faces to muscle name or label whichever we want
-        with open('outputs/faces_found_by_muscles.json', 'w') as fp:
-            print("Muscles faces length", len(self.muscle_faces))
-            json.dump(self.muscle_faces, fp)
+        # TODO match faces to label name or label whichever we want
+        print("Creating faces found by labels json file!")
+        with open('outputs/faces_found_by_labels.json', 'w') as fp:
+            print("labels faces length", len(self.label_faces))
+            json.dump(self.label_faces, fp)
 
 
 def uvs_to_pixels(u, v):
@@ -138,6 +147,7 @@ def uvs_to_pixels(u, v):
     # since 0, 0 is at the bottom left! very important
     y = math.floor((v - 1) * -MAX_HEIGHT)
     return x, y
+
 
 # This is a standard barycentric coordinate function.
 # I don't know how this works...
@@ -171,20 +181,21 @@ def isPtInTriangle(p, p0, p1, p2):
 
 
 if __name__ == "__main__":
-    TARGET_FILE = 'outputs/pixels_by_muscles.json'
+    TARGET_FILE = 'outputs/pixels_by_labels.json'
     start = time.time()
     pixel_to_faces = PixelToFace(TARGET_FILE)
     end = time.time()
     print()
     print(f"Finished reading in geometries...Took {end - start} seconds")
-    start = time.time()
+    start1 = time.time()
 
     # create all the points within the class
     # IMPORTANT you can comment this out if it's already been done!
-    # pixel_to_faces.decompose_all_triangles()
+    pixel_to_faces.decompose_all_triangles()
 
     # then search through target_uvs
     pixel_to_faces.find_faces_of_targets()
     end = time.time()
-    print(end - start)
+    print(f"Triangle decompose and finding faces took {end - start} seconds.")
+    print()
     print(f"Full task took {(end - start) / 60} minutes")
