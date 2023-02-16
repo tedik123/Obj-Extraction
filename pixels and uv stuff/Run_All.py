@@ -35,7 +35,7 @@ if __name__ == "__main__":
 
     # label_names_to_test = ["Anconeus", "Adductor Longus", "Adductor Magnus", "Abductor Pollicis Longus", "Brachialis", "Biceps Brachii", "Biceps Femoris", "Brachioradialis", "Coracobrachialis", "Deltoid", "Extensor Carpi Radialis Brevis", "Extensor Carpi Radialis Longus", "Extensor Carpi Ulnaris", "Extensor Digitorum", "Extensor Digitorum Longus", "Extensor Digiti Minimi", "External Oblique", "Extensor Pollicis Brevis", "Erector Spinae"]
     # # grab last two for testing
-    # label_names_to_test = label_names_to_test[-1:]
+    # label_names_to_test = label_names_to_test[-2:]
 
     label_names_to_test = []
 
@@ -63,8 +63,6 @@ if __name__ == "__main__":
     # IMPORTANT unless you're testing something you can just leave it
     # target is what pixels we're trying to find
     TARGET_FILE = 'outputs/pixels_by_labels.json'
-
-
 
     start0 = time.time()
     if RUN_PIXEL_GRABBER:
