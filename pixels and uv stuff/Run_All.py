@@ -35,18 +35,19 @@ if __name__ == "__main__":
     # label_names_to_test = label_names_to_test[-1:]
     label_names_to_test = []
 
-    # if there's a fade or variation in color you will want to raise this to loosen what is an acceptable color
-    default_pixel_deviation = 3
-
     texture_file_path = 'obj textures/diffuse.jpg'
     # define the dimensions of the image
     texture_max_width, texture_max_height = 4096, 4096
 
+    # if there's a fade or variation in color you will want to raise this to loosen what is an acceptable color
+    default_pixel_deviation = 3
+
+    # set white as the default acceptable colors
+    default_acceptable_colors = [[255, 255, 255]]
+    deviation_default_colors = 2
+
     base_obj_file_path = "obj files/Anatomy.OBJ"
 
-    # IMPORTANT unless you're testing something you can just leave it
-    # target is what pixels we're trying to find
-    TARGET_FILE = 'outputs/pixels_by_labels.json'
     # if you only want to run certain scripts you can change accordingly here
     RUN_PIXEL_GRABBER = True
     RUN_PIXEL_TO_FACE = True
@@ -55,9 +56,11 @@ if __name__ == "__main__":
     # this triangle decomposer only needs to be run once if the base .obj file is the same! So turn it to false, after!
     RUN_TRIANGLE_DECOMPOSER = True
 
-    # set white as the default acceptable colors
-    default_acceptable_colors = [[255, 255, 255]]
-    deviation_default_colors = 2
+    # IMPORTANT unless you're testing something you can just leave it
+    # target is what pixels we're trying to find
+    TARGET_FILE = 'outputs/pixels_by_labels.json'
+
+
 
     start0 = time.time()
     if RUN_PIXEL_GRABBER:
