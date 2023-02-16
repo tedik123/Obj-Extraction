@@ -212,5 +212,111 @@
   "starting_points": [[816, 1506],[2697, 1267]],
   "acceptable_colors_rgb": [[219,156,211]],
     "pixel_deviation": 6
+  },
+  "Anconeus":{
+    "label": "A",
+    "starting_points": [[641, 722],[3405, 3033]],
+    "acceptable_colors_rgb": [[211,157,217],[212,156,219]],
+    "pixel_deviation": 10,
+    "wide_white_range": false
+  },
+  "Adductor Longus": {
+    "label": "AL",
+    "starting_points": [[3581, 584],[1804, 1992]],
+    "acceptable_colors_rgb": [[157,176,219]],
+    "pixel_deviation": 12
+  },
+  "Adductor Magnus": {
+    "label": "AM",
+    "starting_points": [[1731, 851],[3746, 1711]],
+    "acceptable_colors_rgb": [[161,156,220]]
+  },
+  "Abductor Pollicis Longus": {
+    "label": "APL",
+    "starting_points": [[1043, 564],[3316, 3442]],
+    "acceptable_colors_rgb": [[157,157,219]],
+    "pixel_deviation": 6
+  },
+  "Brachialis": {
+    "label": "B",
+    "starting_points": [[332, 507],[3129, 2773],[2905, 3007],[445, 973]],
+    "acceptable_colors_rgb": [[156,167,220]]
+  },
+  "Biceps Femoris": {
+    "label": "BF",
+    "starting_points": [[1479, 1225],[3399, 1395]],
+    "acceptable_colors_rgb": [[161,156,220]],
+    "pixel_deviation": 10,
+    "wide_white_range": false
+  },
+  "Brachioradialis": {
+    "label": "Br",
+    "starting_points": [[679, 477],[3161, 3033]],
+    "acceptable_colors_rgb": [[156,219,174]],
+    "pixel_deviation": 10
+  },
+  "Coracobrachialis": {
+    "label": "C",
+    "starting_points": [[174, 1035],[3597, 2528]],
+    "acceptable_colors_rgb": [[157,218,158],[170,202,179],[171,206,176]],
+    "pixel_deviation": 10
+  },
+  "Extensor Carpi Radialis Brevis": {
+    "label": "ECRB",
+    "starting_points": [[881, 589],[3311, 3241]],
+    "acceptable_colors_rgb": [[220,156,155]],
+    "pixel_deviation": 15,
+    "wide_white_range": false
+  },
+  "Extensor Carpi Radialis Longus": {
+    "label": "ECRL",
+    "starting_points": [[707, 565],[3254, 3105]],
+    "acceptable_colors_rgb": [[157,157,219]],
+    "pixel_deviation": 20,
+    "wide_white_range": false
+  },
+  "Extensor Carpi Ulnaris": {
+    "label": "ECU",
+    "starting_points": [[824, 724],[3451, 3253]],
+    "acceptable_colors_rgb": [[157,157,219]],
+    "pixel_deviation": 20,
+    "wide_white_range": false
+  },
+  "Extensor Digitorum": {
+    "label": "ED",
+    "starting_points": [[3351, 3169],[827, 648]],
+    "acceptable_colors_rgb": [[185,156,220]],
+    "wide_white_range": false
+  },
+  "Extensor Digitorum Longus": {
+    "label": "EDL",
+    "starting_points": [[476, 1569],[2376, 1272]],
+    "acceptable_colors_rgb": [[157,194,220],[174,200,215]],
+    "wide_white_range": false
+  },
+  "Extensor Digiti Minimi": {
+    "label": "EDM",
+    "starting_points": [[3428, 3316],[3396, 3169],[790, 694],[939, 699],[838, 692],[847, 699],[3407, 3230]],
+    "acceptable_colors_rgb": [[157,218,158]],
+    "pixel_deviation": 20,
+    "wide_white_range": false
+  },
+  "External Oblique": {
+    "label": "EO",
+    "starting_points": [[367, 3106],[1272, 3116],[1719, 2823],[2702, 2831]],
+    "acceptable_colors_rgb": [[144,150,208],[148,155,209],[154,151,204]],
+    "wide_white_range": false
+  },
+  "Extensor Pollicis Brevis": {
+    "label": "EPB",
+    "starting_points": [[1031, 609],[1117, 580],[3350, 3501],[3358, 3418]],
+    "acceptable_colors_rgb": [[176,213,178],[156,219,190],[164,218,186]],
+    "pixel_deviation": 10
+  },
+  "Erector Spinae": {
+    "label": "ES",
+    "starting_points": [[2170, 2799],[2317, 2799],[2239, 3941]],
+    "acceptable_colors_rgb": [[207,207,207]],
+    "pixel_deviation": 10
   }
 }

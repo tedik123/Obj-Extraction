@@ -27,10 +27,10 @@ if __name__ == "__main__":
     # muscle_names_to_test = ["Flexor Carpi Ulnaris","Flexor Carpi Radialis","Flexor Digitorum Superficialis","Flexor Digitorum Longus","Gracilis","Gastrocnemius","Iliopsoas","Infraspinatus","Iliotibial Tract","Latissimus Dorsi","Levator Scapulae","Pectineus","Peroneus Longus"]
     #["Flexor Carpi Ulnaris","Flexor Carpi Radialis","Flexor Digitorum Superficialis","Flexor Digitorum Longus","Gracilis","Gastrocnemius","Iliopsoas","Infraspinatus","Iliotibial Tract","Latissimus Dorsi","Levator Scapulae","Pectineus","Peroneus Longus"]
 
-    # muscle_names_to_test = []
+    muscle_names_to_test = ["Anconeus", "Adductor Longus", "Adductor Magnus", "Abductor Pollicis Longus", "Brachialis", "Biceps Brachii", "Biceps Femoris", "Brachioradialis", "Coracobrachialis", "Deltoid", "Extensor Carpi Radialis Brevis", "Extensor Carpi Radialis Longus", "Extensor Carpi Ulnaris", "Extensor Digitorum", "Extensor Digitorum Longus", "Extensor Digiti Minimi", "External Oblique", "Extensor Pollicis Brevis", "Erector Spinae"]
     # # grab last two for testing
     # muscle_names_to_test = muscle_names_to_test[-1:]
-    muscle_names_to_test = []
+    # muscle_names_to_test = []
 
     # if there's a fade or variation in color you will want to raise this to loosen what is an acceptable color
     default_pixel_deviation = 3
@@ -39,8 +39,8 @@ if __name__ == "__main__":
     TARGET_FILE = 'outputs/pixels_by_muscles.json'
     # if you only want to run certain scripts you can change accordingly here
     RUN_PIXEL_GRABBER = True
-    RUN_PIXEL_TO_FACE = False
-    RUN_PIXEL_INDEXER = False
+    RUN_PIXEL_TO_FACE = True
+    RUN_PIXEL_INDEXER = True
 
     start0 = time.time()
     if RUN_PIXEL_GRABBER:
