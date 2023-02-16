@@ -27,13 +27,11 @@ if __name__ == "__main__":
     #muscle_names_to_test = ["Flexor Carpi Ulnaris","Flexor Carpi Radialis","Flexor Digitorum Superficialis","Flexor Digitorum Longus","Gracilis","Gastrocnemius","Iliopsoas","Infraspinatus","Latissimus Dorsi","Levator Scapulae","Pectineus","Peroneus Longus"]
     #["Flexor Carpi Ulnaris","Flexor Carpi Radialis","Flexor Digitorum Superficialis","Flexor Digitorum Longus","Gracilis","Gastrocnemius","Iliopsoas","Infraspinatus","Iliotibial Tract","Latissimus Dorsi","Levator Scapulae","Pectineus","Peroneus Longus"]
 
-    # muscle_names_to_test = ["Vastus Medialis", "Vastus Lateralis", "Trapezius",
-    #                         "Teres Minor", "Teres Major", "Tensor Fasciae Lata",
-    #                         "Tibialis Anterior", "Soleus", "Semitendinosus", "Serratus Anterior", "Rectus Abdominis",
-    #                         "Rhomboids", "Pronator Teres", "Palmaris Longus"]
+    muscle_names_to_test = ["Anconeus", "Adductor Longus", "Adductor Magnus", "Abductor Pollicis Longus", "Brachialis", "Biceps Brachii", "Biceps Femoris", "Brachioradialis", "Coracobrachialis", "Deltoid", "Extensor Carpi Radialis Brevis", "Extensor Carpi Radialis Longus", "Extensor Carpi Ulnaris", "Extensor Digitorum", "Extensor Digitorum Longus", "Extensor Digiti Minimi", "External Oblique", "Extensor Pollicis Brevis", "Erector Spinae"]
     # # grab last two for testing
     # muscle_names_to_test = muscle_names_to_test[-1:]
     muscle_names_to_test = ["Flexor Carpi Radialis"]
+    # muscle_names_to_test = []
 
     # if there's a fade or variation in color you will want to raise this to loosen what is an acceptable color
     default_pixel_deviation = 3
@@ -68,6 +66,7 @@ if __name__ == "__main__":
         print("Saving pixels by muscles file!")
         #  to save the pixels by muscle
         # you can specify an output file name as an argument if you want (optional)
+        pixel_grabber.save_pixels_by_muscles()
         #futures = [executor.submit(pixel_grabber.save_pixels_by_muscles, "pixels_by_muscles.json")]
         pixel_grabber.save_pixels_by_muscles() # run for better print statements without process pool
 
@@ -77,6 +76,7 @@ if __name__ == "__main__":
         #futures = [executor.submit(pixel_grabber.change_pixels_test, '#000000')]
         pixel_grabber.change_pixels_test() # run for better print statements without process pool
 
+        pixel_grabber.change_pixels_test() # run for better print statements without process pool
         #executor.shutdown(wait=True, cancel_futures=False)
         print("Finished saving pixel change test file and pixel by muscle.json file")
 
