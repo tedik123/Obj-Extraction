@@ -134,12 +134,13 @@
   "label": "FCU",
   "starting_points": [[605,845], [3520,3230]],
   "acceptable_colors_rgb": [[156,219,200],[174,216,202]],
+    "wide_white_range": false,
     "pixel_deviation": 10
   },
   "Flexor Carpi Radialis":
   {
   "label": "FCR",
-  "starting_points": [[850,350], [3100,3300]],
+  "starting_points": [[850,350], [3100,3300],[3705, 2892],[589, 977]],
   "acceptable_colors_rgb": [[182,156,219]]
   },
   "Flexor Digitorum Superficialis":
@@ -159,7 +160,7 @@
   "Gracilis":
   {
   "label": "G",
-  "starting_points": [[1365, 846],[3411, 1778]],
+  "starting_points": [[1365, 846],[3411, 1778],[3399, 531],[1636, 2068],[2227, 1863],[839, 4068]],
   "acceptable_colors_rgb": [[219,156,211],[218,158,210]],
     "pixel_deviation": 6
   },
@@ -167,9 +168,9 @@
   "Gastrocnemius":
   {
   "label": "Ga",
-  "starting_points": [[2725, 1674],[788, 1350]],
+  "starting_points": [[2725, 1674],[788, 1350],[2519, 876],[787, 1896]],
   "acceptable_colors_rgb": [[219,156,211],[219,156,209]],
-    "pixel_deviation": 9
+    "pixel_deviation": 6
   },
   "Iliopsoas":
   {
@@ -202,9 +203,16 @@
   "Pectineus":
   {
   "label": "Pe",
-  "starting_points": [[701, 3902],[983, 3902]],
+  "starting_points": [[701, 3902],[983, 3902],[1942, 1904],[3704, 661]],
   "acceptable_colors_rgb": [[210,156,218]],
-    "pixel_deviation": 12
+    "pixel_deviation": 6
+  },
+  "Peroneus Brevis":
+  {
+  "label": "PB",
+  "starting_points": [[2234, 1347],[2257, 1386],[355, 1488],[335, 1526]],
+  "acceptable_colors_rgb": [[219,156,165],[219,168,163],[217,164,174]],
+    "pixel_deviation": 4
   },
   "Peroneus Longus":
   {

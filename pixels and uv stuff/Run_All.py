@@ -24,7 +24,7 @@ def create_file_names_list():
 
 if __name__ == "__main__":
     # IMPORTANT  this is an array of strings, if it's empty it will do all of them
-    # muscle_names_to_test = ["Flexor Carpi Ulnaris","Flexor Carpi Radialis","Flexor Digitorum Superficialis","Flexor Digitorum Longus","Gracilis","Gastrocnemius","Iliopsoas","Infraspinatus","Iliotibial Tract","Latissimus Dorsi","Levator Scapulae","Pectineus","Peroneus Longus"]
+    #muscle_names_to_test = ["Flexor Carpi Ulnaris","Flexor Carpi Radialis","Flexor Digitorum Superficialis","Flexor Digitorum Longus","Gracilis","Gastrocnemius","Iliopsoas","Infraspinatus","Latissimus Dorsi","Levator Scapulae","Pectineus","Peroneus Longus"]
     #["Flexor Carpi Ulnaris","Flexor Carpi Radialis","Flexor Digitorum Superficialis","Flexor Digitorum Longus","Gracilis","Gastrocnemius","Iliopsoas","Infraspinatus","Iliotibial Tract","Latissimus Dorsi","Levator Scapulae","Pectineus","Peroneus Longus"]
 
     # muscle_names_to_test = ["Vastus Medialis", "Vastus Lateralis", "Trapezius",
@@ -33,7 +33,7 @@ if __name__ == "__main__":
     #                         "Rhomboids", "Pronator Teres", "Palmaris Longus"]
     # # grab last two for testing
     # muscle_names_to_test = muscle_names_to_test[-1:]
-    muscle_names_to_test = []
+    muscle_names_to_test = ["Flexor Carpi Radialis"]
 
     # if there's a fade or variation in color you will want to raise this to loosen what is an acceptable color
     default_pixel_deviation = 3
@@ -42,8 +42,8 @@ if __name__ == "__main__":
     TARGET_FILE = 'outputs/pixels_by_muscles.json'
     # if you only want to run certain scripts you can change accordingly here
     RUN_PIXEL_GRABBER = True
-    RUN_PIXEL_TO_FACE = False
-    RUN_PIXEL_INDEXER = False
+    RUN_PIXEL_TO_FACE = True
+    RUN_PIXEL_INDEXER = True
 
     start0 = time.time()
     if RUN_PIXEL_GRABBER:
@@ -54,7 +54,7 @@ if __name__ == "__main__":
         # pixel_grabber.disable_wide_white_range()
 
         # this is for the future processes
-        executor = ProcessPoolExecutor(max_workers=2)
+        #executor = ProcessPoolExecutor(max_workers=2)
         # although this takes forever it is not worth optimizing as it is a task that must be waited on
         # before anything else is run
         pixel_grabber.set_and_create_image_data()
@@ -68,16 +68,16 @@ if __name__ == "__main__":
         print("Saving pixels by muscles file!")
         #  to save the pixels by muscle
         # you can specify an output file name as an argument if you want (optional)
-        futures = [executor.submit(pixel_grabber.save_pixels_by_muscles, "pixels_by_muscles.json")]
-        # pixel_grabber.save_pixels_by_muscles() # run for better print statements without process pool
+        #futures = [executor.submit(pixel_grabber.save_pixels_by_muscles, "pixels_by_muscles.json")]
+        pixel_grabber.save_pixels_by_muscles() # run for better print statements without process pool
 
         print("Running change pixels test!")
         # if you are testing, you can visualize the changes with the change_pixels_test
         # you can specify a specific hex color default is '#000000'
-        futures = [executor.submit(pixel_grabber.change_pixels_test, '#000000')]
-        # pixel_grabber.change_pixels_test() # run for better print statements without process pool
+        #futures = [executor.submit(pixel_grabber.change_pixels_test, '#000000')]
+        pixel_grabber.change_pixels_test() # run for better print statements without process pool
 
-        executor.shutdown(wait=True, cancel_futures=False)
+        #executor.shutdown(wait=True, cancel_futures=False)
         print("Finished saving pixel change test file and pixel by muscle.json file")
 
         end = time.time()
