@@ -50,6 +50,7 @@ add the data for the labels you want.
    4. acceptable_colors_rgb is the rgb values of the label that you want to be included can be any number of rgb values.
    
    **The following are optional**
+
    5. Min_X, min_Y are the lowest acceptable values, basically not allowing the search to go past
    it.
    6. Max_X, max_Y are the max acceptable values, similarly not allowing the search to continue past those values.
