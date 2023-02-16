@@ -172,6 +172,12 @@
   "acceptable_colors_rgb": [[219,156,211],[219,156,209]],
     "pixel_deviation": 6
   },
+    "Gluteus Maximus":
+  {
+  "label": "GMa",
+  "starting_points": [[2249, 2196]],
+  "acceptable_colors_rgb": [[220,156,155]]
+  },
   "Iliopsoas":
   {
   "label": "I",
