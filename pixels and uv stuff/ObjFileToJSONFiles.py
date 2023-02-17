@@ -179,7 +179,7 @@ class ObjToJSON:
         print("Finished writing uv data!")
 
     def create_and_save_normal_data(self):
-        output_file_name = "geometry_files/geometry_faces.json"
+        output_file_name = "geometry_files/geometry_normals.json"
         normals_data = {"normals": []}
         # just checking if the first one has normals if it does then it's good enough ig
         if len(self.faces_data[0]["normals"]) > 1:

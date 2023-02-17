@@ -102,6 +102,7 @@ class PixelToFace:
         for label_name, targets in self.target_pixels_by_name.items():
             face_results = []
             normals_result = []
+            uvs_result = []
             pixels_to_find_count += len(targets)
             # I don't think we care about uvs
             # uvs_result = []
@@ -121,14 +122,21 @@ class PixelToFace:
                     face_results.append(p0)
                     face_results.append(p1)
                     face_results.append(p2)
-                    # n0 = self.normals[uv_does_exist]["a"]
-                    # n1 = self.normals[uv_does_exist]["b"]
-                    # n2 = self.normals[uv_does_exist]["c"]
-                    # normals_result.append(n0)
-                    # normals_result.append(n1)
-                    # normals_result.append(n2)
-            # self.label_faces[label_name] = {"vertices": face_results, "normals": normals_result}
-            self.label_faces[label_name] = {"vertices": face_results}
+                    n0 = self.normals[uv_does_exist]["a"]
+                    n1 = self.normals[uv_does_exist]["b"]
+                    n2 = self.normals[uv_does_exist]["c"]
+                    normals_result.append(n0)
+                    normals_result.append(n1)
+                    normals_result.append(n2)
+
+                    uv0 = self.uvs[uv_does_exist]["a"]
+                    uv1 = self.uvs[uv_does_exist]["b"]
+                    uv2 = self.uvs[uv_does_exist]["c"]
+                    uvs_result.append(uv0)
+                    uvs_result.append(uv1)
+                    uvs_result.append(uv2)
+            self.label_faces[label_name] = {"vertices": face_results, "normals": normals_result, "uvs": uvs_result}
+            # self.label_faces[label_name] = {"vertices": face_results}
         print(f"Missed {round((missed_values/pixels_to_find_count)*100, 2)}% of target pixels.")
         print(f"Missed {missed_values} out of {pixels_to_find_count}, could not find their matching faces.")
         # print(face_results)

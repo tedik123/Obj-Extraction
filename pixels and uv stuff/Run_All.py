@@ -40,12 +40,9 @@ if __name__ == "__main__":
 
     label_names_to_test = []
 
-    texture_file_path = 'obj textures/diffuse.jpg'
+    texture_file_path = 'obj textures/texture.jpg'
     # define the dimensions of the image
-    texture_max_width, texture_max_height = 4096, 4096
-    # muscle_names_to_test = muscle_names_to_test[-1:]
-    muscle_names_to_test = ["Gluteus Maximus"]
-    # muscle_names_to_test = []
+    texture_max_width, texture_max_height = 2048, 2048
 
     # if there's a fade or variation in color you will want to raise this to loosen what is an acceptable color
     default_pixel_deviation = 3
@@ -54,15 +51,15 @@ if __name__ == "__main__":
     default_acceptable_colors = [[255, 255, 255]]
     deviation_default_colors = 2
 
-    base_obj_file_path = "obj files/Anatomy.OBJ"
+    base_obj_file_path = "obj files/girl.OBJ"
 
     # if you only want to run certain scripts you can change accordingly here
-    RUN_PIXEL_GRABBER = True
+    RUN_PIXEL_GRABBER = False
     RUN_PIXEL_TO_FACE = True
     RUN_PIXEL_INDEXER = True
 
     # this triangle decomposer only needs to be run once if the base .obj file is the same! So turn it to false, after!
-    RUN_TRIANGLE_DECOMPOSER = True
+    RUN_TRIANGLE_DECOMPOSER = False
 
     # IMPORTANT unless you're testing something you can just leave it
     # target is what pixels we're trying to find
