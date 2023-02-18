@@ -31,57 +31,69 @@ class PixelIndexer:
         for label_name, values in self.faces_found_by_labels.items():
             vertices = values["vertices"]
             print(len(vertices))
-            # normals = values["normals"]
+            normals = values["normals"]
+            uvs = values["uvs"]
 
-            # we need to preserve the order the keys & indices were inserted
-            vertex_map = OrderedDict()
-            # WE MUST start at 1 because that's how .obj files are interpreted
-            vertex_index = 1
-            # this can be no longer than the amount of vertices
-            indexed_vertex_list = [None] * len(vertices)
-
-            # FIXME if we need normals you should abstract this to it's own function
-            for i, vertex in enumerate(vertices):
-                t_vertex = tuple(vertex)
-                # if it already exists we just need to grab the original vertex index
-                if t_vertex in vertex_map:
-                    index_of_original_vertex = vertex_map[t_vertex]
-                    indexed_vertex_list[i] = index_of_original_vertex
-                # if it doesn't exist we need to create it and update the index
-                else:
-                    vertex_map[t_vertex] = vertex_index
-                    indexed_vertex_list[i] = vertex_index
-                    vertex_index += 1
+            indexed_vertex_list, vertex_map = self.create_indexed_list(vertices)
+            indexed_normals_list, normal_map = self.create_indexed_list(normals)
+            indexed_uvs_list, uvs_map = self.create_indexed_list(uvs)
             # so now we have our label with an indexed list of values
             # we'll use the keys to create the UNIQUE vertices
             # and then the indexed_vertex_list will help us create the faces
             if len(indexed_vertex_list) % 3 != 0:
                 raise Exception("Something went wrong the list must be divisible by 3!")
             # remove nones from list and cleans up duplicates and returns a list of tuples of size 3
-            index_tuples = self.format_indices(indexed_vertex_list)
+            vertex_index_tuples = self.format_indices(indexed_vertex_list)
+            normal_index_tuples = self.format_indices(indexed_normals_list)
+            uvs_index_tuples = self.format_indices(indexed_uvs_list)
             # then write to file!
-            self.create_obj_file(label_name, vertex_map, index_tuples)
+            # TODO need to add all the other maps and lists to this function to be passed in
+            #  and make sure create_obj_file copies them over
+            self.create_obj_file(label_name, vertex_map, vertex_index_tuples,
+                                 normal_map, normal_index_tuples,
+                                 uvs_index_tuples, uvs_map)
+
+    def create_indexed_list(self, geometry_list):
+        # we need to preserve the order the keys & indices were inserted
+        geometry_map = OrderedDict()
+        # WE MUST start at 1 because that's how .obj files are interpreted
+        geometry_index = 1
+        # this can be no longer than the amount of vertices
+        indexed_geometry_list = [None] * len(geometry_list)
+        for i, geometry in enumerate(geometry_list):
+            t_geometry = tuple(geometry)
+            # if it already exists we just need to grab the original geometry index
+            if t_geometry in geometry_map:
+                index_of_original_geometry = geometry_map[t_geometry]
+                indexed_geometry_list[i] = index_of_original_geometry
+            # if it doesn't exist we need to create it and update the index
+            else:
+                geometry_map[t_geometry] = geometry_index
+                indexed_geometry_list[i] = geometry_index
+                geometry_index += 1
+        return indexed_geometry_list, geometry_map
 
     # for some reason the indices are duplicated,
     # I think it's because a point slightly shifted will still be in the same face as another
     # FIXME so the fix is to fix PixelToFace but we can cheat here
-    def format_indices(self, indexed_vertex_list):
-        cleaned_indexed_vertex_list = list(filter(lambda v: v is not None, indexed_vertex_list))
-        print("test", cleaned_indexed_vertex_list[-1])
+    def format_indices(self, indexed_geometry_list):
+        cleaned_indexed_geometry_list = list(filter(lambda v: v is not None, indexed_geometry_list))
+        print("test", cleaned_indexed_geometry_list[-1])
         # do we need an ordered dict? no but it's nice for readability later in the .obj file
         index_map = OrderedDict()
-        for i in range(0, len(cleaned_indexed_vertex_list), 3):
-            v_index_1 = cleaned_indexed_vertex_list[i]
-            v_index_2 = cleaned_indexed_vertex_list[i + 1]
-            v_index_3 = cleaned_indexed_vertex_list[i + 2]
-            v_idx_tuple = (v_index_1, v_index_2, v_index_3)
-            if v_idx_tuple not in index_map:
-                index_map[v_idx_tuple] = True
+        for i in range(0, len(cleaned_indexed_geometry_list), 3):
+            g_index_1 = cleaned_indexed_geometry_list[i]
+            g_index_2 = cleaned_indexed_geometry_list[i + 1]
+            g_index_3 = cleaned_indexed_geometry_list[i + 2]
+            g_idx_tuple = (g_index_1, g_index_2, g_index_3)
+            if g_idx_tuple not in index_map:
+                index_map[g_idx_tuple] = True
         # so now we only have UNIQUE faces in the form of keys in the form of tuples in the dict
         return index_map.keys()
 
 
-    def create_obj_file(self, label_name, vertex_map, index_tuple_list):
+    def create_obj_file(self, label_name, vertex_map, vertex_index_tuples,normal_map, normal_index_tuples,
+                                 uvs_index_tuples, uvs_map):
         # https://en.wikipedia.org/wiki/Wavefront_.obj_file
         label_name_stripped = str(label_name).replace(" ", "")
         with open(f'outputs/OBJ files/{label_name}.obj', 'w') as file:
@@ -96,10 +108,19 @@ class PixelIndexer:
             # first write the vertices that are UNIQUE!
             for vertex, value in vertex_map.items():
                 file.write(f'v {vertex[0]} {vertex[1]} {vertex[2]}\n')
+
+            for normal, value in normal_map.items():
+                file.write(f'vn {normal[0]} {normal[1]} {normal[2]}\n')
+
+            for uvs, value in uvs_map.items():
+                file.write(f'vt {uvs[0]} {uvs[1]}\n')
             # then we write the faces where it takes 3 to make on face!
             # so we iterate by 3 here starting at 0
-            for index_tuple in index_tuple_list:
-                file.write(f'f {index_tuple[0]} {index_tuple[1]} {index_tuple[2]}\n')
+            for vertex_tuple, normal_tuple, uvs_tuple in zip(vertex_index_tuples, normal_index_tuples, uvs_index_tuples):
+                # file.write(f'f {index_tuple[0]} {index_tuple[1]} {index_tuple[2]}\n')
+                file.write(f'f {vertex_tuple[0]}/{uvs_tuple[0]}/{normal_tuple[0]} '
+                           f'{vertex_tuple[1]}/{uvs_tuple[1]}/{normal_tuple[1]} '
+                           f'{vertex_tuple[2]}/{uvs_tuple[2]}/{normal_tuple[2]}\n')
             print(f"Finished writing {label_name}.obj file!")
 
 

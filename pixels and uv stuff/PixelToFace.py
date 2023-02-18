@@ -129,9 +129,10 @@ class PixelToFace:
                     normals_result.append(n1)
                     normals_result.append(n2)
 
-                    uv0 = self.uvs[uv_does_exist]["a"]
-                    uv1 = self.uvs[uv_does_exist]["b"]
-                    uv2 = self.uvs[uv_does_exist]["c"]
+                    uv0 = list(self.uvs[uv_does_exist]["a"].values())
+                    uv1 = list(self.uvs[uv_does_exist]["b"].values())
+                    uv2 = list(self.uvs[uv_does_exist]["c"].values())
+                    # print(uv0, uv1, uv2)
                     uvs_result.append(uv0)
                     uvs_result.append(uv1)
                     uvs_result.append(uv2)
