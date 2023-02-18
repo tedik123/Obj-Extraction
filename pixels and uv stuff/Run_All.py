@@ -9,6 +9,7 @@ from PixelIndexer import PixelIndexer
 from PixelGrabber import run_change_pixels_test, save_pixels_by_labels
 from ObjFileToJSONFiles import ObjToJSON
 
+
 def create_file_names_list():
     ignore_files = [".gitkeep", "human.obj", "file_list.json"]
     mypath = "outputs/OBJ files/"
@@ -25,8 +26,8 @@ def create_file_names_list():
 
 if __name__ == "__main__":
     # IMPORTANT  this is an array of strings, if it's empty it will do all of them
-    #label_names_to_test = ["Flexor Carpi Ulnaris","Flexor Carpi Radialis","Flexor Digitorum Superficialis","Flexor Digitorum Longus","Gracilis","Gastrocnemius","Iliopsoas","Infraspinatus","Latissimus Dorsi","Levator Scapulae","Pectineus","Peroneus Longus"]
-    #["Flexor Carpi Ulnaris","Flexor Carpi Radialis","Flexor Digitorum Superficialis","Flexor Digitorum Longus","Gracilis","Gastrocnemius","Iliopsoas","Infraspinatus","Iliotibial Tract","Latissimus Dorsi","Levator Scapulae","Pectineus","Peroneus Longus"]
+    # label_names_to_test = ["Flexor Carpi Ulnaris","Flexor Carpi Radialis","Flexor Digitorum Superficialis","Flexor Digitorum Longus","Gracilis","Gastrocnemius","Iliopsoas","Infraspinatus","Latissimus Dorsi","Levator Scapulae","Pectineus","Peroneus Longus"]
+    # ["Flexor Carpi Ulnaris","Flexor Carpi Radialis","Flexor Digitorum Superficialis","Flexor Digitorum Longus","Gracilis","Gastrocnemius","Iliopsoas","Infraspinatus","Iliotibial Tract","Latissimus Dorsi","Levator Scapulae","Pectineus","Peroneus Longus"]
 
     # label_names_to_test = ["Vastus Medialis", "Vastus Lateralis", "Trapezius",
     #                         "Teres Minor", "Teres Major", "Tensor Fasciae Lata",
@@ -34,7 +35,7 @@ if __name__ == "__main__":
     #                         "Rhomboids", "Pronator Teres", "Palmaris Longus"]
 
     # label_names_to_test = ["Anconeus", "Adductor Longus", "Adductor Magnus", "Abductor Pollicis Longus", "Brachialis", "Biceps Brachii", "Biceps Femoris", "Brachioradialis", "Coracobrachialis", "Deltoid", "Extensor Carpi Radialis Brevis", "Extensor Carpi Radialis Longus", "Extensor Carpi Ulnaris", "Extensor Digitorum", "Extensor Digitorum Longus", "Extensor Digiti Minimi", "External Oblique", "Extensor Pollicis Brevis", "Erector Spinae"]
-    #muscle_names_to_test = ["Anconeus", "Adductor Longus", "Adductor Magnus", "Abductor Pollicis Longus", "Brachialis", "Biceps Brachii", "Biceps Femoris", "Brachioradialis", "Coracobrachialis", "Deltoid", "Extensor Carpi Radialis Brevis", "Extensor Carpi Radialis Longus", "Extensor Carpi Ulnaris", "Extensor Digitorum", "Extensor Digitorum Longus", "Extensor Digiti Minimi", "External Oblique", "Extensor Pollicis Brevis", "Erector Spinae"]
+    # muscle_names_to_test = ["Anconeus", "Adductor Longus", "Adductor Magnus", "Abductor Pollicis Longus", "Brachialis", "Biceps Brachii", "Biceps Femoris", "Brachioradialis", "Coracobrachialis", "Deltoid", "Extensor Carpi Radialis Brevis", "Extensor Carpi Radialis Longus", "Extensor Carpi Ulnaris", "Extensor Digitorum", "Extensor Digitorum Longus", "Extensor Digiti Minimi", "External Oblique", "Extensor Pollicis Brevis", "Erector Spinae"]
     # # grab last two for testing
     # label_names_to_test = label_names_to_test[-2:]
 
@@ -53,9 +54,13 @@ if __name__ == "__main__":
 
     base_obj_file_path = "obj files/girl.OBJ"
 
+    # choose whether to save the uvs and normals, if both are false it will only save the vertices
+    SAVE_UVS = False
+    SAVE_NORMALS = False
+
     # if you only want to run certain scripts you can change accordingly here
     RUN_PIXEL_GRABBER = False
-    RUN_PIXEL_TO_FACE = True
+    RUN_PIXEL_TO_FACE = False
     RUN_PIXEL_INDEXER = True
 
     # this triangle decomposer only needs to be run once if the base .obj file is the same! So turn it to false, after!
@@ -122,7 +127,7 @@ if __name__ == "__main__":
             obj_to_json.insert_face_data()
             obj_to_json.create_json_files()
 
-        pixel_to_faces = PixelToFace(TARGET_FILE)
+        pixel_to_faces = PixelToFace(TARGET_FILE, SAVE_NORMALS, SAVE_UVS)
         end = time.time()
         print()
         print(f"Finished reading in geometries...Took {end - start} seconds")
@@ -130,7 +135,6 @@ if __name__ == "__main__":
 
         # create all the points within the obj files
         if RUN_TRIANGLE_DECOMPOSER:
-
             # then break down those geometry files
             pixel_to_faces.decompose_all_triangles(texture_max_width, texture_max_height)
 
@@ -146,7 +150,7 @@ if __name__ == "__main__":
         print()
         print("Starting Pixel Indexer and .obj creation")
         start = time.time()
-        indexer = PixelIndexer(label_names_to_test)
+        indexer = PixelIndexer(label_names_to_test, SAVE_NORMALS, SAVE_UVS)
         end = time.time()
         print()
         print(f"Finished reading in faces...Took {end - start} seconds")

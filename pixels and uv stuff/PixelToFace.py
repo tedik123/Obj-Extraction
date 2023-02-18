@@ -7,7 +7,7 @@ from TriangleDecomposer import TriangleDecomposer
 
 class PixelToFace:
 
-    def __init__(self, target_file_path):
+    def __init__(self, target_file_path, save_normals=True, save_uvs=True):
         # these are all arrays!!!!!!!!!
         self.target_file_path = target_file_path
 
@@ -25,6 +25,9 @@ class PixelToFace:
         # value = index of face that holds the uvs
         # since (0, 0) repeats a lot to start we're just gonna manually create it so we can just ignore it later
         self.point_to_triangle = {"(0, 0)": 0}
+        # TODO use boolean statements to save normals and uvs if wanted
+        self.save_normals = save_normals
+        self.save_uvs = save_uvs
 
     def read_in_faces(self):
         print("Loading in faces")

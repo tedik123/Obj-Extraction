@@ -5,11 +5,13 @@ from collections import OrderedDict
 
 class PixelIndexer:
 
-    def __init__(self, label_names):
+    def __init__(self, label_names, save_normals=True, save_uvs=True):
         self.faces_found_file_path = 'outputs/faces_found_by_labels.json'
         self.faces_found_by_labels = None
         self.read_in_faces_found_by_labels()
         self.label_names = label_names
+        self.save_normals = save_normals
+        self.save_uvs = save_uvs
 
     def read_in_faces_found_by_labels(self):
         print("Reading in faces by labels")
@@ -27,25 +29,30 @@ class PixelIndexer:
                 labels_to_do[label] = temp
             # overwrite it to only the labels we care about
             self.faces_found_by_labels = labels_to_do
-        # this will have to change later so we can handle normals, faces, and uvs?
+        # this will have to change later, so we can handle normals, faces, and uvs?
         for label_name, values in self.faces_found_by_labels.items():
             vertices = values["vertices"]
-            print(len(vertices))
-            normals = values["normals"]
-            uvs = values["uvs"]
-
             indexed_vertex_list, vertex_map = self.create_indexed_list(vertices)
-            indexed_normals_list, normal_map = self.create_indexed_list(normals)
-            indexed_uvs_list, uvs_map = self.create_indexed_list(uvs)
+            if len(indexed_vertex_list) % 3 != 0:
+                raise Exception("Something went wrong the list must be divisible by 3!")
             # so now we have our label with an indexed list of values
             # we'll use the keys to create the UNIQUE vertices
             # and then the indexed_vertex_list will help us create the faces
-            if len(indexed_vertex_list) % 3 != 0:
-                raise Exception("Something went wrong the list must be divisible by 3!")
             # remove nones from list and cleans up duplicates and returns a list of tuples of size 3
             vertex_index_tuples = self.format_indices(indexed_vertex_list)
-            normal_index_tuples = self.format_indices(indexed_normals_list)
-            uvs_index_tuples = self.format_indices(indexed_uvs_list)
+            print(len(vertices))
+            # default none
+            normal_map, normal_index_tuples, uvs_index_tuples, uvs_map = None, None, None, None
+            if self.save_normals:
+                normals = values["normals"]
+                indexed_normals_list, normal_map = self.create_indexed_list(normals)
+                normal_index_tuples = self.format_indices(indexed_normals_list)
+
+            if self.save_uvs:
+                uvs = values["uvs"]
+                indexed_uvs_list, uvs_map = self.create_indexed_list(uvs)
+                uvs_index_tuples = self.format_indices(indexed_uvs_list)
+
             # then write to file!
             # TODO need to add all the other maps and lists to this function to be passed in
             #  and make sure create_obj_file copies them over
@@ -91,9 +98,8 @@ class PixelIndexer:
         # so now we only have UNIQUE faces in the form of keys in the form of tuples in the dict
         return index_map.keys()
 
-
-    def create_obj_file(self, label_name, vertex_map, vertex_index_tuples,normal_map, normal_index_tuples,
-                                 uvs_index_tuples, uvs_map):
+    def create_obj_file(self, label_name, vertex_map, vertex_index_tuples, normal_map, normal_index_tuples,
+                        uvs_index_tuples, uvs_map):
         # https://en.wikipedia.org/wiki/Wavefront_.obj_file
         label_name_stripped = str(label_name).replace(" ", "")
         with open(f'outputs/OBJ files/{label_name}.obj', 'w') as file:
@@ -108,19 +114,39 @@ class PixelIndexer:
             # first write the vertices that are UNIQUE!
             for vertex, value in vertex_map.items():
                 file.write(f'v {vertex[0]} {vertex[1]} {vertex[2]}\n')
-
-            for normal, value in normal_map.items():
-                file.write(f'vn {normal[0]} {normal[1]} {normal[2]}\n')
-
-            for uvs, value in uvs_map.items():
-                file.write(f'vt {uvs[0]} {uvs[1]}\n')
+            if self.save_normals:
+                for normal, value in normal_map.items():
+                    file.write(f'vn {normal[0]} {normal[1]} {normal[2]}\n')
+            if self.save_uvs:
+                for uvs, value in uvs_map.items():
+                    file.write(f'vt {uvs[0]} {uvs[1]}\n')
             # then we write the faces where it takes 3 to make on face!
             # so we iterate by 3 here starting at 0
-            for vertex_tuple, normal_tuple, uvs_tuple in zip(vertex_index_tuples, normal_index_tuples, uvs_index_tuples):
-                # file.write(f'f {index_tuple[0]} {index_tuple[1]} {index_tuple[2]}\n')
-                file.write(f'f {vertex_tuple[0]}/{uvs_tuple[0]}/{normal_tuple[0]} '
-                           f'{vertex_tuple[1]}/{uvs_tuple[1]}/{normal_tuple[1]} '
-                           f'{vertex_tuple[2]}/{uvs_tuple[2]}/{normal_tuple[2]}\n')
+            # save everything
+            # TODO simplify this plz
+            if self.save_uvs and self.save_normals:
+                for vertex_tuple, normal_tuple, uvs_tuple in zip(vertex_index_tuples, normal_index_tuples,
+                                                                 uvs_index_tuples):
+                    # file.write(f'f {index_tuple[0]} {index_tuple[1]} {index_tuple[2]}\n')
+                    file.write(f'f {vertex_tuple[0]}/{uvs_tuple[0]}/{normal_tuple[0]} '
+                               f'{vertex_tuple[1]}/{uvs_tuple[1]}/{normal_tuple[1]} '
+                               f'{vertex_tuple[2]}/{uvs_tuple[2]}/{normal_tuple[2]}\n')
+            elif not self.save_uvs and self.save_normals:
+                for vertex_tuple, normal_tuple in zip(vertex_index_tuples, normal_index_tuples):
+                    # file.write(f'f {index_tuple[0]} {index_tuple[1]} {index_tuple[2]}\n')
+                    file.write(f'f {vertex_tuple[0]}//{normal_tuple[0]} '
+                               f'{vertex_tuple[1]}//{normal_tuple[1]} '
+                               f'{vertex_tuple[2]}//{normal_tuple[2]}\n')
+            elif self.save_uvs and not self.save_normals:
+                for vertex_tuple, uvs_tuple in zip(vertex_index_tuples, uvs_index_tuples):
+                    # file.write(f'f {index_tuple[0]} {index_tuple[1]} {index_tuple[2]}\n')
+                    file.write(f'f {vertex_tuple[0]}/{uvs_tuple[0]} '
+                               f'{vertex_tuple[1]}/{uvs_tuple[1]} '
+                               f'{vertex_tuple[2]}/{uvs_tuple[2]}\n')
+            else:
+                for vertex_tuple in vertex_index_tuples:
+                    file.write(f'f {vertex_tuple[0]} {vertex_tuple[1]} {vertex_tuple[2]}\n')
+
             print(f"Finished writing {label_name}.obj file!")
 
 
@@ -137,5 +163,3 @@ if __name__ == "__main__":
     end = time.time()
     print(end - start)
     print(f"Full task took {(end - start) / 60} minutes")
-
-
