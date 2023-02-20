@@ -37,7 +37,6 @@
   "acceptable_colors_rgb": [[220, 156, 156], [218,157, 156]],
   "enable_default_range": false
   },
-
   "Vastus Medialis":
   {
   "label": "VM",
@@ -153,7 +152,7 @@
   "Flexor Digitorum Longus":
   {
   "label": "FDL",
-  "starting_points": [[216, 1184],[2161, 1726]],
+  "starting_points": [[216, 1184],[2161, 1726],[316, 1856],[2124, 1009]],
   "acceptable_colors_rgb":[[171,219,157]],
     "pixel_deviation": 10
   },
