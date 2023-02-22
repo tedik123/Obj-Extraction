@@ -79,7 +79,10 @@ into normals, uvs, and faces. It then uses that to figure out what pixel value b
 and this is how we get our .obj files ultimately.
 1. Copy over your .obj file into the "obj files" directory.
 2. Base_obj_file_path should be changed to the path of your obj file like this "obj_files/YourFile.obj"
-3. If this is your first time running this script set RUN_TRIANGLE_DECOMPOSER to True. This only needs
+3. You can choose whether the final .obj file should also save the base obj file's uvs and normals by 
+setting the SAVE_UVS and SAVE_NORMALS to true or false.
+![img.png](/misc/save_normals.png)
+4. If this is your first time running this script set RUN_TRIANGLE_DECOMPOSER to True. This only needs
 to be run once per base obj file, so if you don't change your obj file all subsequent runs can be done 
 with RUN_TRIANGLE_DECOMPOSER to False.
 
