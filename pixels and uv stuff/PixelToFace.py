@@ -16,6 +16,8 @@ class PixelToFace:
 
         self.save_normals = save_normals
         self.save_uvs = save_uvs
+        self.normals = None
+        self.uvs = None
 
         # FIXME I could use async for these tasks so the load is faster
         self.read_in_faces()
@@ -130,7 +132,7 @@ class PixelToFace:
                     face_results.append(p0)
                     face_results.append(p1)
                     face_results.append(p2)
-                    if self.save_normals:
+                    if self.save_normals and self.normals:
                         n0 = self.normals[uv_does_exist]["a"]
                         n1 = self.normals[uv_does_exist]["b"]
                         n2 = self.normals[uv_does_exist]["c"]

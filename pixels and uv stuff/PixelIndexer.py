@@ -43,12 +43,12 @@ class PixelIndexer:
             print(len(vertices))
             # default none
             normal_map, normal_index_tuples, uvs_index_tuples, uvs_map = None, None, None, None
-            if self.save_normals:
+            if self.save_normals and len(values["normals"]) > 0:
                 normals = values["normals"]
                 indexed_normals_list, normal_map = self.create_indexed_list(normals)
                 normal_index_tuples = self.format_indices(indexed_normals_list)
 
-            if self.save_uvs:
+            if self.save_uvs and len(values["uvs"]) > 0:
                 uvs = values["uvs"]
                 indexed_uvs_list, uvs_map = self.create_indexed_list(uvs)
                 uvs_index_tuples = self.format_indices(indexed_uvs_list)
@@ -114,28 +114,32 @@ class PixelIndexer:
             # first write the vertices that are UNIQUE!
             for vertex, value in vertex_map.items():
                 file.write(f'v {vertex[0]} {vertex[1]} {vertex[2]}\n')
-            if self.save_normals:
+            # just check one of the normal objects to see if we have anything to work with
+            if self.save_normals and normal_map:
                 for normal, value in normal_map.items():
                     file.write(f'vn {normal[0]} {normal[1]} {normal[2]}\n')
             if self.save_uvs:
                 for uvs, value in uvs_map.items():
                     file.write(f'vt {uvs[0]} {uvs[1]}\n')
+
             # then we write the faces where it takes 3 to make on face!
             # so we iterate by 3 here starting at 0
             # save everything
             # TODO simplify this plz
-            if self.save_uvs and self.save_normals:
+            # check if normal_index_tuple exists in case they're asking to save normals but normals don't exist
+            # in the base file
+            if self.save_uvs and self.save_normals and normal_index_tuples:
                 for vertex_tuple, normal_tuple, uvs_tuple in zip(vertex_index_tuples, normal_index_tuples,
                                                                  uvs_index_tuples):
                     file.write(f'f {vertex_tuple[0]}/{uvs_tuple[0]}/{normal_tuple[0]} '
                                f'{vertex_tuple[1]}/{uvs_tuple[1]}/{normal_tuple[1]} '
                                f'{vertex_tuple[2]}/{uvs_tuple[2]}/{normal_tuple[2]}\n')
-            elif not self.save_uvs and self.save_normals:
+            elif not self.save_uvs and self.save_normals and normal_index_tuples:
                 for vertex_tuple, normal_tuple in zip(vertex_index_tuples, normal_index_tuples):
                     file.write(f'f {vertex_tuple[0]}//{normal_tuple[0]} '
                                f'{vertex_tuple[1]}//{normal_tuple[1]} '
                                f'{vertex_tuple[2]}//{normal_tuple[2]}\n')
-            elif self.save_uvs and not self.save_normals:
+            elif self.save_uvs and not self.save_normals and uvs_index_tuples:
                 for vertex_tuple, uvs_tuple in zip(vertex_index_tuples, uvs_index_tuples):
                     file.write(f'f {vertex_tuple[0]}/{uvs_tuple[0]} '
                                f'{vertex_tuple[1]}/{uvs_tuple[1]} '
