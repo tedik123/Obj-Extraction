@@ -127,19 +127,16 @@ class PixelIndexer:
             if self.save_uvs and self.save_normals:
                 for vertex_tuple, normal_tuple, uvs_tuple in zip(vertex_index_tuples, normal_index_tuples,
                                                                  uvs_index_tuples):
-                    # file.write(f'f {index_tuple[0]} {index_tuple[1]} {index_tuple[2]}\n')
                     file.write(f'f {vertex_tuple[0]}/{uvs_tuple[0]}/{normal_tuple[0]} '
                                f'{vertex_tuple[1]}/{uvs_tuple[1]}/{normal_tuple[1]} '
                                f'{vertex_tuple[2]}/{uvs_tuple[2]}/{normal_tuple[2]}\n')
             elif not self.save_uvs and self.save_normals:
                 for vertex_tuple, normal_tuple in zip(vertex_index_tuples, normal_index_tuples):
-                    # file.write(f'f {index_tuple[0]} {index_tuple[1]} {index_tuple[2]}\n')
                     file.write(f'f {vertex_tuple[0]}//{normal_tuple[0]} '
                                f'{vertex_tuple[1]}//{normal_tuple[1]} '
                                f'{vertex_tuple[2]}//{normal_tuple[2]}\n')
             elif self.save_uvs and not self.save_normals:
                 for vertex_tuple, uvs_tuple in zip(vertex_index_tuples, uvs_index_tuples):
-                    # file.write(f'f {index_tuple[0]} {index_tuple[1]} {index_tuple[2]}\n')
                     file.write(f'f {vertex_tuple[0]}/{uvs_tuple[0]} '
                                f'{vertex_tuple[1]}/{uvs_tuple[1]} '
                                f'{vertex_tuple[2]}/{uvs_tuple[2]}\n')

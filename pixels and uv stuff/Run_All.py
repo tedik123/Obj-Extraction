@@ -54,17 +54,18 @@ if __name__ == "__main__":
 
     base_obj_file_path = "obj files/girl.OBJ"
 
-    # choose whether to save the uvs and normals, if both are false it will only save the vertices
-    SAVE_UVS = False
-    SAVE_NORMALS = False
+    # choose whether to save the uvs and normals, if both are false it will only save the vertices and faces
+    SAVE_UVS = True
+    SAVE_NORMALS = True
 
     # if you only want to run certain scripts you can change accordingly here
-    RUN_PIXEL_GRABBER = False
-    RUN_PIXEL_TO_FACE = False
+    RUN_PIXEL_GRABBER = True
+    RUN_PIXEL_TO_FACE = True
     RUN_PIXEL_INDEXER = True
 
     # this triangle decomposer only needs to be run once if the base .obj file is the same! So turn it to false, after!
-    RUN_TRIANGLE_DECOMPOSER = False
+    RUN_TRIANGLE_DECOMPOSER = True
+
 
     # IMPORTANT unless you're testing something you can just leave it
     # target is what pixels we're trying to find

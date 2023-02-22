@@ -1,6 +1,5 @@
 import json
 import math
-import multiprocessing
 import time
 from TriangleDecomposer import TriangleDecomposer
 
@@ -15,19 +14,22 @@ class PixelToFace:
         # self.json_data_directory = "geometry_files/"
         self.json_data_directory = "outputs/geometry_files"
 
+        self.save_normals = save_normals
+        self.save_uvs = save_uvs
+
         # FIXME I could use async for these tasks so the load is faster
         self.read_in_faces()
-        self.read_in_normals()
+        if save_normals:
+            self.read_in_normals()
         self.read_in_geometry_uvs()
         self.read_in_target_pixels()
+
         # this will be the dictionary that contains all points and which triangle they belong to
         # key = (x, y) in pixels
         # value = index of face that holds the uvs
         # since (0, 0) repeats a lot to start we're just gonna manually create it so we can just ignore it later
         self.point_to_triangle = {"(0, 0)": 0}
-        # TODO use boolean statements to save normals and uvs if wanted
-        self.save_normals = save_normals
-        self.save_uvs = save_uvs
+
 
     def read_in_faces(self):
         print("Loading in faces")
@@ -36,13 +38,16 @@ class PixelToFace:
         self.faces = json.loads(data)['faces']
 
     def read_in_normals(self):
-        print("Loading normals")
-        try:
-            with open(f'{self.json_data_directory}/geometry_normals.json', 'r') as file:
-                data = file.read()
-            self.normals = json.loads(data)['normals']
-        except FileNotFoundError:
-            print("Couldn't find geometry normals file, ignoring it!")
+        if self.save_normals:
+            print("Loading normals")
+            try:
+                with open(f'{self.json_data_directory}/geometry_normals.json', 'r') as file:
+                    data = file.read()
+                self.normals = json.loads(data)['normals']
+            except FileNotFoundError:
+                print("Couldn't find geometry normals file, ignoring it!")
+        else:
+            print("Normals not loaded")
 
     def read_in_geometry_uvs(self):
         print("Loading geometry uvs")
@@ -125,23 +130,33 @@ class PixelToFace:
                     face_results.append(p0)
                     face_results.append(p1)
                     face_results.append(p2)
-                    n0 = self.normals[uv_does_exist]["a"]
-                    n1 = self.normals[uv_does_exist]["b"]
-                    n2 = self.normals[uv_does_exist]["c"]
-                    normals_result.append(n0)
-                    normals_result.append(n1)
-                    normals_result.append(n2)
+                    if self.save_normals:
+                        n0 = self.normals[uv_does_exist]["a"]
+                        n1 = self.normals[uv_does_exist]["b"]
+                        n2 = self.normals[uv_does_exist]["c"]
+                        normals_result.append(n0)
+                        normals_result.append(n1)
+                        normals_result.append(n2)
+                    if self.save_uvs:
+                        uv0 = list(self.uvs[uv_does_exist]["a"].values())
+                        uv1 = list(self.uvs[uv_does_exist]["b"].values())
+                        uv2 = list(self.uvs[uv_does_exist]["c"].values())
+                        # print(uv0, uv1, uv2)
+                        uvs_result.append(uv0)
+                        uvs_result.append(uv1)
+                        uvs_result.append(uv2)
+            if self.save_uvs:
+                if self.save_normals:
+                    self.label_faces[label_name] = {"vertices": face_results, "normals": normals_result,
+                                                    "uvs": uvs_result}
+                else:
+                    self.label_faces[label_name] = {"vertices": face_results, "uvs": uvs_result}
+            elif self.save_normals:
+                self.label_faces[label_name] = {"vertices": face_results, "normals": normals_result}
+            else:
+                self.label_faces[label_name] = {"vertices": face_results}
 
-                    uv0 = list(self.uvs[uv_does_exist]["a"].values())
-                    uv1 = list(self.uvs[uv_does_exist]["b"].values())
-                    uv2 = list(self.uvs[uv_does_exist]["c"].values())
-                    # print(uv0, uv1, uv2)
-                    uvs_result.append(uv0)
-                    uvs_result.append(uv1)
-                    uvs_result.append(uv2)
-            self.label_faces[label_name] = {"vertices": face_results, "normals": normals_result, "uvs": uvs_result}
-            # self.label_faces[label_name] = {"vertices": face_results}
-        print(f"Missed {round((missed_values/pixels_to_find_count)*100, 2)}% of target pixels.")
+        print(f"Missed {round((missed_values / pixels_to_find_count) * 100, 2)}% of target pixels.")
         print(f"Missed {missed_values} out of {pixels_to_find_count}, could not find their matching faces.")
         # print(face_results)
         # TODO match faces to label name or label whichever we want
