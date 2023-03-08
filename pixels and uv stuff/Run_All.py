@@ -28,17 +28,16 @@ if __name__ == "__main__":
     #label_names_to_test = ["Flexor Carpi Ulnaris","Flexor Carpi Radialis","Flexor Digitorum Superficialis","Flexor Digitorum Longus","Gracilis","Gastrocnemius","Iliopsoas","Infraspinatus","Latissimus Dorsi","Levator Scapulae","Pectineus","Peroneus Longus"]
     #["Flexor Carpi Ulnaris","Flexor Carpi Radialis","Flexor Digitorum Superficialis","Flexor Digitorum Longus","Gracilis","Gastrocnemius","Iliopsoas","Infraspinatus","Iliotibial Tract","Latissimus Dorsi","Levator Scapulae","Pectineus","Peroneus Longus"]
 
-    # label_names_to_test = ["Vastus Medialis", "Vastus Lateralis", "Trapezius",
-    #                         "Teres Minor", "Teres Major", "Tensor Fasciae Lata",
-    #                         "Tibialis Anterior", "Soleus", "Semitendinosus", "Serratus Anterior", "Rectus Abdominis",
-    #                         "Rhomboids", "Pronator Teres", "Palmaris Longus"]
+    label_names_to_test = ["Vastus Medialis", "Vastus Lateralis", "Trapezius",
+                            "Teres Minor", "Teres Major", "Tensor Fasciae Latae",
+                            "Tibialis Anterior", "Soleus", "Semitendinosus", "Serratus Anterior", "Rectus Abdominis",
+                            "Rhomboids", "Pronator Teres", "Palmaris Longus"]
 
     # label_names_to_test = ["Anconeus", "Adductor Longus", "Adductor Magnus", "Abductor Pollicis Longus", "Brachialis", "Biceps Brachii", "Biceps Femoris", "Brachioradialis", "Coracobrachialis", "Deltoid", "Extensor Carpi Radialis Brevis", "Extensor Carpi Radialis Longus", "Extensor Carpi Ulnaris", "Extensor Digitorum", "Extensor Digitorum Longus", "Extensor Digiti Minimi", "External Oblique", "Extensor Pollicis Brevis", "Erector Spinae"]
-    #muscle_names_to_test = ["Anconeus", "Adductor Longus", "Adductor Magnus", "Abductor Pollicis Longus", "Brachialis", "Biceps Brachii", "Biceps Femoris", "Brachioradialis", "Coracobrachialis", "Deltoid", "Extensor Carpi Radialis Brevis", "Extensor Carpi Radialis Longus", "Extensor Carpi Ulnaris", "Extensor Digitorum", "Extensor Digitorum Longus", "Extensor Digiti Minimi", "External Oblique", "Extensor Pollicis Brevis", "Erector Spinae"]
     # # grab last two for testing
     # label_names_to_test = label_names_to_test[-2:]
 
-    label_names_to_test = ["Flexor Digitorum Longus"]
+    label_names_to_test = ["Trapezius", "Teres Minor"]
 
     texture_file_path = 'obj textures/diffuse.jpg'
     # define the dimensions of the image
