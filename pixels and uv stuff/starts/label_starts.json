@@ -59,7 +59,8 @@
   {
   "label": "TMi",
   "starting_points": [[2595, 3479], [1887, 3480]],
-  "acceptable_colors_rgb": [[175, 156, 220], [174, 155, 219], [175, 157, 219], [173, 157, 219]]
+  "acceptable_colors_rgb": [[175, 156, 220], [174, 155, 219], [175, 157, 219], [173, 157, 219]],
+    "pixel_deviation": 6
   },
   "Teres Major":
   {

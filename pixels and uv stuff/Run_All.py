@@ -38,7 +38,7 @@ if __name__ == "__main__":
     # # grab last two for testing
     # label_names_to_test = label_names_to_test[-2:]
 
-    label_names_to_test = ["Flexor Digitorum Longus"]
+    label_names_to_test = ["Teres Minor"]
 
     texture_file_path = 'obj textures/diffuse.jpg'
     # define the dimensions of the image
