@@ -24,6 +24,8 @@ def create_file_names_list():
     print("Creating file/label list.")
 
 
+
+
 if __name__ == "__main__":
     # IMPORTANT  this is an array of strings, if it's empty it will do all of them
     # label_names_to_test = ["Flexor Carpi Ulnaris","Flexor Carpi Radialis","Flexor Digitorum Superficialis","Flexor Digitorum Longus","Gracilis","Gastrocnemius","Iliopsoas","Infraspinatus","Latissimus Dorsi","Levator Scapulae","Pectineus","Peroneus Longus"]
@@ -39,11 +41,11 @@ if __name__ == "__main__":
     # # grab last two for testing
     # label_names_to_test = label_names_to_test[-2:]
 
-    label_names_to_test = []
+    label_names_to_test = ["Pectoralis Major"]
 
-    texture_file_path = 'obj textures/diffuse.jpeg'
+    texture_file_path = 'obj textures/diffuse.jpg'
     # define the dimensions of the image
-    texture_max_width, texture_max_height = 2048, 2048
+    texture_max_width, texture_max_height = 4096, 4096
 
     # if there's a fade or variation in color you will want to raise this to loosen what is an acceptable color
     default_pixel_deviation = 3
@@ -64,7 +66,7 @@ if __name__ == "__main__":
     RUN_PIXEL_INDEXER = True
 
     # this triangle decomposer only needs to be run once if the base .obj file is the same! So turn it to false, after!
-    RUN_TRIANGLE_DECOMPOSER = False
+    RUN_TRIANGLE_DECOMPOSER = True
 
 
     # IMPORTANT unless you're testing something you can just leave it
@@ -137,7 +139,20 @@ if __name__ == "__main__":
         # create all the points within the obj files
         if RUN_TRIANGLE_DECOMPOSER:
             # then break down those geometry files
+            start_decompose = time.perf_counter()
             pixel_to_faces.decompose_all_triangles(texture_max_width, texture_max_height)
+            end = time.perf_counter()
+            py_time = (end - start_decompose)
+            print("Python triangle decompose time", py_time)
+
+            # start_decompose = time.perf_counter()
+            # pixel_to_faces.decompose_all_triangles_Ccode(texture_max_width, texture_max_height)
+            # end = time.perf_counter()
+            # c_time = (end - start_decompose)
+            # print("C++ triangle decompose time", c_time)
+            # # print('C code is {}x faster'.format(py_time / c_time))
+
+
 
         # then search through target_uvs
         pixel_to_faces.find_faces_of_targets()
