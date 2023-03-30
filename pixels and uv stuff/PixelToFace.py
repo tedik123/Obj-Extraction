@@ -9,6 +9,7 @@ from shapely.geometry import Point, Polygon
 from shapely import STRtree
 import pickle
 
+
 class PixelToFace:
 
     def __init__(self, target_file_path, save_normals=True, save_uvs=True):
@@ -37,6 +38,10 @@ class PixelToFace:
         # since (0, 0) repeats a lot to start we're just gonna manually create it so we can just ignore it later
         self.point_to_triangle = {"(0, 0)": 0}
         self.point_to_triangle_C = {"(0, 0)": 0}
+
+        # this is data for the STR tree
+        self.str_tree = None
+        self.triangle_data = []
 
     def read_in_faces(self):
         print("Loading in faces")
@@ -122,24 +127,24 @@ class PixelToFace:
             coord_point_sum = uv_face["a"]["x"] + uv_face["a"]["y"] + uv_face["b"]["x"] + uv_face["b"]["y"] + \
                               uv_face["c"]["x"] + uv_face["b"]["y"]
             # we'll ignore all 0 points which only happens at the beginning in our case
-            if coord_point_sum != 0:
-                triangle = TriangleDecomposer(uv_face["a"], uv_face["b"], uv_face["c"], max_width, max_height)
-                all_points = triangle.get_all_points_of_triangle()
-                # triangle 14299 has points {'x': 2998, 'y': 1801}, {'x': 2998, 'y': 1804}, {'x': 2999, 'y': 1801} and UVS of: {'x': 0.7321699857711792, 'y': 0.560259997844696}, {'x': 0.7320399880409241, 'y': 0.5595099925994873}, {'x': 0.7322999835014343, 'y': 0.5602999925613403}
-                # triangle 14302 has points {'x': 3001, 'y': 1803}, {'x': 3003, 'y': 1802}, {'x': 2999, 'y': 1801} and UVS of: {'x': 0.7327700257301331, 'y': 0.559660017490387}, {'x': 0.7333499789237976, 'y': 0.5600100159645081}, {'x': 0.7322999835014343, 'y': 0.5602999925613403}
-                # if index == 14302 or index == 14299:
-                #     print(f"triangle {index} has points {triangle.p1}, {triangle.p2}, {triangle.p3} and UVS of:"
-                #           f" {triangle.uv_p1}, {triangle.uv_p2}, {triangle.uv_p3}")
-                for point in all_points:
-                    # if point in self.point_to_triangle:
-                    #     print(f"duplicate point {point} at index {index}. "
-                    #           f"Original belongs to index {self.point_to_triangle[point]}")
-                    # unfortunately to save it to a json we need to convert it to a string first
-                    # if point:
-                    key = str(point)
-                    self.point_to_triangle[key] = index
-                    # else:
-                    #     print("cringe")
+            # if coord_point_sum != 0:
+            triangle = TriangleDecomposer(uv_face["a"], uv_face["b"], uv_face["c"], max_width, max_height)
+            all_points = triangle.get_all_points_of_triangle()
+            # triangle 14299 has points {'x': 2998, 'y': 1801}, {'x': 2998, 'y': 1804}, {'x': 2999, 'y': 1801} and UVS of: {'x': 0.7321699857711792, 'y': 0.560259997844696}, {'x': 0.7320399880409241, 'y': 0.5595099925994873}, {'x': 0.7322999835014343, 'y': 0.5602999925613403}
+            # triangle 14302 has points {'x': 3001, 'y': 1803}, {'x': 3003, 'y': 1802}, {'x': 2999, 'y': 1801} and UVS of: {'x': 0.7327700257301331, 'y': 0.559660017490387}, {'x': 0.7333499789237976, 'y': 0.5600100159645081}, {'x': 0.7322999835014343, 'y': 0.5602999925613403}
+            # if index == 14302 or index == 14299:
+            #     print(f"triangle {index} has points {triangle.p1}, {triangle.p2}, {triangle.p3} and UVS of:"
+            #           f" {triangle.uv_p1}, {triangle.uv_p2}, {triangle.uv_p3}")
+            for point in all_points:
+                # if point in self.point_to_triangle:
+                #     print(f"duplicate point {point} at index {index}. "
+                #           f"Original belongs to index {self.point_to_triangle[point]}")
+                # unfortunately to save it to a json we need to convert it to a string first
+                # if point:
+                key = str(point)
+                self.point_to_triangle[key] = index
+                # else:
+                #     print("cringe")
 
         # then let's save all the points to a json
         with open('outputs/all_points_from_model.json', 'w') as fp:
@@ -167,12 +172,12 @@ class PixelToFace:
                 quad_tree.insert_triangle(triangle)
         print_tree(quad_tree, 0)
         return quad_tree
-    def decompose_all_triangles_STRTree(self, max_width, max_height):
 
-        print("Decomposing all triangles into points using a STR Tree")
+    def decompose_all_triangles_STRTree(self):
+        print("Building STR Tree!")
         triangle_list = []
-        # we'll store the full object here in parallel
-        triangle_data = []
+        # we'll store the full object (Triangle Class) here in parallel
+        # triangle_data = []
         for index, uv_face in enumerate(self.uvs):
             # coord_point_sum = uv_face["a"]["x"] + uv_face["a"]["y"] + uv_face["b"]["x"] + uv_face["b"]["y"] + \
             #                   uv_face["c"]["x"] + uv_face["b"]["y"]
@@ -185,16 +190,18 @@ class PixelToFace:
             # I don't remember if index should start at 0 or 1
             triangle = Triangle(p1, p2, p3, index)
             triangle_list.append(triangle.triangle)
-            triangle_data.append(triangle)
-        str_tree = STRtree(triangle_list)
+            # self.triangle_data.append(triangle)
+        self.str_tree = STRtree(triangle_list)
+        print("Finished building STR TREE")
+        print("Saving STR related Data")
         with open("outputs/STRtree.bin", "wb") as f:
             print("Writing STR tree binary")
-            pickle.dump(str_tree, f)
-        with open("outputs/triangle_data.bin", "wb") as f:
-            print("Writing triangle data binary")
-            pickle.dump(triangle_data, f)
-        print(str_tree)
-        return str_tree, triangle_list, triangle_data
+            pickle.dump(self.str_tree, f)
+        # with open("outputs/triangle_data.bin", "wb") as f:
+        #     print("Writing triangle data binary")
+        #     pickle.dump(self.triangle_data, f)
+        print(self.str_tree)
+        # return str_tree, triangle_list, triangle_data
 
     def find_faces_of_targets(self):
         self.label_faces = {}
@@ -292,7 +299,7 @@ class PixelToFace:
                         missed_values += 1
                     count += 1
                     if count == int(max_uvs * percent):
-                        print(f"{percent*100}%")
+                        print(f"{percent * 100}%")
                         percent += .1
                         # print(uv_does_exist)
                     if uv_does_exist:
@@ -341,7 +348,8 @@ class PixelToFace:
         with open('outputs/faces_found_by_labels.json', 'w') as fp:
             print("labels faces length", len(self.label_faces))
             json.dump(self.label_faces, fp)
-    def find_faces_of_targets_STRTree_original(self, stree: STRtree, triangle_list:list, triangle_data:list):
+
+    def find_faces_of_targets_STRTree_original(self, stree: STRtree, triangle_list: list, triangle_data: list):
         labels_to_test = ["Deltoid", "Pectoralis Major"]
         self.label_faces = {}
         # points_dict = self.read_in_points()
@@ -429,16 +437,32 @@ class PixelToFace:
             print("labels faces length", len(self.label_faces))
             json.dump(self.label_faces, fp)
 
-    def find_faces_of_targets_STRTree(self, stree: STRtree, triangle_list:list, triangle_data:list):
-        labels_to_test = ["Deltoid", "Pectoralis Major"]
+    def find_faces_of_targets_STRTree(self):
+        # labels_to_test = ["Deltoid", "Pectoralis Major"]
         self.label_faces = {}
+
         # points_dict = self.read_in_points()
-        print("Searching points for targets...")
         missed_values = 0
         pixels_to_find_count = 0
+
+        print("Beginning search process")
         print("UV length:", len(self.uvs))
+
+        # STR load stuff if not in memory
+        if self.str_tree is None:
+            print("Reading in STR tree")
+            # TODO i could move these reads and writes to their own function
+            with open("outputs/STRtree.bin", "rb") as f:
+                self.str_tree = pickle.load(f)
+        # if not self.triangle_data:
+        #     print("Reading in Triangle Data")
+        #     with open("outputs/triangle_data.bin", "rb") as f:
+        #         self.triangle_data = pickle.load(f)
+
+        print("Searching points for targets...")
         for label_name, targets in self.target_pixels_by_name.items():
-            if label_name in labels_to_test:
+            # if label_name in labels_to_test:
+            if True:
                 face_results = []
                 normals_result = []
                 uvs_result = []
@@ -451,8 +475,9 @@ class PixelToFace:
                     # cast to a tuple it's what is expected
                     target = tuple(target)
                     target = pixel_coords_to_uv(target)
-                    # should it be nearest
-                    uv_does_exist = stree.nearest(Point(target))
+                    # should it be nearest?
+                    # either way returns an index to that geometry object found
+                    uv_does_exist = self.str_tree.nearest(Point(target))
                     if not uv_does_exist:
                         # print(target)
                         missed_values += 1
@@ -462,9 +487,9 @@ class PixelToFace:
                         index = uv_does_exist
                         # current_tri = self.uvs[index]
                         # print(current_tri)
-                        real_index = triangle_data[index].index_value
-                        if real_index - index != 0:
-                            raise Exception("Real index not the same as default index", index, real_index)
+                        # real_index = self.triangle_data[index].index_value
+                        # if real_index - index != 0:
+                        #     raise Exception("Real index not the same as default index", index, real_index)
                         # index = triangle_data[uv_does_exist].index_value
                         # current_tri = self.uvs[real_index]
                         # print(current_tri)
@@ -610,15 +635,17 @@ if __name__ == "__main__":
 
     print("Starting STR tree version")
     start = time.time()
-    pixel_to_faces = PixelToFace(TARGET_FILE)
+    pixel_to_faces = PixelToFace(TARGET_FILE, save_normals=False, save_uvs=False)
     end = time.time()
     print()
     print(f"Finished reading in geometries...Took {end - start} seconds")
     start1 = time.time()
 
-    # decompose with quad tree
-    str_tree_root, triangle_list, triangle_data = pixel_to_faces.decompose_all_triangles_STRTree(max_width, max_height)
-    pixel_to_faces.find_faces_of_targets_STRTree(str_tree_root, triangle_list, triangle_data)
+    # decompose with stree
+    # str_tree_root, triangle_list, triangle_data = pixel_to_faces.decompose_all_triangles_STRTree(max_width, max_height)
+    pixel_to_faces.decompose_all_triangles_STRTree()
+    # find closest point
+    pixel_to_faces.find_faces_of_targets_STRTree()
     end = time.time()
     print(f"Triangle decompose and finding faces using STRtree took {end - start} seconds.")
     print()
