@@ -1,4 +1,5 @@
 import json
+import pickle
 import time
 from collections import OrderedDict
 
@@ -13,12 +14,18 @@ class PixelIndexer:
         self.save_normals = save_normals
         self.save_uvs = save_uvs
 
-    def read_in_faces_found_by_labels(self):
+    def read_in_faces_found_by_labels(self, read_binary=False):
         print("Reading in faces by labels")
-        print(f"Opening {self.faces_found_file_path}")
-        with open(self.faces_found_file_path, 'r') as file:
-            data = file.read()
-            self.faces_found_by_labels = json.loads(data)
+        if not read_binary:
+            print(f"Opening {self.faces_found_file_path}")
+            with open(self.faces_found_file_path, 'r') as file:
+                data = file.read()
+                self.faces_found_by_labels = json.loads(data)
+        else:
+            print("Reading binary version")
+            print(f"Opening outputs/faces_found_by_labels.bin")
+            with open('outputs/faces_found_by_labels.bin', 'rb') as file:
+                self.faces_found_by_labels = pickle.load(file)
 
     def create_indexed_faces(self):
         print("Starting indexing of faces!")

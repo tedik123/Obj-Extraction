@@ -1,3 +1,5 @@
+import concurrent.futures
+
 import json
 import math
 import time
@@ -5,10 +7,9 @@ from TriangleDecomposer import TriangleDecomposer
 import bresenham_triangle_class
 # from QuadTree3 import QuadTreeNode, Triangle, Boundary, print_tree
 from QuadTree4 import QuadTreeNode, Triangle, Boundary, print_tree
-from shapely.geometry import Point, Polygon
+from shapely.geometry import Point
 from shapely import STRtree
 import pickle
-
 
 class PixelToFace:
 
@@ -176,6 +177,7 @@ class PixelToFace:
     def decompose_all_triangles_STRTree(self):
         print("Building STR Tree!")
         triangle_list = []
+        node_capacity = 40
         # we'll store the full object (Triangle Class) here in parallel
         # triangle_data = []
         for index, uv_face in enumerate(self.uvs):
@@ -191,7 +193,7 @@ class PixelToFace:
             triangle = Triangle(p1, p2, p3, index)
             triangle_list.append(triangle.triangle)
             # self.triangle_data.append(triangle)
-        self.str_tree = STRtree(triangle_list)
+        self.str_tree = STRtree(triangle_list, node_capacity)
         print("Finished building STR TREE")
         print("Saving STR related Data")
         with open("outputs/STRtree.bin", "wb") as f:
@@ -537,10 +539,240 @@ class PixelToFace:
         print(f"Missed {missed_values} out of {pixels_to_find_count}, could not find their matching faces.")
         # # print(face_results)
         # # TODO match faces to label name or label whichever we want
-        print("Creating faces found by labels json file!")
-        with open('outputs/faces_found_by_labels.json', 'w') as fp:
+        # print("Creating faces found by labels json file!")
+        # with open('outputs/faces_found_by_labels.json', 'w') as fp:
+        #     print("labels faces length", len(self.label_faces))
+        #     json.dump(self.label_faces, fp)
+        with open('outputs/faces_found_by_labels.bin', 'wb') as fp:
             print("labels faces length", len(self.label_faces))
-            json.dump(self.label_faces, fp)
+            pickle.dump(self.label_faces, fp)
+
+    # time to beat 7.5 minutes
+    def find_faces_of_targets_STRTree_processes(self):
+        thread_count = 4
+        self.label_faces = {}
+
+        # points_dict = self.read_in_points()
+
+        print("Beginning search process")
+        # print("UV length:", len(self.uvs))
+
+        # STR load stuff if not in memory
+        if self.str_tree is None:
+            print("Reading in STR tree")
+            # TODO i could move these reads and writes to their own function
+            with open("outputs/STRtree.bin", "rb") as f:
+                self.str_tree = pickle.load(f)
+        work_by_thread = split_dict(self.target_pixels_by_name, thread_count)
+        with concurrent.futures.ProcessPoolExecutor(max_workers=thread_count) as executor:
+            # executor.map(self.str_query, {"test": "hi"})
+            futures = []
+            for i in range(thread_count):
+                futures.append(executor.submit(self.str_query, work_by_thread[i], i))
+            # results = [future.result() for future in futures]
+            # take them as they finish instead of waiting around
+            # https://stackoverflow.com/questions/52082665/store-results-threadpoolexecutor
+            for future in concurrent.futures.as_completed(futures):
+                self.label_faces |= future.result()
+
+        # # print(face_results)
+        # # TODO match faces to label name or label whichever we want
+
+        # start = time.time()
+        # print("Creating faces found by labels json file!")
+        # with open('outputs/faces_found_by_labels.json', 'w') as fp:
+        #     print("labels faces length", len(self.label_faces))
+        #     json.dump(self.label_faces, fp)
+        # end = time.time()
+        # print(f"Full file JSON dump took {(end - start) / 60} minutes")
+        #
+        # start = time.time()
+        # print("Creating faces found by labels pickle file!")
+        # with open('outputs/faces_found_by_labels.bin', 'wb') as fp:
+        #     print("labels faces length", len(self.label_faces))
+        #     pickle.dump(self.label_faces, fp)
+        # end = time.time()
+        # print(f"Full file PICKLE dump took {(end - start) / 60} minutes")
+
+    def str_query(self, target_pixels_by_name: dict, thread_count):
+        label_faces = {}
+        print("Searching points for targets...")
+        print(len(list(target_pixels_by_name.keys())))
+        print(thread_count)
+        missed_values = 0
+        pixels_to_find_count = 0
+        for label_name, targets in target_pixels_by_name.items():
+            face_results = []
+            normals_result = []
+            uvs_result = []
+            pixels_to_find_count += len(targets)
+
+            for target in targets:
+                # need to convert these to pixel coordinates if using UVs as targets!!!
+                # cast to a tuple it's what is expected
+                target = tuple(target)
+                target = pixel_coords_to_uv(target)
+                # should it be nearest?
+                # either way returns an index to that geometry object found
+                uv_does_exist = self.str_tree.nearest(Point(target))
+                if not uv_does_exist:
+                    # print(target)
+                    missed_values += 1
+                if uv_does_exist:
+                    index = uv_does_exist
+                    p0 = self.faces[index]["a"]
+                    p1 = self.faces[index]["b"]
+                    p2 = self.faces[index]["c"]
+                    face_results.append(p0)
+                    face_results.append(p1)
+                    face_results.append(p2)
+                    if self.save_normals and self.normals:
+                        n0 = self.normals[index]["a"]
+                        n1 = self.normals[index]["b"]
+                        n2 = self.normals[index]["c"]
+                        normals_result.append(n0)
+                        normals_result.append(n1)
+                        normals_result.append(n2)
+                    if self.save_uvs:
+                        uv0 = list(self.uvs[index]["a"].values())
+                        uv1 = list(self.uvs[index]["b"].values())
+                        uv2 = list(self.uvs[index]["c"].values())
+                        # print(uv0, uv1, uv2)
+                        uvs_result.append(uv0)
+                        uvs_result.append(uv1)
+                        uvs_result.append(uv2)
+                else:
+                    print(uv_does_exist)
+            if self.save_uvs:
+                if self.save_normals:
+                    label_faces[label_name] = {"vertices": face_results, "normals": normals_result,
+                                               "uvs": uvs_result}
+                else:
+                    label_faces[label_name] = {"vertices": face_results, "uvs": uvs_result}
+            elif self.save_normals:
+                label_faces[label_name] = {"vertices": face_results, "normals": normals_result}
+            else:
+                label_faces[label_name] = {"vertices": face_results}
+        print(f"Missed {round((missed_values / pixels_to_find_count) * 100, 2)}% of target pixels.")
+        print(f"Missed {missed_values} out of {pixels_to_find_count}, could not find their matching faces.")
+        return label_faces
+
+
+    # 3.2 minutes to beat against processes, THIS IS MUCH SLOWER and is the same as using no threads it might even be worse
+    def find_faces_of_targets_STRTree_threaded(self):
+        thread_count = 5
+        self.label_faces = {}
+
+        # points_dict = self.read_in_points()
+
+        print("Beginning search process")
+        # print("UV length:", len(self.uvs))
+
+        # STR load stuff if not in memory
+        if self.str_tree is None:
+            print("Reading in STR tree")
+            # TODO i could move these reads and writes to their own function
+            with open("outputs/STRtree.bin", "rb") as f:
+                self.str_tree = pickle.load(f)
+        work_by_thread = split_dict(self.target_pixels_by_name, thread_count)
+        with concurrent.futures.ThreadPoolExecutor(max_workers=thread_count) as executor:
+            # executor.map(self.str_query, {"test": "hi"})
+            futures = []
+            for i in range(thread_count):
+                futures.append(executor.submit(self.str_query, work_by_thread[i], i))
+            # results = [future.result() for future in futures]
+            # take them as they finish instead of waiting around
+            # https://stackoverflow.com/questions/52082665/store-results-threadpoolexecutor
+            for future in concurrent.futures.as_completed(futures):
+                result = future.result()
+                for name, indices in result.items():
+                    self.get_geometries_by_index_list(self.label_faces, name, indices)
+
+
+        # # print(face_results)
+        # # TODO match faces to label name or label whichever we want
+
+        # start = time.time()
+        # print("Creating faces found by labels json file!")
+        # with open('outputs/faces_found_by_labels.json', 'w') as fp:
+        #     print("labels faces length", len(self.label_faces))
+        #     json.dump(self.label_faces, fp)
+        # end = time.time()
+        # print(f"Full file JSON dump took {(end - start) / 60} minutes")
+        #
+        # start = time.time()
+        # print("Creating faces found by labels pickle file!")
+        # with open('outputs/faces_found_by_labels.bin', 'wb') as fp:
+        #     print("labels faces length", len(self.label_faces))
+        #     pickle.dump(self.label_faces, fp)
+        # end = time.time()
+        # print(f"Full file PICKLE dump took {(end - start) / 60} minutes")
+
+    # returns only the indexes associated with each face
+    def str_query_thread(self, target_pixels_by_name: dict, thread_count):
+        label_indexes = {}
+        print("Searching points for targets...")
+        print(len(list(target_pixels_by_name.keys())))
+        print(thread_count)
+        missed_values = 0
+        pixels_to_find_count = 0
+        for label_name, targets in target_pixels_by_name.items():
+            pixels_to_find_count += len(targets)
+            # create the inital empty array
+            label_indexes[label_name] = []
+            for target in targets:
+                # need to convert these to pixel coordinates if using UVs as targets!!!
+                # cast to a tuple it's what is expected
+                target = tuple(target)
+                target = pixel_coords_to_uv(target)
+                # should it be nearest?
+                # either way returns an index to that geometry object found
+                uv_does_exist = self.str_tree.nearest(Point(target))
+                if not uv_does_exist:
+                    # print(target)
+                    missed_values += 1
+                if uv_does_exist:
+                    index = uv_does_exist
+                    label_indexes[label_name].append(index)
+        print(f"Missed {round((missed_values / pixels_to_find_count) * 100, 2)}% of target pixels.")
+        print(f"Missed {missed_values} out of {pixels_to_find_count}, could not find their matching faces.")
+        return label_indexes
+
+    def get_geometries_by_index_list(self, label_faces:dict, label_name:str, list_of_indices: list):
+        face_results = []
+        normals_result = []
+        uvs_result = []
+        for index in list_of_indices:
+            p0 = self.faces[index]["a"]
+            p1 = self.faces[index]["b"]
+            p2 = self.faces[index]["c"]
+            face_results.append(p0)
+            face_results.append(p1)
+            face_results.append(p2)
+            if self.save_normals and self.normals:
+                n0 = self.normals[index]["a"]
+                n1 = self.normals[index]["b"]
+                n2 = self.normals[index]["c"]
+                normals_result.append(n0)
+                normals_result.append(n1)
+                normals_result.append(n2)
+            if self.save_uvs:
+                uv0 = list(self.uvs[index]["a"].values())
+                uv1 = list(self.uvs[index]["b"].values())
+                uv2 = list(self.uvs[index]["c"].values())
+                uvs_result.append(uv0)
+                uvs_result.append(uv1)
+                uvs_result.append(uv2)
+        if self.save_uvs:
+            if self.save_normals:
+                label_faces[label_name] = {"vertices": face_results, "normals": normals_result,
+                                           "uvs": uvs_result}
+            else:
+                label_faces[label_name] = {"vertices": face_results, "uvs": uvs_result}
+        elif self.save_normals:
+            label_faces[label_name] = {"vertices": face_results, "normals": normals_result}
+        else:
+            label_faces[label_name] = {"vertices": face_results}
 
 
 def uvs_to_pixels(u, v):
@@ -596,6 +828,19 @@ def isPtInTriangle(p, p0, p1, p2):
     return False
 
 
+# returns a list of dictionaries that are roughly split evenly
+def split_dict(dictionary, n):
+    # there has to be a more efficient way to split a dict!
+    size = len(dictionary)
+    chunk_size = (size // n) + (size % n > 0)
+    dictionary_list = list(dictionary.items())
+    list_of_dicts = []
+    for i in range(0, size, chunk_size):
+        list_of_dicts.append(dict(dictionary_list[i:i + chunk_size]))
+    # returns the dict sorted so the longest list of pixel values are first
+    return sorted(list_of_dicts, key=lambda d: sum(map(len, d.values())), reverse=True)
+
+
 if __name__ == "__main__":
     max_width, max_height = 4096, 4096
     TARGET_FILE = 'outputs/pixels_by_labels.json'
@@ -633,20 +878,38 @@ if __name__ == "__main__":
     # print()
     # print(f"Full task took {(end - start) / 60} minutes")
 
-    print("Starting STR tree version")
+    # print("Starting STR tree version")
+    # start = time.time()
+    # pixel_to_faces = PixelToFace(TARGET_FILE, save_normals=False, save_uvs=False)
+    # end = time.time()
+    # print()
+    # print(f"Finished reading in geometries...Took {end - start} seconds")
+    # start1 = time.time()
+    #
+    # # TODO CLEAN UP ALOT OF MISC CODE
+    # #   Seperate out the triangle class
+    # #   make find faces faster either through threads or processes I want to reduce the run time to under a minute
+    #
+    # # decompose with stree
     start = time.time()
     pixel_to_faces = PixelToFace(TARGET_FILE, save_normals=False, save_uvs=False)
-    end = time.time()
-    print()
-    print(f"Finished reading in geometries...Took {end - start} seconds")
-    start1 = time.time()
-
-    # decompose with stree
     # str_tree_root, triangle_list, triangle_data = pixel_to_faces.decompose_all_triangles_STRTree(max_width, max_height)
-    pixel_to_faces.decompose_all_triangles_STRTree()
+    # pixel_to_faces.decompose_all_triangles_STRTree()
     # find closest point
     pixel_to_faces.find_faces_of_targets_STRTree()
     end = time.time()
     print(f"Triangle decompose and finding faces using STRtree took {end - start} seconds.")
     print()
     print(f"Full task took {(end - start) / 60} minutes")
+
+    # start = time.time()
+    # pixel_to_faces = PixelToFace(TARGET_FILE, save_normals=False, save_uvs=False)
+    # pixel_to_faces.find_faces_of_targets_STRTree_processes()
+    # end = time.time()
+    # print(f"Full task took {(end - start) / 60} minutes")
+
+    # start = time.time()
+    # pixel_to_faces = PixelToFace(TARGET_FILE, save_normals=False, save_uvs=False)
+    # pixel_to_faces.find_faces_of_targets_STRTree_threaded()
+    # end = time.time()
+    # print(f"Full task took {(end - start) / 60} minutes")
