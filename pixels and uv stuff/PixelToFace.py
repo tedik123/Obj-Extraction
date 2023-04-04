@@ -268,9 +268,90 @@ class PixelToFace:
         # print(face_results)
         # TODO match faces to label name or label whichever we want
         print("Creating faces found by labels json file!")
-        with open('outputs/faces_found_by_labels.json', 'w') as fp:
+        # with open('outputs/faces_found_by_labels.json', 'w') as fp:
+        #     print("labels faces length", len(self.label_faces))
+        #     json.dump(self.label_faces, fp)
+
+
+    # mixed you get the worst of both of worlds it's really bad!
+    def find_faces_of_targets_mixed(self):
+        self.label_faces = {}
+        points_dict = self.read_in_points()
+        print("Searching points for targets...")
+        missed_values = 0
+        pixels_to_find_count = 0
+
+        if self.str_tree is None:
+            print("Reading in STR tree")
+            # TODO i could move these reads and writes to their own function
+            with open("outputs/STRtree.bin", "rb") as f:
+                self.str_tree = pickle.load(f)
+
+        for label_name, targets in self.target_pixels_by_name.items():
+            face_results = []
+            normals_result = []
+            uvs_result = []
+            pixels_to_find_count += len(targets)
+            # I don't think we care about uvs
+            # uvs_result = []
+            for target in targets:
+                # need to convert these to pixel coordinates if using UVs as targets!!!
+                # target = (uvs_to_pixels(target[0], target[1]))
+                target_tuple = tuple(target)
+                target = str(target_tuple)
+                uv_does_exist = points_dict.get(target, None)
+                if not uv_does_exist:
+                    # print(target)
+                    # missed_values += 1
+                    target = pixel_coords_to_uv(target_tuple)
+                    uv_does_exist = self.str_tree.nearest(Point(target))
+                    # print(uv_does_exist)
+                if uv_does_exist:
+                    p0 = self.faces[uv_does_exist]["a"]
+                    p1 = self.faces[uv_does_exist]["b"]
+                    p2 = self.faces[uv_does_exist]["c"]
+                    face_results.append(p0)
+                    face_results.append(p1)
+                    face_results.append(p2)
+                    if self.save_normals and self.normals:
+                        n0 = self.normals[uv_does_exist]["a"]
+                        n1 = self.normals[uv_does_exist]["b"]
+                        n2 = self.normals[uv_does_exist]["c"]
+                        normals_result.append(n0)
+                        normals_result.append(n1)
+                        normals_result.append(n2)
+                    if self.save_uvs:
+                        uv0 = list(self.uvs[uv_does_exist]["a"].values())
+                        uv1 = list(self.uvs[uv_does_exist]["b"].values())
+                        uv2 = list(self.uvs[uv_does_exist]["c"].values())
+                        # print(uv0, uv1, uv2)
+                        uvs_result.append(uv0)
+                        uvs_result.append(uv1)
+                        uvs_result.append(uv2)
+            if self.save_uvs:
+                if self.save_normals:
+                    self.label_faces[label_name] = {"vertices": face_results, "normals": normals_result,
+                                                    "uvs": uvs_result}
+                else:
+                    self.label_faces[label_name] = {"vertices": face_results, "uvs": uvs_result}
+            elif self.save_normals:
+                self.label_faces[label_name] = {"vertices": face_results, "normals": normals_result}
+            else:
+                self.label_faces[label_name] = {"vertices": face_results}
+
+        print(f"Missed {round((missed_values / pixels_to_find_count) * 100, 2)}% of target pixels.")
+        print(f"Missed {missed_values} out of {pixels_to_find_count}, could not find their matching faces.")
+        # print(face_results)
+        # TODO match faces to label name or label whichever we want
+        print("Creating faces found by labels json file!")
+        # with open('outputs/faces_found_by_labels.json', 'w') as fp:
+        #     print("labels faces length", len(self.label_faces))
+        #     json.dump(self.label_faces, fp)
+        print("Creating faces found by labels pickle file!")
+        with open('outputs/faces_found_by_labels.bin', 'wb') as fp:
             print("labels faces length", len(self.label_faces))
-            json.dump(self.label_faces, fp)
+            pickle.dump(self.label_faces, fp)
+
 
     def find_faces_of_targets_quadTree(self, quadTree: QuadTreeNode):
         labels_to_test = ["Deltoid"]

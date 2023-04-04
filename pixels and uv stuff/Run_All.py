@@ -64,7 +64,7 @@ if __name__ == "__main__":
     # if you only want to run certain scripts you can change accordingly here
     RUN_PIXEL_GRABBER = False
     RUN_PIXEL_TO_FACE = True
-    RUN_PIXEL_INDEXER = True
+    RUN_PIXEL_INDEXER = False
 
     # this triangle decomposer only needs to be run once if the base .obj file is the same! So turn it to false, after!
     RUN_TRIANGLE_DECOMPOSER = False
@@ -154,9 +154,22 @@ if __name__ == "__main__":
             # # print('C code is {}x faster'.format(py_time / c_time))
 
 
-
+        # start_normal_search = time.perf_counter()
         # then search through target_uvs
         pixel_to_faces.find_faces_of_targets()
+        # end = time.perf_counter()
+        # pure_time = (end - start_normal_search)
+        # print("Pure decompose check", pure_time)
+
+        # this is a little faster than using 5 cores...but still :(
+        # it's really bad
+        # start_mixed_search = time.perf_counter()
+        # pixel_to_faces.find_faces_of_targets_mixed()
+        # end = time.perf_counter()
+        # mixed_time = (end - start_mixed_search)
+        # print("Mixed decompose check", mixed_time)
+        # print('Mixed code is {}x faster'.format(pure_time / mixed_time))
+
         end = time.time()
         print(end - start)
         print(f"Pixel to face search took {(end - start) / 60} minutes")
