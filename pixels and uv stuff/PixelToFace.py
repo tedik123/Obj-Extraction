@@ -10,7 +10,7 @@ from QuadTree4 import QuadTreeNode, Triangle, Boundary, print_tree
 from shapely.geometry import Point
 from shapely import STRtree
 import pickle
-from multiprocessing import cpu_count
+from multiprocessing import cpu_count, Process, Queue
 
 
 class PixelToFace:
@@ -743,7 +743,7 @@ class PixelToFace:
 
     # 3.2 minutes to beat against processes, THIS IS MUCH SLOWER and is the same as using no threads it might even be worse
     def find_faces_of_targets_STRTree_threaded(self):
-        thread_count = 5
+        thread_count = 12
         self.label_faces = {}
 
         # points_dict = self.read_in_points()
@@ -757,8 +757,14 @@ class PixelToFace:
             # TODO i could move these reads and writes to their own function
             with open("outputs/STRtree.bin", "rb") as f:
                 self.str_tree = pickle.load(f)
+        # convert all points to Point objects
+        for name, pixel_list in self.target_pixels_by_name.items():
+            for count, pixel in enumerate(pixel_list):
+                pixel_list[count] = Point(pixel_coords_to_uv(tuple(pixel)))
         work_by_thread = split_dict(self.target_pixels_by_name, thread_count)
         results = []
+        start = time.time()
+        print("Creating threads")
         with concurrent.futures.ThreadPoolExecutor(max_workers=thread_count) as executor:
             # executor.map(self.str_query, {"test": "hi"})
             futures = []
@@ -771,6 +777,8 @@ class PixelToFace:
                 print("finished")
                 # result = future.result()
                 results.append(future.result())
+        end = time.time()
+        print(f"Threading task took {(end - start) / 60} minutes")
         for result in results:
             for name, indices in result.items():
                 self.get_geometries_by_index_list(self.label_faces, name, indices)
@@ -786,13 +794,13 @@ class PixelToFace:
         # end = time.time()
         # print(f"Full file JSON dump took {(end - start) / 60} minutes")
         #
-        # start = time.time()
-        # print("Creating faces found by labels pickle file!")
-        # with open('outputs/faces_found_by_labels.bin', 'wb') as fp:
-        #     print("labels faces length", len(self.label_faces))
-        #     pickle.dump(self.label_faces, fp)
-        # end = time.time()
-        # print(f"Full file PICKLE dump took {(end - start) / 60} minutes")
+        start = time.time()
+        print("Creating faces found by labels pickle file!")
+        with open('outputs/faces_found_by_labels.bin', 'wb') as fp:
+            print("labels faces length", len(self.label_faces))
+            pickle.dump(self.label_faces, fp)
+        end = time.time()
+        print(f"Full file PICKLE dump took {(end - start) / 60} minutes")
 
     # returns only the indexes associated with each face
     def str_query_thread(self, target_pixels_by_name: dict, thread_count):
@@ -806,20 +814,24 @@ class PixelToFace:
             pixels_to_find_count += len(targets)
             # create the inital empty array
             label_indexes[label_name] = []
-            for target in targets:
-                # need to convert these to pixel coordinates if using UVs as targets!!!
-                # cast to a tuple it's what is expected
-                target = tuple(target)
-                target = pixel_coords_to_uv(target)
-                # should it be nearest?
-                # either way returns an index to that geometry object found
-                uv_does_exist = self.str_tree.nearest(Point(target))
-                if not uv_does_exist:
-                    # print(target)
-                    missed_values += 1
-                if uv_does_exist:
-                    index = uv_does_exist
-                    label_indexes[label_name].append(index)
+            label_indexes[label_name] = self.str_tree.nearest(targets)
+
+            # for target in targets:
+            #     # need to convert these to pixel coordinates if using UVs as targets!!!
+            #     # cast to a tuple it's what is expected
+            #     target = tuple(target)
+            #     target = pixel_coords_to_uv(target)
+            #     # should it be nearest?
+            #     # either way returns an index to that geometry object found
+            #     # uv_does_exist = self.str_tree.nearest(Point(target))
+            #     # uv_does_exist = self.str_tree.nearest(Point(target))
+            #     uv_does_exist = self.str_tree.query_nearest(Point(target), max_distance=0.01, all_matches=False)
+            #     if not uv_does_exist:
+            #         # print(target)
+            #         missed_values += 1
+            #     if uv_does_exist:
+            #         index = uv_does_exist
+            #         label_indexes[label_name].append(index)
         print(f"Missed {round((missed_values / pixels_to_find_count) * 100, 2)}% of target pixels.")
         print(f"Missed {missed_values} out of {pixels_to_find_count}, could not find their matching faces.")
         return label_indexes
@@ -829,6 +841,8 @@ class PixelToFace:
         normals_result = []
         uvs_result = []
         for index in list_of_indices:
+            print(index)
+            index = index[0]
             p0 = self.faces[index]["a"]
             p1 = self.faces[index]["b"]
             p2 = self.faces[index]["c"]
@@ -983,6 +997,8 @@ def split_dict(dictionary: dict, n: int):
     return split_dict_greater_than3(dictionary, n)
 
 
+
+
 if __name__ == "__main__":
     max_width, max_height = 4096, 4096
     TARGET_FILE = 'outputs/pixels_by_labels.json'
@@ -1044,17 +1060,16 @@ if __name__ == "__main__":
     # print()
     # print(f"Full task took {(end - start) / 60} minutes")
 
-    start = time.time()
-    pixel_to_faces = PixelToFace(TARGET_FILE, save_normals=False, save_uvs=False)
-    # pixel_to_faces.decompose_all_triangles_STRTree()
-    pixel_to_faces.find_faces_of_targets_STRTree_processes()
-    end = time.time()
-    print(f"Full task took {(end - start) / 60} minutes")
-
     # start = time.time()
     # pixel_to_faces = PixelToFace(TARGET_FILE, save_normals=False, save_uvs=False)
     # # pixel_to_faces.decompose_all_triangles_STRTree()
-    # pixel_to_faces.find_faces_of_targets_STRTree_threaded()
+    # pixel_to_faces.find_faces_of_targets_STRTree_processes()
     # end = time.time()
     # print(f"Full task took {(end - start) / 60} minutes")
-    # print(cpu_count())
+
+    start = time.time()
+    pixel_to_faces = PixelToFace(TARGET_FILE, save_normals=False, save_uvs=False)
+    # pixel_to_faces.decompose_all_triangles_STRTree()
+    pixel_to_faces.find_faces_of_targets_STRTree_threaded()
+    end = time.time()
+    print(f"Full task took {(end - start) / 60} minutes")
