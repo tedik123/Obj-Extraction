@@ -7,7 +7,7 @@ from collections import OrderedDict
 class PixelIndexer:
 
     def __init__(self, label_names, save_normals=True, save_uvs=True):
-        self.faces_found_file_path = 'outputs/faces_found_by_labels.json'
+        self.faces_found_file_path = 'outputs/faces_found_by_labels'
         self.faces_found_by_labels = None
         self.read_in_faces_found_by_labels(True)
         self.label_names = label_names
@@ -18,12 +18,12 @@ class PixelIndexer:
         print("Reading in faces by labels")
         if not read_binary:
             print(f"Opening {self.faces_found_file_path}")
-            with open(self.faces_found_file_path, 'r') as file:
+            with open(self.faces_found_file_path+".json", 'r') as file:
                 data = file.read()
                 self.faces_found_by_labels = json.loads(data)
         else:
             print("Reading binary version")
-            print(f"Opening outputs/faces_found_by_labels.bin")
+            print(f"Opening outputs/faces_found_by_labels"+".bin")
             with open('outputs/faces_found_by_labels.bin', 'rb') as file:
                 self.faces_found_by_labels = pickle.load(file)
 

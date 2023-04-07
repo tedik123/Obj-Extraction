@@ -41,19 +41,24 @@ class PixelToFace:
         # self.read_in_target_pixels()
 
         thread_count = 5
-        self.read_in_target_pixels()
-        self.convert_pixels_to_points()
-        # with concurrent.futures.ThreadPoolExecutor(max_workers=thread_count) as executor:
-        #     futures = [executor.submit(self.read_in_target_pixels)]
-        #     if preload_STRtree:
-        #         futures.append(executor.submit(self.read_in_str_tree))
-        #
-        #     futures.append(executor.submit(self.read_in_geometry_uvs))
-        #     futures.append(executor.submit(self.read_in_faces))
-        #     if save_normals:
-        #         futures.append(executor.submit(self.read_in_normals))
-        #     concurrent.futures.wait(futures)
-        #     print("Finished loading files")
+        # self.read_in_target_pixels()
+        # self.convert_pixels_to_points()
+        with concurrent.futures.ThreadPoolExecutor(max_workers=thread_count) as executor:
+            target_pixel_future = executor.submit(self.read_in_target_pixels)
+            # set the callback to run convert pixels, since it's dependent
+            target_pixel_future.add_done_callback(lambda future: executor.submit(self.convert_pixels_to_points))
+            futures = [target_pixel_future]
+            if preload_STRtree:
+                futures.append(executor.submit(self.read_in_str_tree))
+
+            futures.append(executor.submit(self.read_in_geometry_uvs))
+            futures.append(executor.submit(self.read_in_faces))
+            if save_normals:
+                futures.append(executor.submit(self.read_in_normals))
+            # Set a callback for important_future to submit dependent_function
+            concurrent.futures.wait(futures)
+
+        print("Finished loading files")
 
         # this will be the dictionary that contains all points and which triangle they belong to
         # key = (x, y) in pixels
@@ -91,9 +96,18 @@ class PixelToFace:
 
     def read_in_target_pixels(self):
         print("Loading target pixels")
-        with open(self.target_file_path, 'r') as file:
-            data = file.read()
-        self.target_pixels_by_name = json.loads(data)
+        # start = time.time()
+        # with open(self.target_file_path, 'r') as file:
+        #     data = file.read()
+        # self.target_pixels_by_name = json.loads(data)
+        # end = time.time()
+        # print(f"Reading JSON file took {(end - start)} seconds")
+
+        start = time.time()
+        with open("outputs/pixels_by_labels.bin", 'rb') as file:
+            self.target_pixels_by_name = pickle.load(file)
+        end = time.time()
+        print(f"Reading PICKLE file took {(end - start)} seconds")
 
     # this is a dictionary of pixel coordinates (x,y) that map to the obj face
     # produced by the triangle decomposer
@@ -761,8 +775,10 @@ class PixelToFace:
         return label_faces
 
     # 3.2 minutes to beat against processes, THIS IS MUCH SLOWER and is the same as using no threads it might even be worse
-    def find_faces_of_targets_STRTree_threaded(self):
-        thread_count = 12
+    def find_faces_of_targets_STRTree_threaded(self, thread_count:int = None):
+        if not thread_count:
+            thread_count = cpu_count() - 1
+        print(f"Using {thread_count} threads to query tree!")
         time_for_indexing = 0.0
         self.label_faces = {}
         # print("Creating Process Queue And Event")
@@ -776,14 +792,11 @@ class PixelToFace:
             # TODO i could move these reads and writes to their own function
             self.read_in_str_tree()
         # convert all points to Point objects
-        self.convert_pixels_to_points()
+        # self.convert_pixels_to_points()
         work_by_thread = split_dict(self.target_pixels_by_name, thread_count)
-        results = []
         start = time.time()
         print("Creating threads")
-
         with concurrent.futures.ThreadPoolExecutor(max_workers=thread_count) as executor:
-
             futures = []
             for i in range(thread_count):
                 futures.append(executor.submit(self.str_query_thread, work_by_thread[i], i))
@@ -841,7 +854,7 @@ class PixelToFace:
 
     # converts all target points to Point objects
     # FIXME this is a huge bottleneck!!!! takes 34 seconds to run!!!
-    #   Brought down to 6 seconds by using PointS instead of just point
+    #   Brought down to 6.5 seconds by using PointS instead of just point
     #   Perhaps multithreading will increase the speed
     #   Perhaps we can hide this slowness by throwing it in the file loads
     def convert_pixels_to_points(self):
@@ -850,7 +863,12 @@ class PixelToFace:
         for name, pixel_list in self.target_pixels_by_name.items():
             # for count, pixel in enumerate(pixel_list):
                 # pixel_list[count] = Point(pixel_coords_to_uv(tuple(pixel)))
-            uv_list = [pixel_coords_to_uv(tuple(pixel)) for pixel in pixel_list]
+            # for pixel in pixel_list:
+            #     print(pixel, type(pixel))
+            # no longer need to convert to tuple since pickling saves tuples unlike json
+            # uv_list = [pixel_coords_to_uv(tuple(pixel)) for pixel in pixel_list]
+            uv_list = [pixel_coords_to_uv(pixel) for pixel in pixel_list]
+            # uv_list = [pixel_coords_to_uv(pixel) for pixel in pixel_list if pixel_coords_to_uv(pixel) is not None]
             self.target_pixels_by_name[name] = Points(uv_list)
         end = time.time()
 
@@ -864,6 +882,9 @@ class PixelToFace:
         print(f"Thread {thread_count + 1} is searching points for targets of {len(list(target_pixels_by_name.keys()))}")
         missed_values = 0
         pixels_to_find_count = 0
+        # one idea here would be to combine all the targets in one giant list and save the length associated
+        # with each label and then slice it out when it returns that way more time is spent in C code rather than
+        # python code? maybe...
         for label_name, targets in target_pixels_by_name.items():
             pixels_to_find_count += len(targets)
             # create the inital empty array
@@ -986,6 +1007,11 @@ def pixel_coords_to_uv(coord):
     MAX_HEIGHT = 4096
     # u is width, v is height
     # coords tuple will be key
+    # if type(coord) != tuple:
+    #     print("File contains not a tuple, skipping", coord)
+    #     return None
+    # else:
+    #     print("okay", coord)
     x, y = coord
     u = x / MAX_WIDTH
     # since 0, 0 is at the bottom left! very important
@@ -1166,6 +1192,6 @@ if __name__ == "__main__":
     start = time.time()
     pixel_to_faces = PixelToFace(TARGET_FILE, preload_STRtree=True, save_normals=False, save_uvs=False)
     # pixel_to_faces.decompose_all_triangles_STRTree()
-    # pixel_to_faces.find_faces_of_targets_STRTree_threaded()
+    pixel_to_faces.find_faces_of_targets_STRTree_threaded()
     end = time.time()
     print(f"Full task took {(end - start) / 60} minutes")

@@ -1,4 +1,5 @@
 import json
+import pickle
 import time
 from concurrent.futures.process import ProcessPoolExecutor
 from collections import deque
@@ -102,7 +103,7 @@ class PixelGrabber:
             self.pixels_by_label[label_name] = label_pixels
 
     # this is the searching algorithm for neighboring pixels that match
-    def DFS(self, starting_coords, label_name, min_X, min_Y, max_X, max_Y):
+    def DFS(self, starting_coords: tuple, label_name, min_X, min_Y, max_X, max_Y):
         x, y = starting_coords
         pixel_rgb = self.coords_dict[(x, y)]
 
@@ -157,7 +158,7 @@ class PixelGrabber:
         return
 
     # simply gets the coordinates points 1 pixel away in all directions, returns a list
-    def get_neighbors(self, x_given, y_given):
+    def get_neighbors_original(self, x_given, y_given):
         neighbors = []
         # bottom left row_given+1, column_given - 1
         if not (x_given + 1 >= self.max_width) and not (y_given - 1 < 0):
@@ -185,6 +186,21 @@ class PixelGrabber:
             neighbors.append((x_given + 1, y_given))
         return neighbors
 
+    # this is correct and works fine
+    # returns a list of indicies representing the neighbors of the current coordinate
+    def get_neighbors(self, x_given, y_given):
+        neighbors = []
+        # Define offsets for each direction
+        offsets = [(1, -1), (0, -1), (-1, -1), (-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0)]
+        for dx, dy in offsets:
+            # Calculate the x and y coordinates for the neighboring cell
+            x, y = x_given + dx, y_given + dy
+            # Check if the neighboring cell is within bounds
+            if 0 <= x < self.max_width and 0 <= y < self.max_height:
+                neighbors.append((x, y))
+        return neighbors
+
+
     # TODO so you can do multiple colors at a time
     # takes in a HEX VALUE FOR COLOR! use '#hex_value'
     def change_pixels_test(self, color='#000000'):
@@ -201,6 +217,7 @@ class PixelGrabber:
 
     def save_pixels_by_labels(self, output_file_name='pixels_by_labels.json'):
         print("SAVING PIXELS OR TRYING TO WHO KNOWS")
+        start = time.time()
         with open("outputs/" + output_file_name, 'w') as fp:
             # uvs_list = list(uv_dict.values())
             # print("uvs_list", len(uvs_list))
@@ -208,6 +225,17 @@ class PixelGrabber:
             json.dump(self.pixels_by_label, fp)
             print("Finished saving pixels by labels json file.")
             fp.flush()
+        end = time.time()
+        print(f"Full file JSON dump took {(end - start) / 60} minutes")
+
+        start = time.time()
+        print("Creating faces found by labels pickle file!")
+
+        with open("outputs/" + "pixels_by_labels.bin", 'wb') as f:
+            print("Writing STR tree binary")
+            pickle.dump(self.pixels_by_label, f)
+        end = time.time()
+        print(f"Full file PICKLE dump took {(end - start) / 60} minutes")
 
     # this grabs each pixel coordinate and uses a tuple pair as key
     # and the value is the r, g, b at that pixel
@@ -334,15 +362,27 @@ def run_change_pixels_test(texture_file, pixels_by_label, color='#000000'):
     print("Finished saving change pixel test image.", flush=True)
 
 
-def save_pixels_by_labels(pixels_by_label, output_file_name='pixels_by_labels.json'):
+def save_pixels_by_labels(pixels_by_label, output_file_name='pixels_by_labels'):
     print("Saving pixels by labels", flush=True)
-    with open("outputs/" + output_file_name, 'w') as fp:
-        # uvs_list = list(uv_dict.values())
-        # print("uvs_list", len(uvs_list))
-        print("length of pixels by labels", len(pixels_by_label), flush=True)
-        json.dump(pixels_by_label, fp)
-        print("Finished saving pixels by labels json file.", flush=True)
-        fp.flush()
+    # start = time.time()
+    # with open("outputs/" + output_file_name, 'w') as fp:
+    #     # uvs_list = list(uv_dict.values())
+    #     # print("uvs_list", len(uvs_list))
+    #     print("length of pixels by labels", len(pixels_by_label), flush=True)
+    #     json.dump(pixels_by_label, fp)
+    #     print("Finished saving pixels by labels json file.", flush=True)
+    #     fp.flush()
+    #
+    # end = time.time()
+    # print(f"Full file JSON dump took {(end - start) } seconds")
+
+    start = time.time()
+    print("Creating faces found by labels pickle file!")
+    with open("outputs/" + f"{output_file_name}.bin", 'wb') as f:
+        print("Writing label binary")
+        pickle.dump(pixels_by_label, f, protocol=pickle.HIGHEST_PROTOCOL)
+    end = time.time()
+    print(f"Full file PICKLE dump took {(end - start)} seconds")
 
 
 if __name__ == "__main__":

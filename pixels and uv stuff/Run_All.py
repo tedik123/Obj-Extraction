@@ -24,8 +24,6 @@ def create_file_names_list():
     print("Creating file/label list.")
 
 
-
-
 if __name__ == "__main__":
     # IMPORTANT  this is an array of strings, if it's empty it will do all of them
     # label_names_to_test = ["Flexor Carpi Ulnaris","Flexor Carpi Radialis","Flexor Digitorum Superficialis","Flexor Digitorum Longus","Gracilis","Gastrocnemius","Iliopsoas","Infraspinatus","Latissimus Dorsi","Levator Scapulae","Pectineus","Peroneus Longus"]
@@ -61,14 +59,16 @@ if __name__ == "__main__":
     SAVE_UVS = False
     SAVE_NORMALS = False
 
+    # by default will use max threads available - 1
+    THREAD_COUNT = None
+
     # if you only want to run certain scripts you can change accordingly here
-    RUN_PIXEL_GRABBER = False
+    RUN_PIXEL_GRABBER = True
     RUN_PIXEL_TO_FACE = False
-    RUN_PIXEL_INDEXER = True
+    RUN_PIXEL_INDEXER = False
 
     # this triangle decomposer only needs to be run once if the base .obj file is the same! So turn it to false, after!
     RUN_TRIANGLE_DECOMPOSER = False
-
 
     # IMPORTANT unless you're testing something you can just leave it
     # target is what pixels we're trying to find
@@ -131,7 +131,8 @@ if __name__ == "__main__":
             obj_to_json.insert_face_data()
             obj_to_json.create_json_files()
 
-        pixel_to_faces = PixelToFace(TARGET_FILE, SAVE_NORMALS, SAVE_UVS)
+        pixel_to_faces = PixelToFace(TARGET_FILE, preload_STRtree=not RUN_TRIANGLE_DECOMPOSER,
+                                     save_normals=SAVE_NORMALS, save_uvs=SAVE_UVS)
         end = time.time()
         print()
         print(f"Finished reading in geometries...Took {end - start} seconds")
@@ -141,7 +142,8 @@ if __name__ == "__main__":
         if RUN_TRIANGLE_DECOMPOSER:
             # then break down those geometry files
             start_decompose = time.perf_counter()
-            pixel_to_faces.decompose_all_triangles(texture_max_width, texture_max_height)
+            # pixel_to_faces.decompose_all_triangles(texture_max_width, texture_max_height)
+            pixel_to_faces.decompose_all_triangles_STRTree()
             end = time.perf_counter()
             py_time = (end - start_decompose)
             print("Python triangle decompose time", py_time)
@@ -153,10 +155,10 @@ if __name__ == "__main__":
             # print("C++ triangle decompose time", c_time)
             # # print('C code is {}x faster'.format(py_time / c_time))
 
-
         # start_normal_search = time.perf_counter()
         # then search through target_uvs
-        pixel_to_faces.find_faces_of_targets()
+        # pixel_to_faces.find_faces_of_targets()
+        pixel_to_faces.find_faces_of_targets_STRTree_threaded(THREAD_COUNT)
         # end = time.perf_counter()
         # pure_time = (end - start_normal_search)
         # print("Pure decompose check", pure_time)
