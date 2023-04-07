@@ -8,7 +8,7 @@ import bresenham_triangle_class
 # from QuadTree3 import QuadTreeNode, Triangle, Boundary, print_tree
 from QuadTree4 import QuadTreeNode, Triangle, Boundary, print_tree
 from shapely.geometry import Point
-from shapely import STRtree
+from shapely import STRtree,points as Points
 import pickle
 from multiprocessing import cpu_count, Process, Queue, Event
 import queue as normal_queue
@@ -41,19 +41,19 @@ class PixelToFace:
         # self.read_in_target_pixels()
 
         thread_count = 5
-        # self.read_in_target_pixels()
-        # self.convert_pixels_to_points()
-        with concurrent.futures.ThreadPoolExecutor(max_workers=thread_count) as executor:
-            futures = [executor.submit(self.read_in_target_pixels)]
-            if preload_STRtree:
-                futures.append(executor.submit(self.read_in_str_tree))
-
-            futures.append(executor.submit(self.read_in_geometry_uvs))
-            futures.append(executor.submit(self.read_in_faces))
-            if save_normals:
-                futures.append(executor.submit(self.read_in_normals))
-            concurrent.futures.wait(futures)
-            print("Finished loading files")
+        self.read_in_target_pixels()
+        self.convert_pixels_to_points()
+        # with concurrent.futures.ThreadPoolExecutor(max_workers=thread_count) as executor:
+        #     futures = [executor.submit(self.read_in_target_pixels)]
+        #     if preload_STRtree:
+        #         futures.append(executor.submit(self.read_in_str_tree))
+        #
+        #     futures.append(executor.submit(self.read_in_geometry_uvs))
+        #     futures.append(executor.submit(self.read_in_faces))
+        #     if save_normals:
+        #         futures.append(executor.submit(self.read_in_normals))
+        #     concurrent.futures.wait(futures)
+        #     print("Finished loading files")
 
         # this will be the dictionary that contains all points and which triangle they belong to
         # key = (x, y) in pixels
@@ -840,18 +840,28 @@ class PixelToFace:
         print(f"Full file PICKLE dump took {(end - start) / 60} minutes")
 
     # converts all target points to Point objects
+    # FIXME this is a huge bottleneck!!!! takes 34 seconds to run!!!
+    #   Brought down to 6 seconds by using PointS instead of just point
+    #   Perhaps multithreading will increase the speed
+    #   Perhaps we can hide this slowness by throwing it in the file loads
     def convert_pixels_to_points(self):
+        print("Starting conversion of pixels to points")
         start = time.time()
         for name, pixel_list in self.target_pixels_by_name.items():
-            for count, pixel in enumerate(pixel_list):
-                pixel_list[count] = Point(pixel_coords_to_uv(tuple(pixel)))
+            # for count, pixel in enumerate(pixel_list):
+                # pixel_list[count] = Point(pixel_coords_to_uv(tuple(pixel)))
+            uv_list = [pixel_coords_to_uv(tuple(pixel)) for pixel in pixel_list]
+            self.target_pixels_by_name[name] = Points(uv_list)
         end = time.time()
+
         print(f"Conversion of pixels to UV Points {(end - start)} seconds")
+
+
 
     # returns only the indexes associated with each face
     def str_query_thread(self, target_pixels_by_name: dict, thread_count):
         label_indexes = {}
-        print(f"Thread {thread_count+1} is searching points for targets of {len(list(target_pixels_by_name.keys()))}")
+        print(f"Thread {thread_count + 1} is searching points for targets of {len(list(target_pixels_by_name.keys()))}")
         missed_values = 0
         pixels_to_find_count = 0
         for label_name, targets in target_pixels_by_name.items():
