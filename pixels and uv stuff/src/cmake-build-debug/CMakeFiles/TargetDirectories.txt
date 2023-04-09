@@ -1,0 +1,6 @@
+C:/Users/tedik/PycharmProjects/RandomScripts/pixels and uv stuff/src/cmake-build-debug/CMakeFiles/obj_helper_functions.dir
+C:/Users/tedik/PycharmProjects/RandomScripts/pixels and uv stuff/src/cmake-build-debug/CMakeFiles/src.dir
+C:/Users/tedik/PycharmProjects/RandomScripts/pixels and uv stuff/src/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/tedik/PycharmProjects/RandomScripts/pixels and uv stuff/src/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+C:/Users/tedik/PycharmProjects/RandomScripts/pixels and uv stuff/src/cmake-build-debug/pybind11/CMakeFiles/edit_cache.dir
+C:/Users/tedik/PycharmProjects/RandomScripts/pixels and uv stuff/src/cmake-build-debug/pybind11/CMakeFiles/rebuild_cache.dir

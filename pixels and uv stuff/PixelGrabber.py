@@ -4,6 +4,7 @@ import time
 from concurrent.futures.process import ProcessPoolExecutor
 from collections import deque
 from PIL import Image, ImageColor
+from obj_helper_functions import get_neighbors_from_point
 
 
 class PixelGrabber:
@@ -17,8 +18,12 @@ class PixelGrabber:
         self.texture_file = texture_file_path
         self.label_names = label_names
         self.coords_dict, self.max_width, self.max_height, self.mode, self.pixels = None, None, None, None, None
+
         self.acceptable_colors_by_label = {}
         self.default_acceptable_colors_dict = {}
+
+        #   temp remove later
+        self.neighbor_total_time = 0
 
     # opens the texture image and gets all the pixels and width as well the rgb by pixel coordinate
     def set_and_create_image_data(self):
@@ -103,36 +108,31 @@ class PixelGrabber:
             self.pixels_by_label[label_name] = label_pixels
 
     # this is the searching algorithm for neighboring pixels that match
-    def DFS(self, starting_coords: tuple, label_name, min_X, min_Y, max_X, max_Y):
+    def DFS(self, starting_coords: tuple, label_name: str, min_X: int, min_Y: int, max_X: int, max_Y: int):
         x, y = starting_coords
+        # coords dict is a dict of x,y tuples, assume it exists do not pass it in
         pixel_rgb = self.coords_dict[(x, y)]
-
-        # color = (220, 156, 190)
-        # acceptable_colors = {color: True}
-        # dequeue is a doubly linked list
+        # dequeue is a doubly linked list, a normal vector is fine
+        # queue is just a tuple list of coords
         queue = deque()
-        # important that this is a dict it's much faster!
+        # important that this is a dict it's much faster look up time!
         visited = {}
-        # accepted_pixels = []
+        # this can just be a normal list or vector
         accepted_pixels = deque()
-        # add it to the queue and the visited
+        # add the start to the queue and the visited dict
         queue.append(starting_coords)
-        # idk what value to store it's arbitrary
+        # the value stored is arbitrary
         visited[starting_coords] = pixel_rgb
         accepted_pixels.append(starting_coords)
         acceptable_colors = self.acceptable_colors_by_label[label_name]
         while queue:
-            # queue is just a tuple list of coords
-            # current_coords = queue.pop(0)
             current_coords = queue.popleft()
             x, y = current_coords
             pixel_rgb = self.coords_dict[(x, y)]
-            # print(queue)
-            # print(pixel_rgb)
-            # print(color)
+            # this is a function, do not rewrite this function assume it exists
             neighbors = self.get_neighbors(x, y)
-            # this is no more than 8 long at a time
 
+            # this is no more than 8 long at a time
             for neighbor in neighbors:
                 current_x, current_y = neighbor
                 # need to check that it's within the confines as well
@@ -145,7 +145,8 @@ class PixelGrabber:
         return accepted_pixels
 
     # this is the helper function for the search algorithm to make it more readable
-    def DFS_helper(self, current_coords, rgb, acceptable_colors: dict, queue, visited: dict, accepted_pixels):
+    def DFS_helper(self, current_coords: tuple, rgb: list, acceptable_colors: dict, queue:deque, visited: dict,
+                   accepted_pixels:deque):
         if current_coords not in visited:
             visited[current_coords] = rgb
             # if rgb value is not equal to the targeted rgb then we ignore it and don't continue searching from there
@@ -189,6 +190,7 @@ class PixelGrabber:
     # this is correct and works fine
     # returns a list of indicies representing the neighbors of the current coordinate
     def get_neighbors(self, x_given, y_given):
+        start = time.perf_counter()
         neighbors = []
         # Define offsets for each direction
         offsets = [(1, -1), (0, -1), (-1, -1), (-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0)]
@@ -198,8 +200,16 @@ class PixelGrabber:
             # Check if the neighboring cell is within bounds
             if 0 <= x < self.max_width and 0 <= y < self.max_height:
                 neighbors.append((x, y))
+        end = time.perf_counter()
+        self.neighbor_total_time += end - start
         return neighbors
 
+    def get_neighbors_withC(self, x_given, y_given):
+        start = time.perf_counter()
+        neighbors = get_neighbors_from_point(x_given, y_given, self.max_width, self.max_height)
+        end = time.perf_counter()
+        self.neighbor_total_time += end - start
+        return neighbors
 
     # TODO so you can do multiple colors at a time
     # takes in a HEX VALUE FOR COLOR! use '#hex_value'
@@ -417,29 +427,30 @@ if __name__ == "__main__":
 
     # then run the actual pixel_grabber algo
     pixel_grabber.run_pixel_grabber()
+    print("Time for neighbors check", pixel_grabber.neighbor_total_time)
 
-    # print("Saving pixels by labels file!")
-    #  to save the pixels by label
-    # you can specify an output file name as an argument if you want (optional)
-    output_file_name = "pixels_by_labels.json"
-    futures = [executor.submit(save_pixels_by_labels, pixel_grabber.pixels_by_label, output_file_name)]
-    # pixel_grabber.save_pixels_by_labels() # run for better print statements without process pool
-
-    # print("Running change pixels test!")
-    # if you are testing, you can visualize the changes with the change_pixels_test
-    # you can specify a specific hex color default is '#000000'
-    hex_color = '#000000'
-    futures.append(
-        executor.submit(run_change_pixels_test, pixel_grabber.texture_file, pixel_grabber.pixels_by_label,
-                        hex_color))
-    # for future in as_completed(futures):
-    #     print("finished")
-
-    # print(futures[0].result())
-    # wait(futures)
-    # pixel_grabber.change_pixels_test() # run for better print statements without process pool
-    executor.shutdown(wait=True, cancel_futures=False)
-    print("Finished saving pixel change test file and pixel by label.json file")
+    # # print("Saving pixels by labels file!")
+    # #  to save the pixels by label
+    # # you can specify an output file name as an argument if you want (optional)
+    # output_file_name = "pixels_by_labels.json"
+    # futures = [executor.submit(save_pixels_by_labels, pixel_grabber.pixels_by_label, output_file_name)]
+    # # pixel_grabber.save_pixels_by_labels() # run for better print statements without process pool
+    #
+    # # print("Running change pixels test!")
+    # # if you are testing, you can visualize the changes with the change_pixels_test
+    # # you can specify a specific hex color default is '#000000'
+    # hex_color = '#000000'
+    # futures.append(
+    #     executor.submit(run_change_pixels_test, pixel_grabber.texture_file, pixel_grabber.pixels_by_label,
+    #                     hex_color))
+    # # for future in as_completed(futures):
+    # #     print("finished")
+    #
+    # # print(futures[0].result())
+    # # wait(futures)
+    # # pixel_grabber.change_pixels_test() # run for better print statements without process pool
+    # executor.shutdown(wait=True, cancel_futures=False)
+    # print("Finished saving pixel change test file and pixel by label.json file")
     end = time.time()
     print()
     print(f"Finished finding pixels...Took {end - start} seconds")
