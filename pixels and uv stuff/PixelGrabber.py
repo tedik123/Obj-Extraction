@@ -416,7 +416,7 @@ if __name__ == "__main__":
     pixel_grabber = PixelGrabber(texture_file_path, label_names_to_test, default_pixel_deviation)
 
     # this is for the future processes
-    executor = ProcessPoolExecutor(max_workers=2)
+    # executor = ProcessPoolExecutor(max_workers=2)
 
     # although this takes forever it is not worth optimizing as it is a task that must be waited on
     # before anything else is run

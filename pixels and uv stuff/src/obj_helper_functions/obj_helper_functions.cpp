@@ -13,10 +13,14 @@
 using namespace std;
 
 #include <pybind11/stl.h>
+#include <pybind11/numpy.h>
 #include <iostream>
 //#include <pybind11/pybind11.h>
 
 namespace py = pybind11;
+
+
+// Define the type aliases for the nested unordered_map and the outer unordered_map.
 
 
 vector<pair<int, int>> neighbor_offsets = {{1,  -1},
@@ -101,121 +105,215 @@ struct PairHash {
     }
 };
 
-// assume these variables exist and are accessible within the function
-//unordered_map<pair<int, int>, vector<int>, PairHash> coords_dict=  {
-//        {{0, 0}, {255, 0, 0}}, // matches to red acceptable colors
-//        {{1, 1}, {4, 5, 6}},
-//        {{2, 2}, {7, 8, 9}},
-//        {{3, 3}, {10, 11, 12}},
-//        {{4, 4}, {13, 14, 15}}
-//};
+
 // for testing these are the 8 neighbors of 50, 50
-unordered_map<pair<int, int>, vector<int>, PairHash> coords_dict = {
-        {{50, 50}, {255, 0, 0}}, // matches to red acceptable colors
-        {{51, 49}, {255, 0, 0}},
-        {{50, 49}, {255, 0, 0}},
-        {{49, 49}, {255, 0, 0}},
-        {{49, 50}, {255, 0, 0}},
-        {{49, 51}, {255, 0, 0}},
-        {{50, 51}, {255, 0, 0}},
-        {{51, 51}, {255, 0, 0}},
-        {{51, 50}, {255, 0, 0}}
-};
+//unordered_map<pair<int, int>, vector<int>, PairHash> coords_dict = {
+//        {{50, 50}, {255, 0, 0}}, // matches to red acceptable colors
+//        {{51, 49}, {255, 0, 0}},
+//        {{50, 49}, {255, 0, 0}},
+//        {{49, 49}, {255, 0, 0}},
+//        {{49, 50}, {255, 0, 0}},
+//        {{49, 51}, {255, 0, 0}},
+//        {{50, 51}, {255, 0, 0}},
+//        {{51, 51}, {255, 0, 0}},
+//        {{51, 50}, {255, 0, 0}}
+//};
+//
+//
+//unordered_map<string, vector<vector<int>>> acceptable_colors_by_label = {
+//        {"red",    {{255, 0,   0},   {128, 0,   0},   {255, 99,  71}}},
+//        {"green",  {{0,   255, 0},   {0,   128, 0},   {34,  139, 34}}},
+//        {"blue",   {{0,   0,   255}, {0,   0,   128}, {65,  105, 225}}},
+//        {"yellow", {{255, 255, 0},   {255, 215, 0},   {255, 255, 224}}},
+//        {"purple", {{128, 0,   128}, {75,  0,   130}, {218, 112, 214}}}
+//};
 
-//for some reason I can't do it here...?
-//coords_dict.insert({{5, 5}, {6, 6, 6}});
-
-//unordered_map<string, vector<vector<int>>> acceptable_colors_by_label;
-
-unordered_map<string, vector<vector<int>>> acceptable_colors_by_label = {
-        {"red",    {{255, 0,   0},   {128, 0,   0},   {255, 99,  71}}},
-        {"green",  {{0,   255, 0},   {0,   128, 0},   {34,  139, 34}}},
-        {"blue",   {{0,   0,   255}, {0,   0,   128}, {65,  105, 225}}},
-        {"yellow", {{255, 255, 0},   {255, 215, 0},   {255, 255, 224}}},
-        {"purple", {{128, 0,   128}, {75,  0,   130}, {218, 112, 214}}}
-};
-
-
-// helper function for the search algorithm to make it more readable
-void DFS_helper(const pair<int, int> &current_coords, const vector<int> &rgb,
-                const vector<vector<int>> &acceptable_colors,
-                deque<pair<int, int>> &queue, unordered_map<pair<int, int>, vector<int>, PairHash> &visited,
-                deque<pair<int, int>> &accepted_pixels) {
-    // you can think of .end() as -1 or not found
-//    can probably change this to contains
-    if (!visited.contains(current_coords)) {
-        visited[current_coords] = rgb;
-        // if rgb value is not equal to the targeted rgb then we ignore it and don't continue searching from there
-        bool found_rgb = false;
-        for (const auto &color: acceptable_colors) {
-            if (color == rgb) {
-                found_rgb = true;
-                break;
-            }
-        }
-        if (!found_rgb) {
-            return;
-        }
-        // if it's acceptable then add to the queue to continue searching from there as well as you know that it's
-        // an acceptable rgb value
-        queue.push_back(current_coords);
-        accepted_pixels.push_back(current_coords);
+struct TupleHash {
+    std::size_t operator()(const std::tuple<int, int, int> &t) const {
+        // combine the hash values of each element in the tuple
+        return std::hash<int>{}(std::get<0>(t)) ^
+               std::hash<int>{}(std::get<1>(t)) ^
+               std::hash<int>{}(std::get<2>(t));
     }
-}
+};
+
+
+class PixelGrabber_C {
+    using ColorDict = unordered_map<tuple<int, int, int>, bool, TupleHash>;
+    using LabelsDict = unordered_map<string, ColorDict>;
+
+public:
+    LabelsDict acceptable_colors_by_label;
+    unordered_map<pair<int, int>, vector<int>, PairHash> coords_dict;
+//    for the numpy shape
+    const pybind11::ssize_t *shape;
+    int dim1;
+    int dim2;
+    int dim3;
+    pybind11::array_t<int> imagePixels;
+//    py::array_t<int>& imagePixels;
+    // Get a pointer to the raw data
+    int* ptr;
+
+//    PixelGrabber_C(unordered_map<pair<int, int>, vector<int>, PairHash> coords_dict,
+//                   LabelsDict acceptable_colors_by_label) {
+//        this->coords_dict = std::move(coords_dict);
+//        this->acceptable_colors_by_label = std::move(acceptable_colors_by_label);
+//    }
+
+
+    PixelGrabber_C(py::array_t<int> &imagePixels,
+                   LabelsDict acceptable_colors_by_label) {
+//        this->coords_dict = std::move(coords_dict);
+        this->acceptable_colors_by_label = std::move(acceptable_colors_by_label);
+//        set these as class variables, so we don't have to keep accessing them
+        this->shape = imagePixels.shape();
+        this->dim1 = shape[0];
+        this->dim2 = shape[1];
+        this->dim3 = shape[2];
+//        need to store the reference of pixels!!! otherwise it gets garbage collected!!!
+        this-> imagePixels = imagePixels;
+        // Get a pointer to the raw data
+        this->ptr = static_cast<int *>(imagePixels.request().ptr);
+    }
+
+    void pixel_indexer(int x_index, int y_index) {
+//        auto ptr = static_cast<int *>(imagePixels_test.request().ptr);
+
+        // Print out the desired elements
+        int idx1 = y_index;
+        int idx2 = x_index;
+        cout << "Elements of dim 3 at index (" << idx1 << ", " << idx2 << "):\n";
+//        extract the 3 elements at the third dimension this should match to rgb values
+        int val1 = *(ptr + (idx1 * dim2 + idx2) * dim3 + 0);
+        int val2 = *(ptr + (idx1 * dim2 + idx2) * dim3 + 1);
+        int val3 = *(ptr + (idx1 * dim2 + idx2) * dim3 + 2);
+        tuple<int, int, int> rgb_value = make_tuple(val1, val2, val3);
+//        cout << val1 << " " << val2 << " " << val3 << endl;
+//         Print the tuple
+        cout << "(" << get<0>(rgb_value) << ", " << get<1>(rgb_value) << ", " << get<2>(rgb_value) << ")" << endl;
+    }
+
+    // helper function for the search algorithm to make it more readable
+    void DFS_helper(const pair<int, int> &current_coords, const vector<int> &rgb,
+                    const ColorDict &acceptable_colors,
+                    deque<pair<int, int>> &queue, unordered_map<pair<int, int>, vector<int>, PairHash> &visited,
+                    deque<pair<int, int>> &accepted_pixels) {
+        // you can think of .end() as -1 or not found
+//    can probably change this to contains
+        if (!visited.contains(current_coords)) {
+            visited[current_coords] = rgb;
+            // if rgb value is not equal to the targeted rgb then we ignore it and don't continue searching from there
+            auto rgb_tuple = make_tuple(rgb[0], rgb[1], rgb[2]);
+            if (!acceptable_colors.contains(rgb_tuple)) {
+                return;
+            }
+            // if it's acceptable then add to the queue to continue searching from there as well as you know that it's
+            // an acceptable rgb value
+            queue.push_back(current_coords);
+            accepted_pixels.push_back(current_coords);
+        }
+    }
 
 
 // searching algorithm for neighboring pixels that match
 //deque<pair<int, int>>, should i return a python deque?
-py::list DFS(const pair<int, int> &starting_coords, const string &label_name,
-                          const int &min_X, const int &min_Y, const int &max_X, const int &max_Y) {
+    py::list DFS(const pair<int, int> &starting_coords, const string &label_name,
+                 const int &min_X, const int &min_Y, const int &max_X, const int &max_Y) {
 //    coords_dict.insert({{5, 5}, {6, 6, 6}});
-    int x = starting_coords.first;
-    int y = starting_coords.second;
-    // deque is a doubly linked list, a normal vector is fine
-    // queue is just a tuple list of coords
-    deque<pair<int, int>> queue;
-    // important that this is an unordered_map it's much faster look up time!
-    unordered_map<pair<int, int>, vector<int>, PairHash> visited;
-    // this can just be a normal list or vector
-    deque<pair<int, int>> accepted_pixels;
-    // add the start to the queue and the visited unordered_map
-    queue.push_back(starting_coords);
+        int x = starting_coords.first;
+        int y = starting_coords.second;
+        // deque is a doubly linked list, a normal vector is fine
+        // queue is just a tuple list of coords
+        deque<pair<int, int>> queue;
+        // important that this is an unordered_map it's much faster look up time!
+        unordered_map<pair<int, int>, vector<int>, PairHash> visited;
+        // this can just be a normal list or vector
+        deque<pair<int, int>> accepted_pixels;
+        // add the start to the queue and the visited unordered_map
+        queue.push_back(starting_coords);
 
-    // the value stored is arbitrary in this case it's rgb from coords dict
-    visited[starting_coords] = coords_dict[starting_coords];
-    accepted_pixels.push_back(starting_coords);
-    auto acceptable_colors = acceptable_colors_by_label[label_name];
+        // the value stored is arbitrary in this case it's rgb from coords dict
+        visited[starting_coords] = coords_dict[starting_coords];
+        accepted_pixels.push_back(starting_coords);
+        auto acceptable_colors = acceptable_colors_by_label[label_name];
 
-    while (!queue.empty()) {
-        auto current_coords = queue.front();
-        queue.pop_front();
-        x = current_coords.first;
-        y = current_coords.second;
+        while (!queue.empty()) {
+            auto current_coords = queue.front();
+            queue.pop_front();
+            x = current_coords.first;
+            y = current_coords.second;
 //        remove later this is just to prevent the crashing since we have a limited amount of points
-        if (!coords_dict.contains(current_coords)) {
-            cout << "Starting coords do not exist in dict! Skipping this one!" << endl;
-        } else {
-            auto pixel_rgb = coords_dict[current_coords];
+            if (!coords_dict.contains(current_coords)) {
+                cout << "Starting coords do not exist in dict! Skipping this one!" << endl;
+            } else {
+                auto pixel_rgb = coords_dict[current_coords];
 //        FIXME later should not be fixed 4096
-            auto neighbors = get_neighbors_from_point_C_only(x, y, 4096, 4096);
+                auto neighbors = get_neighbors_from_point_C_only(x, y, 4096, 4096);
 
-            // this is no more than 8 long at a time
-            for (const auto &neighbor: neighbors) {
-                auto current_x = neighbor.first;
-                auto current_y = neighbor.second;
-                // need to check that it's within the confines as well
-                if (max_X >= current_x && current_x >= min_X && max_Y >= current_y && current_y >= min_Y) {
-                    DFS_helper(make_pair(current_x, current_y), pixel_rgb, acceptable_colors, queue, visited,
-                               accepted_pixels);
+                // this is no more than 8 long at a time
+                for (const auto &neighbor: neighbors) {
+                    auto current_x = neighbor.first;
+                    auto current_y = neighbor.second;
+                    // need to check that it's within the confines as well
+                    if (max_X >= current_x && current_x >= min_X && max_Y >= current_y && current_y >= min_Y) {
+                        DFS_helper(make_pair(current_x, current_y), pixel_rgb, acceptable_colors, queue, visited,
+                                   accepted_pixels);
+                    }
                 }
             }
         }
+        // return revealed which should be all matching pixels within range
+        cout << "visited vs revealed" << endl;
+        cout << visited.size() << endl;
+        cout << accepted_pixels.size() << endl;
+        return py::cast(accepted_pixels);
     }
-    // return revealed which should be all matching pixels within range
-    cout << "visited vs revealed" << endl;
-    cout << visited.size() << endl;
-    cout << accepted_pixels.size() << endl;
-    return py::cast(accepted_pixels);
+
+};
+
+void print_array_value(py::array_t<int> arr, int y_index, int x_index) {
+    // Get the shape of the array
+    auto shape = arr.shape();
+    int dim1 = shape[0];
+    int dim2 = shape[1];
+    int dim3 = shape[2];
+
+    // Get a pointer to the raw data
+    auto ptr = static_cast<int *>(arr.request().ptr);
+
+    // Print out the desired elements
+    int idx1 = y_index;
+    int idx2 = x_index;
+    std::cout << "Elements of dim 3 at index (" << idx1 << ", " << idx2 << "):\n";
+    for (int k = 0; k < dim3; k++) {
+        int val = *(ptr + (idx1 * dim2 + idx2) * dim3 + k);
+        std::cout << val << " ";
+    }
+    std::cout << std::endl;
+}
+
+void print_3d_array(py::array_t<int> &arr) {
+    // Get the shape of the array
+    auto shape = arr.shape();
+    int dim1 = shape[0];
+    int dim2 = shape[1];
+    int dim3 = shape[2];
+
+    // Get a pointer to the raw data
+    auto ptr = static_cast<int *>(arr.request().ptr);
+
+    // Loop over the elements of the array and print them out
+    for (int i = 0; i < dim1; i++) {
+        for (int j = 0; j < dim2; j++) {
+            for (int k = 0; k < dim3; k++) {
+                int val = *(ptr + (i * dim2 + j) * dim3 + k);
+                std::cout << val << " ";
+            }
+            std::cout << std::endl;
+        }
+        std::cout << std::endl;
+    }
 }
 
 
@@ -260,8 +358,18 @@ PYBIND11_MODULE(obj_helper_functions, m) {
       )pbdoc",
           py::arg("points"), py::arg("max_width"), py::arg("max_height"));
 
-    m.def("DFS", &DFS, R"pbdoc(DFS TEST)pbdoc", py::arg("starting_coords"), py::arg("label_name"),
-          py::arg("min_X"), py::arg("min_Y"), py::arg("max_X"), py::arg("max_Y"));
+//    m.def("DFS", &DFS, R"pbdoc(DFS TEST)pbdoc", py::arg("starting_coords"), py::arg("label_name"),
+//          py::arg("min_X"), py::arg("min_Y"), py::arg("max_X"), py::arg("max_Y"));
+    py::class_<PixelGrabber_C>(m, "PixelGrabber_C")
+//            .def(py::init<std::unordered_map<std::pair<int, int>, std::vector<int>, PairHash>,
+//                    unordered_map<string, unordered_map<tuple<int, int, int>, bool, TupleHash>>>())
+            .def(py::init<py::array_t<int> &, unordered_map<string, unordered_map<tuple<int, int, int>, bool, TupleHash>>>())
+            .def("DFS", &PixelGrabber_C::DFS, py::arg("starting_coords"), py::arg("label_name"),
+                 py::arg("min_X"), py::arg("min_Y"), py::arg("max_X"), py::arg("max_Y"))
+            .def("pixel_indexer", &PixelGrabber_C::pixel_indexer, py::arg("y_index"), py::arg("x_index")),
+            m.def("test_numpy_index", &print_array_value, py::arg("numpy_array"), py::arg("y_index"),
+                  py::arg("x_index"));
+    m.def("test_numpy_3D_print", &print_3d_array, py::arg("numpy_array"));
 
 #ifdef VERSION_INFO
     m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);
