@@ -52,7 +52,7 @@ if __name__ == "__main__":
     # if you only want to run certain scripts you can change accordingly here
     RUN_PIXEL_GRABBER = True
     RUN_PIXEL_TO_FACE = False
-    RUN_PIXEL_INDEXER = False
+    RUN_PIXEL_INDEXER = True
 
     # this triangle decomposer only needs to be run once if the base .obj file is the same! So turn it to false, after!
     RUN_TRIANGLE_DECOMPOSER = False

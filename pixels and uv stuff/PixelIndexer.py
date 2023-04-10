@@ -2,11 +2,12 @@ import json
 import pickle
 import time
 from collections import OrderedDict
+from concurrent.futures import ThreadPoolExecutor
 
 
 class PixelIndexer:
 
-    def __init__(self, label_names, save_normals=True, save_uvs=True):
+    def __init__(self, label_names, save_normals=False, save_uvs=False):
         self.faces_found_file_path = 'outputs/faces_found_by_labels'
         self.faces_found_by_labels = None
         self.read_in_faces_found_by_labels(True)
@@ -18,16 +19,17 @@ class PixelIndexer:
         print("Reading in faces by labels")
         if not read_binary:
             print(f"Opening {self.faces_found_file_path}")
-            with open(self.faces_found_file_path+".json", 'r') as file:
+            with open(self.faces_found_file_path + ".json", 'r') as file:
                 data = file.read()
                 self.faces_found_by_labels = json.loads(data)
         else:
             print("Reading binary version")
-            print(f"Opening outputs/faces_found_by_labels"+".bin")
+            print(f"Opening outputs/faces_found_by_labels" + ".bin")
             with open('outputs/faces_found_by_labels.bin', 'rb') as file:
                 self.faces_found_by_labels = pickle.load(file)
 
     def create_indexed_faces(self):
+        thread_count = 11
         print("Starting indexing of faces!")
         if self.label_names:
             labels_to_do = {}
@@ -37,6 +39,7 @@ class PixelIndexer:
             # overwrite it to only the labels we care about
             self.faces_found_by_labels = labels_to_do
         # this will have to change later, so we can handle normals, faces, and uvs?
+        # with ThreadPoolExecutor(max_workers=thread_count) as executor:
         for label_name, values in self.faces_found_by_labels.items():
             vertices = values["vertices"]
             indexed_vertex_list, vertex_map = self.create_indexed_list(vertices)
@@ -54,18 +57,19 @@ class PixelIndexer:
                 normals = values["normals"]
                 indexed_normals_list, normal_map = self.create_indexed_list(normals)
                 normal_index_tuples = self.format_indices(indexed_normals_list)
-
             if self.save_uvs and len(values["uvs"]) > 0:
                 uvs = values["uvs"]
                 indexed_uvs_list, uvs_map = self.create_indexed_list(uvs)
                 uvs_index_tuples = self.format_indices(indexed_uvs_list)
-
             # then write to file!
             # TODO need to add all the other maps and lists to this function to be passed in
             #  and make sure create_obj_file copies them over
             self.create_obj_file(label_name, vertex_map, vertex_index_tuples,
                                  normal_map, normal_index_tuples,
                                  uvs_index_tuples, uvs_map)
+                # executor.submit(self.create_obj_file, label_name, vertex_map, vertex_index_tuples,
+                #                 normal_map, normal_index_tuples,
+                #                 uvs_index_tuples, uvs_map)
 
     def create_indexed_list(self, geometry_list):
         # we need to preserve the order the keys & indices were inserted
