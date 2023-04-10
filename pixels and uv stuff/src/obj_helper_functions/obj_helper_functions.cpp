@@ -317,6 +317,23 @@ void print_3d_array(py::array_t<int> &arr) {
 }
 
 
+py::list pixel_coords_to_uv(vector<pair<int, int>> &pixel_list, int max_width, int max_height) {
+    // u is width, v is height
+    vector<pair<double, double>> result;
+    for (const auto &pixel: pixel_list) {
+        int x = pixel.first;
+        int y = pixel.second;
+        double u = static_cast<double>(x) / max_width;
+        double v = 1.0 - static_cast<double>(y) / max_height;
+//        result.emplace_back(make_pair(u, v));
+        result.emplace_back(u, v);
+    }
+    // LOCK BEFORE RETURN!
+    py::gil_scoped_acquire acquire;
+    return py::cast(result);
+}
+
+
 PYBIND11_MODULE(obj_helper_functions, m) {
     m.doc() = R"pbdoc(
         Pybind11 example plugin
@@ -376,7 +393,7 @@ PYBIND11_MODULE(obj_helper_functions, m) {
                  py::arg("starting_coord"),
                  py::arg("label_name"),
                  py::arg("min_X"), py::arg("min_Y"), py::arg("max_X"), py::arg("max_Y"),
-                    R"pbdoc(
+                 R"pbdoc(
         Performs a depth-first search (DFS) on the image data to find all pixels matching a given label.
         Multithreading can be used with this function.
 
@@ -395,6 +412,9 @@ PYBIND11_MODULE(obj_helper_functions, m) {
             m.def("test_numpy_index", &print_array_value, py::arg("numpy_array"), py::arg("y_index"),
                   py::arg("x_index"));
     m.def("test_numpy_3D_print", &print_3d_array, py::arg("numpy_array"));
+    m.def("pixel_coords_to_uv", &pixel_coords_to_uv, py::call_guard<py::gil_scoped_release>(),
+          R"pbdoc("Convert pixel coordinates to uv coordinates, returns a list of tuples.")pbdoc", py::arg("pixel_list"), py::arg("max_width"),
+          py::arg("max_height"));
 
 #ifdef VERSION_INFO
     m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);
