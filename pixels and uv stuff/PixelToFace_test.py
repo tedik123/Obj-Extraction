@@ -6,8 +6,8 @@ import time
 from Triangles import Triangle
 from shapely import STRtree, points as Points
 import pickle
-from multiprocessing import cpu_count
-from obj_helper_functions import pixel_coords_to_uv as pixel_coords_to_uv_c
+from multiprocessing import cpu_count, Queue
+from obj_helper_functions import pixel_coords_to_uv as c_pixel_coords_to_uv, pixel_coords_to_uv_vector
 
 
 class PixelToFace:
@@ -137,51 +137,112 @@ class PixelToFace:
         print(self.str_tree)
 
     # searches the STR tree for the targets given!
+    # def find_faces_of_targets(self, thread_count: int = None):
+    #     if not thread_count:
+    #         thread_count = cpu_count() - 1
+    #     print(f"Using {thread_count} threads to query tree!")
+    #     time_for_indexing = 0.0
+    #     self.label_faces = {}
+    #     # print("Creating Process Queue And Event")
+    #     # queue = Queue()
+    #     # process_result = Queue()
+    #
+    #     print("Beginning search process")
+    #
+    #     # STR load stuff if not in memory
+    #     if self.str_tree is None:
+    #         self.read_in_str_tree()
+    #     # convert all points to Point objects
+    #     # self.convert_pixels_to_points()
+    #     work_by_thread = split_dict(self.target_pixels_by_name, thread_count)
+    #     start = time.time()
+    #     print("Creating threads")
+    #     results = []
+    #     with concurrent.futures.ThreadPoolExecutor(max_workers=thread_count) as executor:
+    #         futures = []
+    #         for i in range(thread_count):
+    #             futures.append(executor.submit(self.str_query_thread, work_by_thread[i], i))
+    #
+    #         # take them as they finish instead of waiting around
+    #         # https://stackoverflow.com/questions/52082665/store-results-threadpoolexecutor
+    #         for future in concurrent.futures.as_completed(futures):
+    #             thread_start_time = time.time()
+    #             print("finished")
+    #             # result = future.result()
+    #             results.append(future.result())
+    #
+    #             thread_end_time = time.time()
+    #             time_for_indexing += thread_end_time - thread_start_time
+    #         print("TIME FOR INDEXING ALL GEOMETRIES", time_for_indexing)
+    #     end = time.time()
+    #     print(f"Threading task took {(end - start) / 60} minutes")
+    #     for result in results:
+    #         for name, indices in result.items():
+    #             self.get_geometries_by_index_list(self.label_faces, name, indices)
+    #
+    #     start = time.time()
+    #     print("Creating faces found by labels pickle file!")
+    #     with open('outputs/faces_found_by_labels.bin', 'wb') as fp:
+    #         print("labels faces length", len(self.label_faces))
+    #         pickle.dump(self.label_faces, fp)
+    #     end = time.time()
+    #     print(f"Full file PICKLE dump took {(end - start) / 60} minutes")
+
     def find_faces_of_targets(self, thread_count: int = None):
         if not thread_count:
             thread_count = cpu_count() - 1
         print(f"Using {thread_count} threads to query tree!")
+        thread_count = 4
         time_for_indexing = 0.0
         self.label_faces = {}
         # print("Creating Process Queue And Event")
-        # queue = Queue()
+        queue = Queue()
         # process_result = Queue()
 
         print("Beginning search process")
 
         # STR load stuff if not in memory
         if self.str_tree is None:
-            # TODO i could move these reads and writes to their own function
             self.read_in_str_tree()
         # convert all points to Point objects
         # self.convert_pixels_to_points()
         work_by_thread = split_dict(self.target_pixels_by_name, thread_count)
         start = time.time()
         print("Creating threads")
-        results = []
-        with concurrent.futures.ThreadPoolExecutor(max_workers=thread_count) as executor:
+        with concurrent.futures.ProcessPoolExecutor(max_workers=thread_count) as executor:
             futures = []
             for i in range(thread_count):
-                futures.append(executor.submit(self.str_query_thread, work_by_thread[i], i))
+                futures.append(executor.submit(str_query_process, work_by_thread[i], self.str_tree, self.max_width,
+                                               self.max_height, queue))
 
             # take them as they finish instead of waiting around
             # https://stackoverflow.com/questions/52082665/store-results-threadpoolexecutor
-            for future in concurrent.futures.as_completed(futures):
+            for future in futures:
                 thread_start_time = time.time()
-                result = future.result()
-                # results.append(future.result())
+                # result = future.result()
+                future.result()
                 print("finished")
-                for name, indices in result.items():
-                    self.get_geometries_by_index_list(self.label_faces, name, indices)
                 thread_end_time = time.time()
                 time_for_indexing += thread_end_time - thread_start_time
+                print("Working on stuff")
+                result = queue.get()
+                print("Queue retrieved")
+                for name, indices in result.items():
+                    self.get_geometries_by_index_list(self.label_faces, name, indices)
             print("TIME FOR INDEXING ALL GEOMETRIES", time_for_indexing)
-        # It doesn't really matter if it goes inside the threadpool executor or not...
+
+            # # Get results from the queue
+            # results = []
+            # while not queue.empty():
+            #     print("Retrieving result")
+            #     results.append(queue.get())
+
+        end = time.time()
+        print(f"Threading task took {(end - start) / 60} minutes")
+
         # for result in results:
         #     for name, indices in result.items():
         #         self.get_geometries_by_index_list(self.label_faces, name, indices)
-        end = time.time()
-        print(f"Threading task took {(end - start) / 60} minutes")
 
         start = time.time()
         print("Creating faces found by labels pickle file!")
@@ -196,20 +257,42 @@ class PixelToFace:
     #   Brought down to 6.5 seconds by using PointS instead of just point
     #   Perhaps multithreading will increase the speed
     #   Perhaps we can hide this slowness by throwing it in the file loads
+    # def convert_pixels_to_points(self):
+    #     print("Starting conversion of pixels to points")
+    #     start = time.time()
+    #     for name, pixel_list in self.target_pixels_by_name.items():
+    #         # no longer need to convert to tuple since pickling saves tuples unlike json
+    #         # uv_list = [pixel_coords_to_uv(tuple(pixel)) for pixel in pixel_list]
+    #         uv_list = pixel_coords_to_uv(pixel_list, self.max_width, self.max_height)
+    #
+    #         self.target_pixels_by_name[name] = Points(uv_list)
+    #     end = time.time()
+    #     print(f"Conversion of pixels to UV Points {(end - start)} seconds")
+
     def convert_pixels_to_points(self):
         print("Starting conversion of pixels to points")
         start = time.time()
-        for name, pixel_list in self.target_pixels_by_name.items():
-            # no longer need to convert to tuple since pickling saves tuples unlike json
-            # uv_list = [pixel_coords_to_uv(tuple(pixel)) for pixel in pixel_list]
-            uv_list = pixel_coords_to_uv(pixel_list, self.max_width, self.max_height)
 
-            self.target_pixels_by_name[name] = Points(uv_list)
+        # Define the worker function for each thread
+        def convert_pixels_to_points_worker(name, pixel_list):
+            uv_list = pixel_coords_to_uv_vector(pixel_list, self.max_width, self.max_height)
+            return name, Points(uv_list)
+
+        # Split work into batches for each thread
+        thread_count = cpu_count() - 1
+        with concurrent.futures.ThreadPoolExecutor(max_workers=thread_count) as executor:
+            futures = []
+            for name, pixel_list in self.target_pixels_by_name.items():
+                futures.append(executor.submit(convert_pixels_to_points_worker, name, pixel_list))
+            # Process results as they become available
+            for future in concurrent.futures.as_completed(futures):
+                name, points = future.result()
+                self.target_pixels_by_name[name] = points
         end = time.time()
         print(f"Conversion of pixels to UV Points {(end - start)} seconds")
 
     # returns only the indexes associated with each face
-    def str_query_thread(self, target_pixels_by_name: dict, thread_count):
+    def str_query_thread(self, target_pixels_by_name: dict, thread_count, queue):
         label_indexes = {}
         print(f"Thread {thread_count + 1} is searching points for targets of {len(list(target_pixels_by_name.keys()))}")
         # missed_values = 0
@@ -220,25 +303,37 @@ class PixelToFace:
         for label_name, targets in target_pixels_by_name.items():
             # pixels_to_find_count += len(targets)
             # store the list returned
-            uv_list = pixel_coords_to_uv_c(targets, self.max_width, self.max_height)
+            uv_list = pixel_coords_to_uv_vector(targets, self.max_width, self.max_height)
             target_points = Points(uv_list)
             label_indexes[label_name] = self.str_tree.nearest(target_points)
 
         # print(f"Missed {round((missed_values / pixels_to_find_count) * 100, 2)}% of target pixels.")
         # print(f"Missed {missed_values} out of {pixels_to_find_count}, could not find their matching faces.")
-        return label_indexes
+        label_indexes
+        return
 
     def test_pixel_to_coords(self):
         original_start = time.perf_counter()
         original_end = time.perf_counter()
         for name, pixel_list in self.target_pixels_by_name.items():
             uv_list = pixel_coords_to_uv(pixel_list, self.max_width, self.max_height)
+            print(uv_list[0])
+
         print("Time for original", original_end - original_start)
+
+        py_manipulation_start = time.perf_counter()
+        py_manipulation_end = time.perf_counter()
+        for name, pixel_list in self.target_pixels_by_name.items():
+            uv_list = c_pixel_coords_to_uv(pixel_list, self.max_width, self.max_height)
+            print(uv_list[0])
+
+        print("Time for py manipulation", py_manipulation_end - py_manipulation_start)
 
         vector_start = time.perf_counter()
         vector_end = time.perf_counter()
         for name, pixel_list in self.target_pixels_by_name.items():
-            uv_list = pixel_coords_to_uv_c(pixel_list, self.max_width, self.max_height)
+            uv_list = pixel_coords_to_uv_vector(pixel_list, self.max_width, self.max_height)
+            print(uv_list[0])
         print("Time for vector", vector_end - vector_start)
 
     def get_geometries_by_index_list(self, label_faces: dict, label_name: str, list_of_indices: list):

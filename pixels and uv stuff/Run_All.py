@@ -116,7 +116,8 @@ if __name__ == "__main__":
             obj_to_json.insert_face_data()
             obj_to_json.create_json_files()
 
-        pixel_to_faces = PixelToFace(TARGET_FILE, preload_STRtree=not RUN_TRIANGLE_DECOMPOSER,
+        pixel_to_faces = PixelToFace(TARGET_FILE, texture_max_width, texture_max_height,
+                                     preload_STRtree=not RUN_TRIANGLE_DECOMPOSER,
                                      save_normals=SAVE_NORMALS, save_uvs=SAVE_UVS)
         end = time.time()
         print()
@@ -126,36 +127,11 @@ if __name__ == "__main__":
         # create all the points within the obj files
         if RUN_TRIANGLE_DECOMPOSER:
             # then break down those geometry files
-            start_decompose = time.perf_counter()
             # pixel_to_faces.decompose_all_triangles(texture_max_width, texture_max_height)
-            pixel_to_faces.decompose_all_triangles_STRTree()
-            end = time.perf_counter()
-            py_time = (end - start_decompose)
-            print("Python triangle decompose time", py_time)
+            pixel_to_faces.build_str_tree()
 
-            # start_decompose = time.perf_counter()
-            # pixel_to_faces.decompose_all_triangles_Ccode(texture_max_width, texture_max_height)
-            # end = time.perf_counter()
-            # c_time = (end - start_decompose)
-            # print("C++ triangle decompose time", c_time)
-            # # print('C code is {}x faster'.format(py_time / c_time))
-
-        # start_normal_search = time.perf_counter()
         # then search through target_uvs
-        # pixel_to_faces.find_faces_of_targets()
-        pixel_to_faces.find_faces_of_targets_STRTree_threaded(THREAD_COUNT)
-        # end = time.perf_counter()
-        # pure_time = (end - start_normal_search)
-        # print("Pure decompose check", pure_time)
-
-        # this is a little faster than using 5 cores...but still :(
-        # it's really bad
-        # start_mixed_search = time.perf_counter()
-        # pixel_to_faces.find_faces_of_targets_mixed()
-        # end = time.perf_counter()
-        # mixed_time = (end - start_mixed_search)
-        # print("Mixed decompose check", mixed_time)
-        # print('Mixed code is {}x faster'.format(pure_time / mixed_time))
+        pixel_to_faces.find_faces_of_targets(THREAD_COUNT)
 
         end = time.time()
         print(end - start)

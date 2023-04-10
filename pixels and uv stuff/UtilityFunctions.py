@@ -1,4 +1,7 @@
 # ignore this because it returns a dictionary which we don't want
+import math
+
+
 def convert_pixel_coords_to_uv( coords: dict, width, height):
     # u is width, v is height
     # coords tuple will be key
@@ -24,3 +27,13 @@ def convert_pixel_coords_to_uv_list( coords: list, width, height):
             v = 1 - y / height
             uvs_list.append([u, v])
         return uvs_list
+
+
+def uvs_to_pixels(u, v):
+    MAX_WIDTH = 4096
+    MAX_HEIGHT = 4096
+    # since pixels are only ints we need to floor or use ceiling
+    x = math.floor(u * MAX_WIDTH)
+    # since 0, 0 is at the bottom left! very important
+    y = math.floor((v - 1) * -MAX_HEIGHT)
+    return x, y
