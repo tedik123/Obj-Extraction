@@ -383,8 +383,6 @@ if __name__ == "__main__":
     # then run the actual pixel_grabber algo
     pixel_grabber.run_pixel_grabber()
 
-
-
     # to save the pixels by label
     # you can specify an output file name as an argument if you want (optional)
     output_file_name = "pixels_by_labels.json"

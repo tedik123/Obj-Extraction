@@ -1,12 +1,12 @@
 import json
 import time
 from concurrent.futures import ProcessPoolExecutor
-from os import listdir, getcwd
+from os import listdir
 from os.path import isfile, join
 from PixelToFace import PixelToFace
 from PixelGrabber import PixelGrabber
 from PixelIndexer import PixelIndexer
-from PixelGrabber import run_change_pixels_test, save_pixels_by_labels
+from PixelGrabber import save_pixels_by_labels
 from ObjFileToJSONFiles import ObjToJSON
 
 
@@ -26,20 +26,7 @@ def create_file_names_list():
 
 if __name__ == "__main__":
     # IMPORTANT  this is an array of strings, if it's empty it will do all of them
-    # label_names_to_test = ["Flexor Carpi Ulnaris","Flexor Carpi Radialis","Flexor Digitorum Superficialis","Flexor Digitorum Longus","Gracilis","Gastrocnemius","Iliopsoas","Infraspinatus","Latissimus Dorsi","Levator Scapulae","Pectineus","Peroneus Longus"]
-    # ["Flexor Carpi Ulnaris","Flexor Carpi Radialis","Flexor Digitorum Superficialis","Flexor Digitorum Longus","Gracilis","Gastrocnemius","Iliopsoas","Infraspinatus","Iliotibial Tract","Latissimus Dorsi","Levator Scapulae","Pectineus","Peroneus Longus"]
 
-    # label_names_to_test = ["Vastus Medialis", "Vastus Lateralis", "Trapezius",
-    #                         "Teres Minor", "Teres Major", "Tensor Fasciae Lata",
-    #                         "Tibialis Anterior", "Soleus", "Semitendinosus", "Serratus Anterior", "Rectus Abdominis",
-    #                         "Rhomboids", "Pronator Teres", "Palmaris Longus"]
-
-    # label_names_to_test = ["Anconeus", "Adductor Longus", "Adductor Magnus", "Abductor Pollicis Longus", "Brachialis", "Biceps Brachii", "Biceps Femoris", "Brachioradialis", "Coracobrachialis", "Deltoid", "Extensor Carpi Radialis Brevis", "Extensor Carpi Radialis Longus", "Extensor Carpi Ulnaris", "Extensor Digitorum", "Extensor Digitorum Longus", "Extensor Digiti Minimi", "External Oblique", "Extensor Pollicis Brevis", "Erector Spinae"]
-    # muscle_names_to_test = ["Anconeus", "Adductor Longus", "Adductor Magnus", "Abductor Pollicis Longus", "Brachialis", "Biceps Brachii", "Biceps Femoris", "Brachioradialis", "Coracobrachialis", "Deltoid", "Extensor Carpi Radialis Brevis", "Extensor Carpi Radialis Longus", "Extensor Carpi Ulnaris", "Extensor Digitorum", "Extensor Digitorum Longus", "Extensor Digiti Minimi", "External Oblique", "Extensor Pollicis Brevis", "Erector Spinae"]
-    # # grab last two for testing
-    # label_names_to_test = label_names_to_test[-2:]
-
-    # label_names_to_test = ["Pectoralis Major", "Deltoid"]
     label_names_to_test = []
 
     texture_file_path = 'obj textures/diffuse.jpg'
@@ -64,8 +51,8 @@ if __name__ == "__main__":
 
     # if you only want to run certain scripts you can change accordingly here
     RUN_PIXEL_GRABBER = True
-    RUN_PIXEL_TO_FACE = True
-    RUN_PIXEL_INDEXER = True
+    RUN_PIXEL_TO_FACE = False
+    RUN_PIXEL_INDEXER = False
 
     # this triangle decomposer only needs to be run once if the base .obj file is the same! So turn it to false, after!
     RUN_TRIANGLE_DECOMPOSER = False
@@ -84,7 +71,8 @@ if __name__ == "__main__":
         # pixel_grabber.disable_default_color_range()
 
         # this is for the future processes
-        executor = ProcessPoolExecutor(max_workers=2)
+        executor = ProcessPoolExecutor(max_workers=1)
+
         # although this takes forever it is not worth optimizing as it is a task that must be waited on
         # before anything else is run
         pixel_grabber.read_in_image_data()
@@ -93,7 +81,7 @@ if __name__ == "__main__":
         pixel_grabber.create_acceptable_colors_by_label(default_acceptable_colors, deviation_default_colors)
 
         # then run the actual pixel_grabber algo
-        pixel_grabber.run_pixel_grabber()
+        pixel_grabber.run_pixel_grabber(THREAD_COUNT)
 
         #  to save the pixels by label
         # you can specify an output file name as an argument if you want (optional)
@@ -105,10 +93,7 @@ if __name__ == "__main__":
         # if you are testing, you can visualize the changes with the change_pixels_test
         # you can specify a specific hex color default is '#000000'
         hex_color = '#000000'
-        futures.append(
-            executor.submit(run_change_pixels_test, pixel_grabber.texture_file, pixel_grabber.pixels_by_label,
-                            hex_color))
-        # pixel_grabber.change_pixels_test() # run for better print statements without process pool
+        pixel_grabber.run_change_pixels_test(hex_color)
 
         executor.shutdown(wait=True, cancel_futures=False)
         print("Finished saving pixel change test file and pixel by label.json file")
