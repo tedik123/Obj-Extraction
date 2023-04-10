@@ -1,8 +1,9 @@
 import json
 import time
+import pickle
 
 
-class ObjToJSON:
+class ObjToGeometryFiles:
     def __init__(self, obj_file_path):
         self.obj_file_path = obj_file_path
         # set to None so values start at 1 instead of 0 like normal
@@ -117,13 +118,14 @@ class ObjToJSON:
 
     # here it splits the faces, normals, and uvs into seperate files
     def create_json_files(self):
+        # I can probably create threads for this by saving it to a class variable instead of going linearly
         self.create_and_save_face_data()
         self.create_and_save_uv_data()
         self.create_and_save_normal_data()
 
     # stores the vertices making up each face in the right format
     def create_and_save_face_data(self):
-        output_file_name = "geometry_files/geometry_faces.json"
+        output_file_name = "geometry_files/geometry_faces"
         face_data = {"faces": []}
         for face in self.faces_data:
             vertex_data = \
@@ -140,12 +142,13 @@ class ObjToJSON:
             vertex_data["c"] = vertices[2]
             face_data["faces"].append(vertex_data)
         print("Writing face data to json file.")
-        with open("outputs/" + output_file_name, 'w') as fp:
-            json.dump(face_data, fp)
+        # with open("outputs/" + output_file_name, 'w') as fp:
+        #     json.dump(face_data, fp)
+        self.write_binary_file(output_file_name, face_data)
         print("Finished writing face data!")
 
     def create_and_save_uv_data(self):
-        output_file_name = "geometry_files/geometry_uvs.json"
+        output_file_name = "geometry_files/geometry_uvs"
         uvs_data = {"uvs": []}
         for face in self.faces_data:
             uv_format = \
@@ -174,12 +177,14 @@ class ObjToJSON:
             uv_format["c"]["y"] = uvs[2][1]
             uvs_data["uvs"].append(uv_format)
         print("Writing uv data to json file.")
-        with open("outputs/" + output_file_name, 'w') as fp:
-            json.dump(uvs_data, fp)
+        # with open("outputs/" + output_file_name, 'w') as fp:
+        #     json.dump(uvs_data, fp)
+        self.write_binary_file(output_file_name, uvs_data)
+
         print("Finished writing uv data!")
 
     def create_and_save_normal_data(self):
-        output_file_name = "geometry_files/geometry_normals.json"
+        output_file_name = "geometry_files/geometry_normals"
         normals_data = {"normals": []}
         # just checking if the first one has normals if it does then it's good enough ig
         if len(self.faces_data[0]["normals"]) > 1:
@@ -196,15 +201,20 @@ class ObjToJSON:
                 normal_data["c"] = normals[2]
                 normals_data["normals"].append(normal_data)
             print("Writing normals data to json file.")
-            with open("outputs/" + output_file_name, 'w') as fp:
-                json.dump(normals_data, fp)
+            # with open("outputs/" + output_file_name, 'w') as fp:
+            #     json.dump(normals_data, fp)
+            self.write_binary_file(output_file_name, normals_data)
             print("Finished writing normals data!")
+
+    def write_binary_file(self, output_file_name, data):
+        with open("outputs/" + output_file_name + ".bin", 'wb') as fp:
+            pickle.dump(data, fp)
 
 
 if __name__ == "__main__":
     start = time.time()
     base_obj_file_path = "obj files/Anatomy.OBJ"
-    obj_to_json = ObjToJSON(base_obj_file_path)
+    obj_to_json = ObjToGeometryFiles(base_obj_file_path)
     obj_to_json.read_in_OBJ_file()
     obj_to_json.insert_face_data()
     obj_to_json.create_json_files()

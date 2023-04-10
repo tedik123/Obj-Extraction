@@ -65,18 +65,23 @@ class PixelToFace:
         self.triangle_data = []
 
     def read_in_faces(self):
+        # print("Loading in faces")
+        # with open(f'{self.json_data_directory}/geometry_faces.json', 'r') as file:
+        #     data = file.read()
+        # self.faces = json.loads(data)['faces']
         print("Loading in faces")
-        with open(f'{self.json_data_directory}/geometry_faces.json', 'r') as file:
-            data = file.read()
-        self.faces = json.loads(data)['faces']
+        with open(f'{self.json_data_directory}/geometry_faces.bin', 'rb') as file:
+            self.faces = pickle.load(file)["faces"]
 
     def read_in_normals(self):
         if self.save_normals:
             print("Loading normals")
             try:
-                with open(f'{self.json_data_directory}/geometry_normals.json', 'r') as file:
-                    data = file.read()
-                self.normals = json.loads(data)['normals']
+                # with open(f'{self.json_data_directory}/geometry_normals.json', 'r') as file:
+                #     data = file.read()
+                # self.normals = json.loads(data)['normals']
+                with open(f'{self.json_data_directory}/geometry_normals.bin', 'rb') as file:
+                    self.normals = pickle.load(file)["normals"]
             except FileNotFoundError:
                 print("Couldn't find geometry normals file, ignoring it!")
         else:
@@ -84,9 +89,11 @@ class PixelToFace:
 
     def read_in_geometry_uvs(self):
         print("Loading geometry uvs")
-        with open(f'{self.json_data_directory}/geometry_uvs.json', 'r') as file:
-            data = file.read()
-        self.uvs = json.loads(data)['uvs']
+        # with open(f'{self.json_data_directory}/geometry_uvs.json', 'r') as file:
+        #     data = file.read()
+        # self.uvs = json.loads(data)['uvs']
+        with open(f'{self.json_data_directory}/geometry_uvs.bin', 'rb') as file:
+            self.uvs = pickle.load(file)["uvs"]
 
     def read_in_target_pixels(self):
         print("Loading target pixels")

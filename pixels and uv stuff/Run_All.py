@@ -7,7 +7,7 @@ from PixelToFace import PixelToFace
 from PixelGrabber import PixelGrabber
 from PixelIndexer import PixelIndexer
 from PixelGrabber import save_pixels_by_labels
-from ObjFileToJSONFiles import ObjToJSON
+from ObjFileToGeometryFiles import ObjToGeometryFiles
 
 
 def create_file_names_list():
@@ -50,7 +50,7 @@ if __name__ == "__main__":
     THREAD_COUNT = None
 
     # if you only want to run certain scripts you can change accordingly here
-    RUN_PIXEL_GRABBER = True
+    RUN_PIXEL_GRABBER = False
     RUN_PIXEL_TO_FACE = False
     RUN_PIXEL_INDEXER = True
 
@@ -111,7 +111,7 @@ if __name__ == "__main__":
         if RUN_TRIANGLE_DECOMPOSER:
             # we need this to create the geometry files and again only needs
             # to be run once, so it's paired with the triangle decomposer
-            obj_to_json = ObjToJSON(base_obj_file_path)
+            obj_to_json = ObjToGeometryFiles(base_obj_file_path)
             obj_to_json.read_in_OBJ_file()
             obj_to_json.insert_face_data()
             obj_to_json.create_json_files()

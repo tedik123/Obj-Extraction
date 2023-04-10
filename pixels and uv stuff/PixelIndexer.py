@@ -42,7 +42,7 @@ class PixelIndexer:
             indexed_vertex_list, vertex_map = self.create_indexed_list(vertices)
             if len(indexed_vertex_list) % 3 != 0:
                 raise Exception("Something went wrong the list must be divisible by 3!")
-            
+
             # so now we have our label with an indexed list of values
             # we'll use the keys to create the UNIQUE vertices
             # and then the indexed_vertex_list will help us create the faces
