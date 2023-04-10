@@ -177,35 +177,37 @@ public:
         this->ptr = static_cast<int *>(imagePixels.request().ptr);
     }
 
-    void pixel_indexer(int x_index, int y_index) {
+    // returns tuple representing rgb value of x, y pixel coordinates
+    tuple<int, int, int> pixel_indexer(int x_index, int y_index) {
 //        auto ptr = static_cast<int *>(imagePixels_test.request().ptr);
 
         // Print out the desired elements
         int idx1 = y_index;
         int idx2 = x_index;
-        cout << "Elements of dim 3 at index (" << idx1 << ", " << idx2 << "):\n";
+//        cout << "Elements of dim 3 at index (" << idx1 << ", " << idx2 << "):\n";
 //        extract the 3 elements at the third dimension this should match to rgb values
         int val1 = *(ptr + (idx1 * dim2 + idx2) * dim3 + 0);
         int val2 = *(ptr + (idx1 * dim2 + idx2) * dim3 + 1);
         int val3 = *(ptr + (idx1 * dim2 + idx2) * dim3 + 2);
         tuple<int, int, int> rgb_value = make_tuple(val1, val2, val3);
-//        cout << val1 << " " << val2 << " " << val3 << endl;
 //         Print the tuple
-        cout << "(" << get<0>(rgb_value) << ", " << get<1>(rgb_value) << ", " << get<2>(rgb_value) << ")" << endl;
+//        cout << "(" << get<0>(rgb_value) << ", " << get<1>(rgb_value) << ", " << get<2>(rgb_value) << ")" << endl;
+        return rgb_value;
     }
 
     // helper function for the search algorithm to make it more readable
-    void DFS_helper(const pair<int, int> &current_coords, const vector<int> &rgb,
+    void DFS_helper(const pair<int, int> &current_coords, const tuple<int, int, int> &rgb,
                     const ColorDict &acceptable_colors,
-                    deque<pair<int, int>> &queue, unordered_map<pair<int, int>, vector<int>, PairHash> &visited,
+                    deque<pair<int, int>> &queue,  unordered_map<pair<int, int>, tuple<int, int, int>, PairHash> &visited,
                     deque<pair<int, int>> &accepted_pixels) {
         // you can think of .end() as -1 or not found
 //    can probably change this to contains
         if (!visited.contains(current_coords)) {
             visited[current_coords] = rgb;
             // if rgb value is not equal to the targeted rgb then we ignore it and don't continue searching from there
-            auto rgb_tuple = make_tuple(rgb[0], rgb[1], rgb[2]);
-            if (!acceptable_colors.contains(rgb_tuple)) {
+//            auto rgb_tuple = make_tuple(rgb[0], rgb[1], rgb[2]);
+//            if (!acceptable_colors.contains(rgb_tuple)) {
+            if (!acceptable_colors.contains(rgb)) {
                 return;
             }
             // if it's acceptable then add to the queue to continue searching from there as well as you know that it's
@@ -227,14 +229,16 @@ public:
         // queue is just a tuple list of coords
         deque<pair<int, int>> queue;
         // important that this is an unordered_map it's much faster look up time!
-        unordered_map<pair<int, int>, vector<int>, PairHash> visited;
+//        unordered_map<pair<int, int>, vector<int>, PairHash> visited;
+        unordered_map<pair<int, int>, tuple<int, int, int>, PairHash> visited;
         // this can just be a normal list or vector
         deque<pair<int, int>> accepted_pixels;
         // add the start to the queue and the visited unordered_map
         queue.push_back(starting_coords);
 
         // the value stored is arbitrary in this case it's rgb from coords dict
-        visited[starting_coords] = coords_dict[starting_coords];
+//        visited[starting_coords] = coords_dict[starting_coords];
+        visited[starting_coords] = pixel_indexer(x, y);
         accepted_pixels.push_back(starting_coords);
         auto acceptable_colors = acceptable_colors_by_label[label_name];
 
@@ -244,10 +248,11 @@ public:
             x = current_coords.first;
             y = current_coords.second;
 //        remove later this is just to prevent the crashing since we have a limited amount of points
-            if (!coords_dict.contains(current_coords)) {
-                cout << "Starting coords do not exist in dict! Skipping this one!" << endl;
-            } else {
-                auto pixel_rgb = coords_dict[current_coords];
+//            if (!coords_dict.contains(current_coords)) {
+//                cout << "Starting coords do not exist in dict! Skipping this one!" << endl;
+//            } else {
+//                auto pixel_rgb = coords_dict[current_coords];
+                auto pixel_rgb = pixel_indexer(x, y);
 //        FIXME later should not be fixed 4096
                 auto neighbors = get_neighbors_from_point_C_only(x, y, 4096, 4096);
 
@@ -261,7 +266,7 @@ public:
                                    accepted_pixels);
                     }
                 }
-            }
+//            }
         }
         // return revealed which should be all matching pixels within range
         cout << "visited vs revealed" << endl;

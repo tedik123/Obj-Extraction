@@ -134,8 +134,8 @@ class PixelGrabber:
         print("Starting c code")
         start= time.time()
         type(self.acceptable_colors_by_label)
-        C_executor = PixelGrabber_C(self.coords_dict, self.acceptable_colors_by_label)
-        print("finished constructor", time.time() -start)
+        C_executor = PixelGrabber_C(self.pixel_data, self.acceptable_colors_by_label)
+        print("finished constructor", time.time() - start)
         # the key will be the label_name,
         # and the value will be the array of pixels that make up the label
         self.pixels_by_label = {}
@@ -345,6 +345,22 @@ class PixelGrabber:
         print("Normal time took", end - start)
         return coords_dict, width, height, mode, pixels
 
+    def open_Image_Pillow_numpy(self):
+        # texture_file_path = "diffuse.jpg"
+        start = time.perf_counter()
+        print("Numpy image....")
+        img = Image.open(self.texture_file)
+        self.max_width, self.max_height = img.size
+        self.pixel_data = np.array(img)
+        end = time.perf_counter()
+        print(f"NUMPY pillow Time {end - start}")
+        # numpy is flipped!
+        # print(data[10][10])
+        # print(data[y][x])
+        print(self.pixel_data.dtype)
+        print(self.pixel_data.shape)
+        # return data
+
 
     # this takes in a color that you want all your labels to accept, this is helpful if the label has some sort of
     # text in the center
@@ -476,6 +492,7 @@ def save_pixels_by_labels(pixels_by_label, output_file_name='pixels_by_labels'):
 
 if __name__ == "__main__":
     # start = time.perf_counter()
+    test_mode = False
     start = time.time()
     # IMPORTANT  this is an array of strings, if it's empty it will do all of them
     label_names_to_test = []
@@ -497,22 +514,29 @@ if __name__ == "__main__":
 
     # although this takes forever it is not worth optimizing as it is a task that must be waited on
     # before anything else is run
-    pixel_grabber.set_and_create_image_data()
+    if not test_mode:
+        pixel_grabber.set_and_create_image_data()
+    else:
+        # for the C code we need this
+        pixel_grabber.open_Image_Pillow_numpy()
+
     # testing
     # pixel_grabber.get_pixel_coords()
     # pixel_grabber.get_pixel_coords_numpy()
 
     # creates the range of acceptable colors by label, in this case just white basically
     pixel_grabber.create_acceptable_colors_by_label(default_acceptable_colors, deviation_default_colors)
-    # start = time.perf_counter()
+    start = time.perf_counter()
     #
     # # starting_coords = (50, 50)
     # # result = pixel_grabber.DFS(starting_coords, "red", 49, 49, 51, 51)
-    pixel_grabber.run_pixel_grabber()
-    # pixel_grabber.run_pixel_grabber_C()
+    if not test_mode:
+        pixel_grabber.run_pixel_grabber()
+    else:
+        pixel_grabber.run_pixel_grabber_C()
     # print(pixel_grabber.pixels_by_label.keys())
     # # print(result)
-    # end = time.perf_counter()
-    end = time.time()
+    end = time.perf_counter()
+    # end = time.time()
     print()
     print(f"Finished finding pixels...Took {end - start} seconds")
