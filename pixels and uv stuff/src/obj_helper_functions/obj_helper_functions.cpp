@@ -105,7 +105,6 @@ struct PairHash {
     }
 };
 
-
 // for testing these are the 8 neighbors of 50, 50
 //unordered_map<pair<int, int>, vector<int>, PairHash> coords_dict = {
 //        {{50, 50}, {255, 0, 0}}, // matches to red acceptable colors
@@ -151,19 +150,14 @@ public:
     int dim2;
     int dim3;
     pybind11::array_t<int> imagePixels;
-//    py::array_t<int>& imagePixels;
-    // Get a pointer to the raw data
-    int* ptr;
 
-//    PixelGrabber_C(unordered_map<pair<int, int>, vector<int>, PairHash> coords_dict,
-//                   LabelsDict acceptable_colors_by_label) {
-//        this->coords_dict = std::move(coords_dict);
-//        this->acceptable_colors_by_label = std::move(acceptable_colors_by_label);
-//    }
+    // Get a pointer to the raw data
+    int *ptr;
+    int max_width, max_height;
 
 
     PixelGrabber_C(py::array_t<int> &imagePixels,
-                   LabelsDict acceptable_colors_by_label) {
+                   LabelsDict acceptable_colors_by_label, int max_width, int max_height) {
 //        this->coords_dict = std::move(coords_dict);
         this->acceptable_colors_by_label = std::move(acceptable_colors_by_label);
 //        set these as class variables, so we don't have to keep accessing them
@@ -172,13 +166,15 @@ public:
         this->dim2 = shape[1];
         this->dim3 = shape[2];
 //        need to store the reference of pixels!!! otherwise it gets garbage collected!!!
-        this-> imagePixels = imagePixels;
+        this->imagePixels = imagePixels;
         // Get a pointer to the raw data
         this->ptr = static_cast<int *>(imagePixels.request().ptr);
+        this->max_height = max_height;
+        this->max_width = max_width;
     }
 
     // returns tuple representing rgb value of x, y pixel coordinates
-    tuple<int, int, int> pixel_indexer(int x_index, int y_index) {
+    tuple<int, int, int> rgb_lookup(int x_index, int y_index) {
 //        auto ptr = static_cast<int *>(imagePixels_test.request().ptr);
 
         // Print out the desired elements
@@ -198,15 +194,12 @@ public:
     // helper function for the search algorithm to make it more readable
     void DFS_helper(const pair<int, int> &current_coords, const tuple<int, int, int> &rgb,
                     const ColorDict &acceptable_colors,
-                    deque<pair<int, int>> &queue,  unordered_map<pair<int, int>, tuple<int, int, int>, PairHash> &visited,
+                    deque<pair<int, int>> &queue,
+                    unordered_map<pair<int, int>, tuple<int, int, int>, PairHash> &visited,
                     deque<pair<int, int>> &accepted_pixels) {
-        // you can think of .end() as -1 or not found
-//    can probably change this to contains
         if (!visited.contains(current_coords)) {
             visited[current_coords] = rgb;
             // if rgb value is not equal to the targeted rgb then we ignore it and don't continue searching from there
-//            auto rgb_tuple = make_tuple(rgb[0], rgb[1], rgb[2]);
-//            if (!acceptable_colors.contains(rgb_tuple)) {
             if (!acceptable_colors.contains(rgb)) {
                 return;
             }
@@ -238,7 +231,7 @@ public:
 
         // the value stored is arbitrary in this case it's rgb from coords dict
 //        visited[starting_coords] = coords_dict[starting_coords];
-        visited[starting_coords] = pixel_indexer(x, y);
+        visited[starting_coords] = rgb_lookup(x, y);
         accepted_pixels.push_back(starting_coords);
         auto acceptable_colors = acceptable_colors_by_label[label_name];
 
@@ -252,26 +245,28 @@ public:
 //                cout << "Starting coords do not exist in dict! Skipping this one!" << endl;
 //            } else {
 //                auto pixel_rgb = coords_dict[current_coords];
-                auto pixel_rgb = pixel_indexer(x, y);
+            auto pixel_rgb = rgb_lookup(x, y);
 //        FIXME later should not be fixed 4096
-                auto neighbors = get_neighbors_from_point_C_only(x, y, 4096, 4096);
+            auto neighbors = get_neighbors_from_point_C_only(x, y, max_width, max_height);
 
-                // this is no more than 8 long at a time
-                for (const auto &neighbor: neighbors) {
-                    auto current_x = neighbor.first;
-                    auto current_y = neighbor.second;
-                    // need to check that it's within the confines as well
-                    if (max_X >= current_x && current_x >= min_X && max_Y >= current_y && current_y >= min_Y) {
-                        DFS_helper(make_pair(current_x, current_y), pixel_rgb, acceptable_colors, queue, visited,
-                                   accepted_pixels);
-                    }
+            // this is no more than 8 long at a time
+            for (const auto &neighbor: neighbors) {
+                auto current_x = neighbor.first;
+                auto current_y = neighbor.second;
+                // need to check that it's within the confines as well
+                if (max_X >= current_x && current_x >= min_X && max_Y >= current_y && current_y >= min_Y) {
+                    DFS_helper(make_pair(current_x, current_y), pixel_rgb, acceptable_colors, queue, visited,
+                               accepted_pixels);
                 }
+            }
 //            }
         }
         // return revealed which should be all matching pixels within range
         cout << "visited vs revealed" << endl;
         cout << visited.size() << endl;
         cout << accepted_pixels.size() << endl;
+//        LOCK BEFORE RETURN!
+        py::gil_scoped_acquire acquire;
         return py::cast(accepted_pixels);
     }
 
@@ -363,15 +358,35 @@ PYBIND11_MODULE(obj_helper_functions, m) {
       )pbdoc",
           py::arg("points"), py::arg("max_width"), py::arg("max_height"));
 
-//    m.def("DFS", &DFS, R"pbdoc(DFS TEST)pbdoc", py::arg("starting_coords"), py::arg("label_name"),
-//          py::arg("min_X"), py::arg("min_Y"), py::arg("max_X"), py::arg("max_Y"));
-    py::class_<PixelGrabber_C>(m, "PixelGrabber_C")
-//            .def(py::init<std::unordered_map<std::pair<int, int>, std::vector<int>, PairHash>,
-//                    unordered_map<string, unordered_map<tuple<int, int, int>, bool, TupleHash>>>())
-            .def(py::init<py::array_t<int> &, unordered_map<string, unordered_map<tuple<int, int, int>, bool, TupleHash>>>())
-            .def("DFS", &PixelGrabber_C::DFS, py::arg("starting_coords"), py::arg("label_name"),
+    py::class_<PixelGrabber_C>(m, "PixelGrabber_C", R"pbdoc(
+        C++ class for extracting pixels of a specified label from a numpy array of image pixels.
+
+        Args:
+            imagePixels (numpy.ndarray): A flattened 3D numpy array of shape (height, width, rgb_values) representing the image pixels.
+            acceptable_colors_by_label (dict): A dictionary of dictionaries associating each label with a dictionary of RGB values that are acceptable.
+            max_width (int): The maximum width of the image.
+            max_height (int): The maximum height of the image.
+    )pbdoc")
+            .def(py::init<py::array_t<int> &, unordered_map<string, unordered_map<tuple<int, int, int>, bool, TupleHash>>, int, int>())
+            .def("DFS", &PixelGrabber_C::DFS, py::call_guard<py::gil_scoped_release>(), R"pbdoc(
+        Performs a depth-first search (DFS) on the image data to find all pixels matching a given label.
+        Multithreading can be used with this function.
+
+        Args:
+            start_point (tuple): The starting (x, y) coordinate for the search.
+            label_name (str): The label to search for in the image data.
+            min_X (int): The minimum x coordinate to search within.
+            min_Y (int): The minimum y coordinate to search within.
+            max_X (int): The maximum x coordinate to search within.
+            max_Y (int): The maximum y coordinate to search within.
+
+        Returns:
+            list of tuples: A list of (x, y) coordinates representing the matching pixels for a label.
+    )pbdoc",
+                 py::arg("starting_coord"),
+                 py::arg("label_name"),
                  py::arg("min_X"), py::arg("min_Y"), py::arg("max_X"), py::arg("max_Y"))
-            .def("pixel_indexer", &PixelGrabber_C::pixel_indexer, py::arg("y_index"), py::arg("x_index")),
+            .def("rgb_lookup", &PixelGrabber_C::rgb_lookup, py::arg("y_index"), py::arg("x_index")),
             m.def("test_numpy_index", &print_array_value, py::arg("numpy_array"), py::arg("y_index"),
                   py::arg("x_index"));
     m.def("test_numpy_3D_print", &print_3d_array, py::arg("numpy_array"));
