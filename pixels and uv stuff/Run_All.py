@@ -93,7 +93,7 @@ if __name__ == "__main__":
         pixel_grabber.create_acceptable_colors_by_label(default_acceptable_colors, deviation_default_colors)
 
         # then run the actual pixel_grabber algo
-        pixel_grabber.run_pixel_grabber_C()
+        pixel_grabber.run_pixel_grabber()
 
         #  to save the pixels by label
         # you can specify an output file name as an argument if you want (optional)

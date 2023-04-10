@@ -56,5 +56,5 @@ def open_Image_Pillow_numpy():
 
 open_Image_Pillow()
 # open_image_CV2()
-open_Image_Pillow_numpy()
+# open_Image_Pillow_numpy()
 
