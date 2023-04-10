@@ -64,8 +64,8 @@ if __name__ == "__main__":
 
     # if you only want to run certain scripts you can change accordingly here
     RUN_PIXEL_GRABBER = True
-    RUN_PIXEL_TO_FACE = False
-    RUN_PIXEL_INDEXER = False
+    RUN_PIXEL_TO_FACE = True
+    RUN_PIXEL_INDEXER = True
 
     # this triangle decomposer only needs to be run once if the base .obj file is the same! So turn it to false, after!
     RUN_TRIANGLE_DECOMPOSER = False
@@ -87,13 +87,13 @@ if __name__ == "__main__":
         executor = ProcessPoolExecutor(max_workers=2)
         # although this takes forever it is not worth optimizing as it is a task that must be waited on
         # before anything else is run
-        pixel_grabber.set_and_create_image_data()
+        pixel_grabber.read_in_image_data()
 
         # creates the range of acceptable colors by label, in this case just white basically
         pixel_grabber.create_acceptable_colors_by_label(default_acceptable_colors, deviation_default_colors)
 
         # then run the actual pixel_grabber algo
-        pixel_grabber.run_pixel_grabber()
+        pixel_grabber.run_pixel_grabber_C()
 
         #  to save the pixels by label
         # you can specify an output file name as an argument if you want (optional)
