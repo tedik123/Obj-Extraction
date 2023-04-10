@@ -246,7 +246,7 @@ public:
 //            } else {
 //                auto pixel_rgb = coords_dict[current_coords];
             auto pixel_rgb = rgb_lookup(x, y);
-//        FIXME later should not be fixed 4096
+
             auto neighbors = get_neighbors_from_point_C_only(x, y, max_width, max_height);
 
             // this is no more than 8 long at a time

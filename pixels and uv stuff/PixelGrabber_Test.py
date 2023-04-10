@@ -14,13 +14,13 @@ from obj_helper_functions import get_neighbors_from_point, PixelGrabber_C
 class PixelGrabber:
     # if label name is none we do all them otherwise it's all of them
     # takes in an array of label names to do
-    def __init__(self, texture_file_path, label_names=None, pixel_deviation=0, ):
-    # def __init__(self):
+    def __init__(self, texture_file_path, label_names=None, pixel_deviation=0):
+        # def __init__(self):
         self.pixel_deviation = pixel_deviation
         self.enable_default_color_range = True
         self.label_starts = self.read_in_label_starts()
-        self.texture_file = 'obj textures/diffuse.jpg'
-        # self.texture_file = texture_file_path
+        # self.texture_file = 'obj textures/diffuse.jpg'
+        self.texture_file = texture_file_path
         self.label_names = label_names
         self.coords_dict, self.max_width, self.max_height, self.mode, self.pixels = None, None, None, None, None
         # self.coords_dict = {
@@ -94,7 +94,7 @@ class PixelGrabber:
             acceptable_colors_dict = self.create_acceptable_colors(acceptable_colors, allow_default_color_range,
                                                                    allowed_pixel_deviation)
             self.acceptable_colors_by_label[label_name] = acceptable_colors_dict
-        print(self.acceptable_colors_by_label["Deltoid"])
+        # print(self.acceptable_colors_by_label["Deltoid"])
 
     # for each label name it will extract all the pixels belonging to it using the label_starts.json
     def run_pixel_grabber(self):
@@ -132,49 +132,9 @@ class PixelGrabber:
                 label_pixels += self.DFS(tuple(point), label_name, min_X, min_Y, max_X, max_Y)
                 print("len label", len(label_pixels))
             self.pixels_by_label[label_name] = label_pixels
-    # def run_pixel_grabber_C(self):
-    #     print("Starting c code")
-    #     type(self.acceptable_colors_by_label)
-    #     C_executor = PixelGrabber_C(self.pixel_data, self.acceptable_colors_by_label)
-    #     print("finished constructor", time.time() - start)
-    #     # the key will be the label_name,
-    #     # and the value will be the array of pixels that make up the label
-    #     self.pixels_by_label = {}
-    #     # need to extract only the labels names we want if provided a list
-    #     if self.label_names:
-    #         change_label_starts = {}
-    #         for label_name in self.label_names:
-    #             label_data = self.label_starts[label_name]
-    #             change_label_starts[label_name] = label_data
-    #         self.label_starts = change_label_starts
-    #
-    #     for label_name, label_data in self.label_starts.items():
-    #         print(f"Starting run for DFS for label {label_name}")
-    #         label = label_data["label"]
-    #         starting_points = label_data["starting_points"]
-    #
-    #         # the length of arrays starting_points, mins, and maxes must all be equal
-    #         label_pixels = []
-    #         for i, point in enumerate(starting_points):
-    #             min_X, min_Y = 0, 0
-    #             # we get the max width from the pic
-    #             max_X, max_Y = self.max_width, self.max_height
-    #             if "min_X" in label_data:
-    #                 min_X = label_data["min_X"][i]
-    #             if "min_Y" in label_data:
-    #                 min_Y = label_data["min_Y"][i]
-    #             if "max_X" in label_data:
-    #                 max_X = label_data["max_X"][i]
-    #             if "max_Y" in label_data:
-    #                 max_Y = label_data["max_Y"][i]
-    #
-    #             # combine results into one big array
-    #             label_pixels += C_executor.DFS(tuple(point), label_name, min_X, min_Y, max_X, max_Y)
-    #             # label_pixels += self.DFS(tuple(point), label_name, min_X, min_Y, max_X, max_Y)
-    #             print("len label", len(label_pixels))
-    #         self.pixels_by_label[label_name] = label_pixels
 
-    def process_label_pixels(self, label_name, label_data, C_executor:PixelGrabber_C):
+    # this is used for the threads to do their own isolated work
+    def process_label_pixels(self, label_name, label_data, C_executor: PixelGrabber_C):
         print(f"Starting run for DFS for label {label_name}")
         label = label_data["label"]
         starting_points = label_data["starting_points"]
@@ -200,12 +160,10 @@ class PixelGrabber:
             print("len label", len(label_pixels))
         return label_name, label_pixels
 
-    def run_pixel_grabber_C(self):
-        print("Starting c code")
-        start = time.time()
-        type(self.acceptable_colors_by_label)
+    def run_pixel_grabber_C(self, thread_count: int = None):
+        print("Starting pixel grabbing process!")
         C_executor = PixelGrabber_C(self.pixel_data, self.acceptable_colors_by_label, self.max_width, self.max_height)
-        print("finished constructor", time.time() - start)
+
         # the key will be the label_name,
         # and the value will be the array of pixels that make up the label
         self.pixels_by_label = {}
@@ -216,7 +174,8 @@ class PixelGrabber:
                 label_data = self.label_starts[label_name]
                 change_label_starts[label_name] = label_data
             self.label_starts = change_label_starts
-        thread_count = cpu_count() - 1
+        if thread_count is None:
+            thread_count = cpu_count() - 1
         with ThreadPoolExecutor(max_workers=thread_count) as executor:
             futures = []
             for label_name, label_data in self.label_starts.items():
@@ -249,7 +208,7 @@ class PixelGrabber:
             current_coords = queue.popleft()
             x, y = current_coords
             # if current_coords not in self.coords_dict:
-                # print("Starting coords do not exist in dict! Skipping this one!")
+            # print("Starting coords do not exist in dict! Skipping this one!")
             # else:
             # pixel_rgb = self.coords_dict[(x, y)]
             pixel_rgb = self.pixels[x, y]
@@ -399,7 +358,8 @@ class PixelGrabber:
         print("Normal time took", end - start)
         return coords_dict, width, height, mode, pixels
 
-    def open_Image_Pillow_numpy(self):
+    # reads in image data as a numpy array
+    def read_in_image_data(self):
         # texture_file_path = "diffuse.jpg"
         start = time.perf_counter()
         print("Numpy image....")
@@ -414,7 +374,6 @@ class PixelGrabber:
         print(self.pixel_data.dtype)
         print(self.pixel_data.shape)
         # return data
-
 
     # this takes in a color that you want all your labels to accept, this is helpful if the label has some sort of
     # text in the center
@@ -572,7 +531,7 @@ if __name__ == "__main__":
         pixel_grabber.set_and_create_image_data()
     else:
         # for the C code we need this
-        pixel_grabber.open_Image_Pillow_numpy()
+        pixel_grabber.read_in_image_data()
 
     # testing
     # pixel_grabber.get_pixel_coords()
