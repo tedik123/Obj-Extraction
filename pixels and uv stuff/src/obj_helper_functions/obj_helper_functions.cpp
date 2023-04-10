@@ -213,11 +213,11 @@ public:
 
 // searching algorithm for neighboring pixels that match
 //deque<pair<int, int>>, should i return a python deque?
-    py::list DFS(const pair<int, int> &starting_coords, const string &label_name,
+    py::list DFS(const pair<int, int> &starting_coord, const string &label_name,
                  const int &min_X, const int &min_Y, const int &max_X, const int &max_Y) {
 //    coords_dict.insert({{5, 5}, {6, 6, 6}});
-        int x = starting_coords.first;
-        int y = starting_coords.second;
+        int x = starting_coord.first;
+        int y = starting_coord.second;
         // deque is a doubly linked list, a normal vector is fine
         // queue is just a tuple list of coords
         deque<pair<int, int>> queue;
@@ -227,12 +227,12 @@ public:
         // this can just be a normal list or vector
         deque<pair<int, int>> accepted_pixels;
         // add the start to the queue and the visited unordered_map
-        queue.push_back(starting_coords);
+        queue.push_back(starting_coord);
 
         // the value stored is arbitrary in this case it's rgb from coords dict
 //        visited[starting_coords] = coords_dict[starting_coords];
-        visited[starting_coords] = rgb_lookup(x, y);
-        accepted_pixels.push_back(starting_coords);
+        visited[starting_coord] = rgb_lookup(x, y);
+        accepted_pixels.push_back(starting_coord);
         auto acceptable_colors = acceptable_colors_by_label[label_name];
 
         while (!queue.empty()) {
@@ -363,17 +363,25 @@ PYBIND11_MODULE(obj_helper_functions, m) {
 
         Args:
             imagePixels (numpy.ndarray): A flattened 3D numpy array of shape (height, width, rgb_values) representing the image pixels.
+
             acceptable_colors_by_label (dict): A dictionary of dictionaries associating each label with a dictionary of RGB values that are acceptable.
+
             max_width (int): The maximum width of the image.
+
             max_height (int): The maximum height of the image.
+
     )pbdoc")
             .def(py::init<py::array_t<int> &, unordered_map<string, unordered_map<tuple<int, int, int>, bool, TupleHash>>, int, int>())
-            .def("DFS", &PixelGrabber_C::DFS, py::call_guard<py::gil_scoped_release>(), R"pbdoc(
+            .def("DFS", &PixelGrabber_C::DFS, py::call_guard<py::gil_scoped_release>(),
+                 py::arg("starting_coord"),
+                 py::arg("label_name"),
+                 py::arg("min_X"), py::arg("min_Y"), py::arg("max_X"), py::arg("max_Y"),
+                    R"pbdoc(
         Performs a depth-first search (DFS) on the image data to find all pixels matching a given label.
         Multithreading can be used with this function.
 
         Args:
-            start_point (tuple): The starting (x, y) coordinate for the search.
+            starting_coord (tuple): The starting (x, y) coordinate for the search.
             label_name (str): The label to search for in the image data.
             min_X (int): The minimum x coordinate to search within.
             min_Y (int): The minimum y coordinate to search within.
@@ -382,10 +390,7 @@ PYBIND11_MODULE(obj_helper_functions, m) {
 
         Returns:
             list of tuples: A list of (x, y) coordinates representing the matching pixels for a label.
-    )pbdoc",
-                 py::arg("starting_coord"),
-                 py::arg("label_name"),
-                 py::arg("min_X"), py::arg("min_Y"), py::arg("max_X"), py::arg("max_Y"))
+    )pbdoc")
             .def("rgb_lookup", &PixelGrabber_C::rgb_lookup, py::arg("y_index"), py::arg("x_index")),
             m.def("test_numpy_index", &print_array_value, py::arg("numpy_array"), py::arg("y_index"),
                   py::arg("x_index"));

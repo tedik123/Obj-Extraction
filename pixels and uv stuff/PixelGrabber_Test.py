@@ -1,8 +1,10 @@
 import json
 import pickle
 import time
-from concurrent.futures.process import ProcessPoolExecutor
+from concurrent.futures.thread import ThreadPoolExecutor
+from concurrent.futures import as_completed
 from collections import deque
+from multiprocessing import cpu_count
 
 import numpy as np
 from PIL import Image, ImageColor
@@ -130,11 +132,79 @@ class PixelGrabber:
                 label_pixels += self.DFS(tuple(point), label_name, min_X, min_Y, max_X, max_Y)
                 print("len label", len(label_pixels))
             self.pixels_by_label[label_name] = label_pixels
+    # def run_pixel_grabber_C(self):
+    #     print("Starting c code")
+    #     type(self.acceptable_colors_by_label)
+    #     C_executor = PixelGrabber_C(self.pixel_data, self.acceptable_colors_by_label)
+    #     print("finished constructor", time.time() - start)
+    #     # the key will be the label_name,
+    #     # and the value will be the array of pixels that make up the label
+    #     self.pixels_by_label = {}
+    #     # need to extract only the labels names we want if provided a list
+    #     if self.label_names:
+    #         change_label_starts = {}
+    #         for label_name in self.label_names:
+    #             label_data = self.label_starts[label_name]
+    #             change_label_starts[label_name] = label_data
+    #         self.label_starts = change_label_starts
+    #
+    #     for label_name, label_data in self.label_starts.items():
+    #         print(f"Starting run for DFS for label {label_name}")
+    #         label = label_data["label"]
+    #         starting_points = label_data["starting_points"]
+    #
+    #         # the length of arrays starting_points, mins, and maxes must all be equal
+    #         label_pixels = []
+    #         for i, point in enumerate(starting_points):
+    #             min_X, min_Y = 0, 0
+    #             # we get the max width from the pic
+    #             max_X, max_Y = self.max_width, self.max_height
+    #             if "min_X" in label_data:
+    #                 min_X = label_data["min_X"][i]
+    #             if "min_Y" in label_data:
+    #                 min_Y = label_data["min_Y"][i]
+    #             if "max_X" in label_data:
+    #                 max_X = label_data["max_X"][i]
+    #             if "max_Y" in label_data:
+    #                 max_Y = label_data["max_Y"][i]
+    #
+    #             # combine results into one big array
+    #             label_pixels += C_executor.DFS(tuple(point), label_name, min_X, min_Y, max_X, max_Y)
+    #             # label_pixels += self.DFS(tuple(point), label_name, min_X, min_Y, max_X, max_Y)
+    #             print("len label", len(label_pixels))
+    #         self.pixels_by_label[label_name] = label_pixels
+
+    def process_label_pixels(self, label_name, label_data, C_executor:PixelGrabber_C):
+        print(f"Starting run for DFS for label {label_name}")
+        label = label_data["label"]
+        starting_points = label_data["starting_points"]
+
+        # the length of arrays starting_points, mins, and maxes must all be equal
+        label_pixels = []
+        for i, point in enumerate(starting_points):
+            min_X, min_Y = 0, 0
+            # we get the max width from the pic
+            max_X, max_Y = self.max_width, self.max_height
+            if "min_X" in label_data:
+                min_X = label_data["min_X"][i]
+            if "min_Y" in label_data:
+                min_Y = label_data["min_Y"][i]
+            if "max_X" in label_data:
+                max_X = label_data["max_X"][i]
+            if "max_Y" in label_data:
+                max_Y = label_data["max_Y"][i]
+
+            # combine results into one big array
+            label_pixels += C_executor.DFS(tuple(point), label_name, min_X, min_Y, max_X, max_Y)
+            # label_pixels += self.DFS(tuple(point), label_name, min_X, min_Y, max_X, max_Y)
+            print("len label", len(label_pixels))
+        return label_name, label_pixels
+
     def run_pixel_grabber_C(self):
         print("Starting c code")
-        start= time.time()
+        start = time.time()
         type(self.acceptable_colors_by_label)
-        C_executor = PixelGrabber_C(self.pixel_data, self.acceptable_colors_by_label)
+        C_executor = PixelGrabber_C(self.pixel_data, self.acceptable_colors_by_label, self.max_width, self.max_height)
         print("finished constructor", time.time() - start)
         # the key will be the label_name,
         # and the value will be the array of pixels that make up the label
@@ -146,31 +216,15 @@ class PixelGrabber:
                 label_data = self.label_starts[label_name]
                 change_label_starts[label_name] = label_data
             self.label_starts = change_label_starts
-        for label_name, label_data in self.label_starts.items():
-            print(f"Starting run for DFS for label {label_name}")
-            label = label_data["label"]
-            starting_points = label_data["starting_points"]
+        thread_count = cpu_count() - 1
+        with ThreadPoolExecutor(max_workers=thread_count) as executor:
+            futures = []
+            for label_name, label_data in self.label_starts.items():
+                futures.append(executor.submit(self.process_label_pixels, label_name, label_data, C_executor))
 
-            # the length of arrays starting_points, mins, and maxes must all be equal
-            label_pixels = []
-            for i, point in enumerate(starting_points):
-                min_X, min_Y = 0, 0
-                # we get the max width from the pic
-                max_X, max_Y = self.max_width, self.max_height
-                if "min_X" in label_data:
-                    min_X = label_data["min_X"][i]
-                if "min_Y" in label_data:
-                    min_Y = label_data["min_Y"][i]
-                if "max_X" in label_data:
-                    max_X = label_data["max_X"][i]
-                if "max_Y" in label_data:
-                    max_Y = label_data["max_Y"][i]
-
-                # combine results into one big array
-                label_pixels += C_executor.DFS(tuple(point), label_name, min_X, min_Y, max_X, max_Y)
-                # label_pixels += self.DFS(tuple(point), label_name, min_X, min_Y, max_X, max_Y)
-                print("len label", len(label_pixels))
-            self.pixels_by_label[label_name] = label_pixels
+            for future in as_completed(futures):
+                label_name, label_pixels = future.result()
+                self.pixels_by_label[label_name] = label_pixels
 
     # this is the searching algorithm for neighboring pixels that match
     def DFS(self, starting_coords: tuple, label_name: str, min_X: int, min_Y: int, max_X: int, max_Y: int):
@@ -492,7 +546,7 @@ def save_pixels_by_labels(pixels_by_label, output_file_name='pixels_by_labels'):
 
 if __name__ == "__main__":
     # start = time.perf_counter()
-    test_mode = False
+    test_mode = True
     start = time.time()
     # IMPORTANT  this is an array of strings, if it's empty it will do all of them
     label_names_to_test = []
