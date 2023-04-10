@@ -2,7 +2,6 @@ import json
 import pickle
 import time
 from collections import OrderedDict
-from concurrent.futures import ThreadPoolExecutor
 
 
 class PixelIndexer:
@@ -29,7 +28,6 @@ class PixelIndexer:
                 self.faces_found_by_labels = pickle.load(file)
 
     def create_indexed_faces(self):
-        thread_count = 11
         print("Starting indexing of faces!")
         if self.label_names:
             labels_to_do = {}
@@ -39,12 +37,12 @@ class PixelIndexer:
             # overwrite it to only the labels we care about
             self.faces_found_by_labels = labels_to_do
         # this will have to change later, so we can handle normals, faces, and uvs?
-        # with ThreadPoolExecutor(max_workers=thread_count) as executor:
         for label_name, values in self.faces_found_by_labels.items():
             vertices = values["vertices"]
             indexed_vertex_list, vertex_map = self.create_indexed_list(vertices)
             if len(indexed_vertex_list) % 3 != 0:
                 raise Exception("Something went wrong the list must be divisible by 3!")
+            
             # so now we have our label with an indexed list of values
             # we'll use the keys to create the UNIQUE vertices
             # and then the indexed_vertex_list will help us create the faces
@@ -62,15 +60,11 @@ class PixelIndexer:
                 indexed_uvs_list, uvs_map = self.create_indexed_list(uvs)
                 uvs_index_tuples = self.format_indices(indexed_uvs_list)
             # then write to file!
-            # TODO need to add all the other maps and lists to this function to be passed in
-            #  and make sure create_obj_file copies them over
             self.create_obj_file(label_name, vertex_map, vertex_index_tuples,
                                  normal_map, normal_index_tuples,
                                  uvs_index_tuples, uvs_map)
-                # executor.submit(self.create_obj_file, label_name, vertex_map, vertex_index_tuples,
-                #                 normal_map, normal_index_tuples,
-                #                 uvs_index_tuples, uvs_map)
 
+    # FIXME this is the bottleneck to this code!
     def create_indexed_list(self, geometry_list):
         # we need to preserve the order the keys & indices were inserted
         geometry_map = OrderedDict()

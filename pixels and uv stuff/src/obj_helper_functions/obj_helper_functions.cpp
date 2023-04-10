@@ -128,11 +128,11 @@ struct PairHash {
 //};
 
 struct TupleHash {
-    std::size_t operator()(const std::tuple<int, int, int> &t) const {
+    size_t operator()(const tuple<int, int, int> &t) const {
         // combine the hash values of each element in the tuple
-        return std::hash<int>{}(std::get<0>(t)) ^
-               std::hash<int>{}(std::get<1>(t)) ^
-               std::hash<int>{}(std::get<2>(t));
+        return hash<int>{}(get<0>(t)) ^
+               hash<int>{}(get<1>(t)) ^
+               hash<int>{}(get<2>(t));
     }
 };
 
@@ -158,8 +158,8 @@ public:
 
     PixelGrabber_C(py::array_t<int> &imagePixels,
                    LabelsDict acceptable_colors_by_label, int max_width, int max_height) {
-//        this->coords_dict = std::move(coords_dict);
-        this->acceptable_colors_by_label = std::move(acceptable_colors_by_label);
+//        this->coords_dict = move(coords_dict);
+        this->acceptable_colors_by_label = move(acceptable_colors_by_label);
 //        set these as class variables, so we don't have to keep accessing them
         this->shape = imagePixels.shape();
         this->dim1 = shape[0];
@@ -285,12 +285,12 @@ void print_array_value(py::array_t<int> arr, int y_index, int x_index) {
     // Print out the desired elements
     int idx1 = y_index;
     int idx2 = x_index;
-    std::cout << "Elements of dim 3 at index (" << idx1 << ", " << idx2 << "):\n";
+    cout << "Elements of dim 3 at index (" << idx1 << ", " << idx2 << "):\n";
     for (int k = 0; k < dim3; k++) {
         int val = *(ptr + (idx1 * dim2 + idx2) * dim3 + k);
-        std::cout << val << " ";
+        cout << val << " ";
     }
-    std::cout << std::endl;
+    cout << endl;
 }
 
 void print_3d_array(py::array_t<int> &arr) {
@@ -308,11 +308,11 @@ void print_3d_array(py::array_t<int> &arr) {
         for (int j = 0; j < dim2; j++) {
             for (int k = 0; k < dim3; k++) {
                 int val = *(ptr + (i * dim2 + j) * dim3 + k);
-                std::cout << val << " ";
+                cout << val << " ";
             }
-            std::cout << std::endl;
+            cout << endl;
         }
-        std::cout << std::endl;
+        cout << endl;
     }
 }
 
@@ -332,6 +332,53 @@ py::list pixel_coords_to_uv(vector<pair<int, int>> &pixel_list, int max_width, i
     py::gil_scoped_acquire acquire;
     return py::cast(result);
 }
+
+
+//using Geometry = vector<float>;
+//using GeometryList = vector<Geometry>;
+//using IndexedGeometryList = vector<int>;
+//
+//struct TupleHasher {
+//    size_t operator()(const tuple<float, float, float>& t) const {
+//        return hash<float>{}(get<0>(t)) ^ hash<float>{}(get<1>(t)) ^ hash<float>{}(get<2>(t));
+//    }
+//};
+//
+//struct TupleEqual {
+//    bool operator()(const tuple<float, float, float>& lhs, const tuple<float, float, float>& rhs) const {
+//        return get<0>(lhs) == get<0>(rhs) && get<1>(lhs) == get<1>(rhs) && get<2>(lhs) == get<2>(rhs);
+//    }
+//};
+//
+//struct TupleComparator {
+//    bool operator()(const tuple<float, float, float>& lhs, const tuple<float, float, float>& rhs) const {
+//        return tie(get<0>(lhs), get<1>(lhs), get<2>(lhs)) < tie(get<0>(rhs), get<1>(rhs), get<2>(rhs));
+//    }
+//};
+//
+//using OrderedGeometryMap = map<tuple<float, float, float>, int, TupleComparator>;
+//
+//py::tuple create_indexed_list(const GeometryList& geometry_list) {
+//    OrderedGeometryMap geometry_map;
+//    int geometry_index = 1;
+//    IndexedGeometryList indexed_geometry_list(geometry_list.size());
+//    for (size_t i = 0; i < geometry_list.size(); ++i) {
+//        const auto& geometry = geometry_list[i];
+//        auto t_geometry = make_tuple(geometry[0], geometry[1], geometry[2]);
+//        if (geometry_map.count(t_geometry)) {
+//            indexed_geometry_list[i] = geometry_map[t_geometry];
+//        }
+//        else {
+//            geometry_map[t_geometry] = geometry_index;
+//            indexed_geometry_list[i] = geometry_index;
+//            ++geometry_index;
+//        }
+//    }
+//    py::dict py_geometry_map(py::cast(geometry_map, py::return_value_policy::move));
+//    return py::make_tuple(indexed_geometry_list, py_geometry_map);
+//}
+
+
 
 
 PYBIND11_MODULE(obj_helper_functions, m) {
@@ -415,6 +462,7 @@ PYBIND11_MODULE(obj_helper_functions, m) {
     m.def("pixel_coords_to_uv", &pixel_coords_to_uv, py::call_guard<py::gil_scoped_release>(),
           R"pbdoc("Convert pixel coordinates to uv coordinates, returns a list of tuples.")pbdoc", py::arg("pixel_list"), py::arg("max_width"),
           py::arg("max_height"));
+//    m.def("create_indexed_list_c", &create_indexed_list);
 
 #ifdef VERSION_INFO
     m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);
