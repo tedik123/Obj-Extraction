@@ -1,0 +1,3 @@
+C:\Users\tedik\AppData\Local\JetBrains\Toolbox\apps\CLion\ch-0\231.8109.174\bin\cmake\win\x64\bin\cmake.exe -E rm -f CMakeFiles\obj_helper_functions.dir/objects.a
+C:\Users\tedik\AppData\Local\JetBrains\Toolbox\apps\CLion\ch-0\231.8109.174\bin\mingw\bin\ar.exe qc CMakeFiles\obj_helper_functions.dir/objects.a @CMakeFiles\obj_helper_functions.dir\objects1
+C:\Users\tedik\AppData\Local\JetBrains\Toolbox\apps\CLion\ch-0\231.8109.174\bin\mingw\bin\g++.exe -g -shared -o obj_helper_functions.cp310-win_amd64.pyd -Wl,--major-image-version,0,--minor-image-version,0 -Wl,--whole-archive CMakeFiles\obj_helper_functions.dir/objects.a -Wl,--no-whole-archive @CMakeFiles\obj_helper_functions.dir\linkLibs.rsp

@@ -3,6 +3,8 @@ import concurrent.futures
 import json
 import time
 
+from PIL import Image
+
 from Triangles import Triangle
 from shapely import STRtree, points as Points
 import pickle
@@ -179,7 +181,8 @@ class PixelToFace:
         results = []
         with concurrent.futures.ThreadPoolExecutor(max_workers=thread_count) as executor:
             futures = []
-            for i in range(thread_count):
+            # work_by_thread is either equal to the thread count or less than
+            for i in range(len(work_by_thread)):
                 futures.append(executor.submit(self.str_query_thread, work_by_thread[i], i))
 
             # take them as they finish instead of waiting around
@@ -426,6 +429,10 @@ def split_dict(dictionary: dict, n: int):
         return split_dict_simple(dictionary, n)
     return split_dict_greater_than3(dictionary, n)
 
+
+def get_image_dimensions(texture_file):
+    img = Image.open(texture_file)
+    return img.size
 
 if __name__ == "__main__":
     max_width, max_height = 4096, 4096

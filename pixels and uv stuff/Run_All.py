@@ -8,7 +8,7 @@ from PixelGrabber import PixelGrabber
 from PixelIndexer import PixelIndexer
 from PixelGrabber import save_pixels_by_labels
 from ObjFileToGeometryFiles import ObjToGeometryFiles
-
+from PixelToFace import get_image_dimensions
 
 def create_file_names_list():
     ignore_files = [".gitkeep", "human.obj", "file_list.json"]
@@ -24,12 +24,15 @@ def create_file_names_list():
     print("Creating file/label list.")
 
 
+
+
 if __name__ == "__main__":
     # IMPORTANT  this is an array of strings, if it's empty it will do all of them
 
     label_names_to_test = []
 
-    texture_file_path = 'obj textures/diffuse.jpg'
+    # texture_file_path = 'obj textures/diffuse.jpg'
+    texture_file_path = 'obj textures/girl_texture.jpg'
 
     # if there's a fade or variation in color you will want to raise this to loosen what is an acceptable color
     default_pixel_deviation = 3
@@ -38,26 +41,27 @@ if __name__ == "__main__":
     default_acceptable_colors = [[255, 255, 255]]
     deviation_default_colors = 2
 
-    base_obj_file_path = "obj files/anatomy.OBJ"
+    # base_obj_file_path = "obj files/anatomy.OBJ"
+    base_obj_file_path = "obj files/girl_100k.obj"
 
     # choose whether to save the uvs and normals, if both are false it will only save the vertices and faces
-    SAVE_UVS = False
-    SAVE_NORMALS = False
+    SAVE_UVS = True
+    SAVE_NORMALS = True
 
     # by default will use max threads available - 1
     THREAD_COUNT = None
 
     # if you only want to run certain scripts you can change accordingly here
     RUN_PIXEL_GRABBER = True
-    RUN_PIXEL_TO_FACE = True
-    RUN_PIXEL_INDEXER = True
+    RUN_PIXEL_TO_FACE = False
+    RUN_PIXEL_INDEXER = False
 
     # this triangle decomposer only needs to be run once if the base .obj file is the same! So turn it to false, after!
-    RUN_TRIANGLE_DECOMPOSER = True
+    RUN_TRIANGLE_DECOMPOSER = False
 
     # IMPORTANT unless you're testing something you can just leave it
     # target is what pixels we're trying to find
-    TARGET_FILE = 'outputs/pixels_by_labels.json'
+    TARGET_FILE = 'outputs/pixels_by_labels.bin'
 
     # these will be created later
     texture_max_width, texture_max_height = None, None
@@ -87,7 +91,7 @@ if __name__ == "__main__":
 
         #  to save the pixels by label
         # you can specify an output file name as an argument if you want (optional)
-        output_file_name = "pixels_by_labels.json"
+        output_file_name = "pixels_by_labels"
         futures = [executor.submit(save_pixels_by_labels, pixel_grabber.pixels_by_label, output_file_name)]
 
         # pixel_grabber.save_pixels_by_labels() # run for better print statements without process pool
@@ -98,7 +102,7 @@ if __name__ == "__main__":
         pixel_grabber.run_change_pixels_test(hex_color)
 
         executor.shutdown(wait=True, cancel_futures=False)
-        print("Finished saving pixel change test file and pixel by label.json file")
+        print("Finished saving pixel change test file and pixel by label file")
 
         end = time.time()
         print()
@@ -109,20 +113,25 @@ if __name__ == "__main__":
     if RUN_PIXEL_TO_FACE:
         print("Starting pixels to faces code!")
 
-        start = time.time()
         if RUN_TRIANGLE_DECOMPOSER:
+            start = time.time()
             # we need this to create the geometry files and again only needs
             # to be run once, so it's paired with the triangle decomposer
             obj_to_json = ObjToGeometryFiles(base_obj_file_path)
             obj_to_json.read_in_OBJ_file()
             obj_to_json.insert_face_data()
             obj_to_json.create_json_files()
-        end = time.time()
-        print()
-        print(f"Finished creating geometries...Took {end - start} seconds")
+            end = time.time()
+            print()
+            print(f"Finished creating geometries...Took {end - start} seconds")
 
         preload_STRtree = not RUN_TRIANGLE_DECOMPOSER
         start = time.time()
+
+        # need to grab the texture dimensions
+        if texture_max_width is None:
+            print("Grabbing texture images")
+            texture_max_width, texture_max_height = get_image_dimensions(texture_file_path)
 
         # if you ran the pixel_grabber we can grab the target pixels without having to load files
         if RUN_PIXEL_GRABBER:
@@ -162,7 +171,10 @@ if __name__ == "__main__":
         print()
         print("Starting Pixel Indexer and .obj creation")
         start = time.time()
-        indexer = PixelIndexer(label_names_to_test, pixel_to_faces.label_faces, SAVE_NORMALS, SAVE_UVS)
+        if RUN_PIXEL_TO_FACE:
+            indexer = PixelIndexer(label_names_to_test, pixel_to_faces.label_faces, SAVE_NORMALS, SAVE_UVS)
+        else:
+            indexer = PixelIndexer(label_names_to_test, save_normals=SAVE_NORMALS, save_uvs=SAVE_UVS)
         end = time.time()
         print()
         print(f"Finished reading in faces...Took {end - start} seconds")

@@ -87,6 +87,7 @@ class PixelGrabber:
                 label_data = self.label_starts[label_name]
                 change_label_starts[label_name] = label_data
             self.label_starts = change_label_starts
+
         if thread_count is None:
             thread_count = cpu_count() - 1
         with ThreadPoolExecutor(max_workers=thread_count) as executor:
@@ -309,7 +310,7 @@ class PixelGrabber:
 def save_pixels_by_labels(pixels_by_label, output_file_name='pixels_by_labels'):
     print("Saving pixels by labels", flush=True)
     # start = time.time()
-    # with open("outputs/" + output_file_name, 'w') as fp:
+    # with open("outputs/" + output_file_name + ".json", 'w') as fp:
     #     # uvs_list = list(uv_dict.values())
     #     # print("uvs_list", len(uvs_list))
     #     print("length of pixels by labels", len(pixels_by_label), flush=True)

@@ -50,7 +50,6 @@ class ObjToGeometryFiles:
                         # print("texture")
                         self.save_and_format_vertex_textures(line)
                     case "vn":
-                        print("normal")
                         self.save_and_format_normals(line)
                     # ignores EOF, and comments, might need to fix later to remember the name?
                     case _:
