@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\build\CMakeFiles\5539333f62a413487be1e61428810c41\memcheck.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\tests\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\build\tests\CMakeFiles\memcheck" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{84223FA2-A7F4-3686-B3AC-5AA3F9F1D82F}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

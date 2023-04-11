@@ -38,6 +38,7 @@ if __name__ == "__main__":
     # label_names_to_test = label_names_to_test[-2:]
 
     label_names_to_test = ["Trapezius", "Teres Minor"]
+    label_names_to_test = []
 
     texture_file_path = 'obj textures/diffuse.jpg'
     # define the dimensions of the image
@@ -61,7 +62,7 @@ if __name__ == "__main__":
     RUN_PIXEL_INDEXER = True
 
     # this triangle decomposer only needs to be run once if the base .obj file is the same! So turn it to false, after!
-    RUN_TRIANGLE_DECOMPOSER = False
+    RUN_TRIANGLE_DECOMPOSER = True
 
     # IMPORTANT unless you're testing something you can just leave it
     # target is what pixels we're trying to find

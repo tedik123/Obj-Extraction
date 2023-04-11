@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\tests\test_cmake_build\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\tests\test_cmake_build\subdirectory_target\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{34B89BE4-B044-3F95-8DC2-940ACAF7B138}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

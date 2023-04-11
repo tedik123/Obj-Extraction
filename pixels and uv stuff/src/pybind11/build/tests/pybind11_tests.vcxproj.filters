@@ -1,0 +1,237 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\tests\pybind11_tests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\tests\test_async.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\tests\test_buffers.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\tests\test_builtin_casters.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\tests\test_call_policies.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\tests\test_callbacks.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\tests\test_chrono.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\tests\test_class.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\tests\test_const_name.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\tests\test_constants_and_functions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\tests\test_copy_move.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\tests\test_custom_type_casters.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\tests\test_custom_type_setup.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\tests\test_docstring_options.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\tests\test_enum.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\tests\test_eval.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\tests\test_exceptions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\tests\test_factory_constructors.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\tests\test_gil_scoped.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\tests\test_iostream.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\tests\test_kwargs_and_defaults.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\tests\test_local_bindings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\tests\test_methods_and_attributes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\tests\test_modules.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\tests\test_multiple_inheritance.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\tests\test_numpy_array.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\tests\test_numpy_dtypes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\tests\test_numpy_vectorize.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\tests\test_opaque_types.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\tests\test_operator_overloading.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\tests\test_pickling.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\tests\test_pytypes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\tests\test_sequences_and_iterators.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\tests\test_smart_ptr.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\tests\test_stl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\tests\test_stl_binders.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\tests\test_tagbased_polymorphic.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\tests\test_thread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\tests\test_union.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\tests\test_virtual_functions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\include\pybind11\detail\class.h">
+      <Filter>Header Files\pybind11\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\include\pybind11\detail\common.h">
+      <Filter>Header Files\pybind11\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\include\pybind11\detail\descr.h">
+      <Filter>Header Files\pybind11\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\include\pybind11\detail\init.h">
+      <Filter>Header Files\pybind11\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\include\pybind11\detail\internals.h">
+      <Filter>Header Files\pybind11\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\include\pybind11\detail\type_caster_base.h">
+      <Filter>Header Files\pybind11\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\include\pybind11\detail\typeid.h">
+      <Filter>Header Files\pybind11\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\include\pybind11\attr.h">
+      <Filter>Header Files\pybind11</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\include\pybind11\buffer_info.h">
+      <Filter>Header Files\pybind11</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\include\pybind11\cast.h">
+      <Filter>Header Files\pybind11</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\include\pybind11\chrono.h">
+      <Filter>Header Files\pybind11</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\include\pybind11\common.h">
+      <Filter>Header Files\pybind11</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\include\pybind11\complex.h">
+      <Filter>Header Files\pybind11</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\include\pybind11\options.h">
+      <Filter>Header Files\pybind11</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\include\pybind11\eigen.h">
+      <Filter>Header Files\pybind11</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\include\pybind11\eigen\matrix.h">
+      <Filter>Header Files\pybind11\eigen</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\include\pybind11\eigen\tensor.h">
+      <Filter>Header Files\pybind11\eigen</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\include\pybind11\embed.h">
+      <Filter>Header Files\pybind11</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\include\pybind11\eval.h">
+      <Filter>Header Files\pybind11</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\include\pybind11\gil.h">
+      <Filter>Header Files\pybind11</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\include\pybind11\iostream.h">
+      <Filter>Header Files\pybind11</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\include\pybind11\functional.h">
+      <Filter>Header Files\pybind11</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\include\pybind11\numpy.h">
+      <Filter>Header Files\pybind11</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\include\pybind11\operators.h">
+      <Filter>Header Files\pybind11</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\include\pybind11\pybind11.h">
+      <Filter>Header Files\pybind11</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\include\pybind11\pytypes.h">
+      <Filter>Header Files\pybind11</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\include\pybind11\stl.h">
+      <Filter>Header Files\pybind11</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\include\pybind11\stl_bind.h">
+      <Filter>Header Files\pybind11</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\include\pybind11\stl\filesystem.h">
+      <Filter>Header Files\pybind11\stl</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\tests\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{A5601D96-13B2-31E6-A600-85FEC4364431}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\pybind11">
+      <UniqueIdentifier>{8A671215-1745-3DE0-BC03-777960FC1015}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\pybind11\detail">
+      <UniqueIdentifier>{2DAF5298-0C7C-357D-B8BC-334627852D8F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\pybind11\eigen">
+      <UniqueIdentifier>{E31D6FEE-3F7D-382A-B4A3-08530FF1C2E8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\pybind11\stl">
+      <UniqueIdentifier>{E38E18E1-2A2F-3007-BA23-F21654EA4FD7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{34B89BE4-B044-3F95-8DC2-940ACAF7B138}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

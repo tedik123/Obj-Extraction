@@ -1,0 +1,9 @@
+# CMake generation dependency list for this directory.
+C:/Program Files/CMake/share/cmake-3.26/Modules/CMakeParseArguments.cmake
+C:/Program Files/CMake/share/cmake-3.26/Modules/FindBoost.cmake
+C:/Program Files/CMake/share/cmake-3.26/Modules/FindPackageHandleStandardArgs.cmake
+C:/Program Files/CMake/share/cmake-3.26/Modules/FindPackageMessage.cmake
+C:/Users/tedik/Downloads/pybind11-master/pybind11-master/build/CMakeFiles/cmake.verify_globs
+C:/Users/tedik/Downloads/pybind11-master/pybind11-master/tests/CMakeLists.txt
+C:/Users/tedik/Downloads/pybind11-master/pybind11-master/tests/pytest.ini
+C:/Users/tedik/Downloads/pybind11-master/pybind11-master/tools/FindEigen3.cmake

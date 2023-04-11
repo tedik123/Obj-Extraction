@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\build\CMakeFiles\ee3868081ca9200c87c13e7a93bf0649\INSTALL_force.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{84223FA2-A7F4-3686-B3AC-5AA3F9F1D82F}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\build\CMakeFiles\7df5fe60f3e02478f58c7af3fb120e61\check_subdirectory_target.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\tests\test_cmake_build\subdirectory_target\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\tedik\Downloads\pybind11-master\pybind11-master\build\tests\test_cmake_build\subdirectory_target\CMakeFiles\check_subdirectory_target" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{84223FA2-A7F4-3686-B3AC-5AA3F9F1D82F}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
