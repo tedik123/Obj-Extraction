@@ -30,8 +30,6 @@ if __name__ == "__main__":
     label_names_to_test = []
 
     texture_file_path = 'obj textures/diffuse.jpg'
-    # define the dimensions of the image
-    texture_max_width, texture_max_height = 4096, 4096
 
     # if there's a fade or variation in color you will want to raise this to loosen what is an acceptable color
     default_pixel_deviation = 3
@@ -50,7 +48,7 @@ if __name__ == "__main__":
     THREAD_COUNT = None
 
     # if you only want to run certain scripts you can change accordingly here
-    RUN_PIXEL_GRABBER = False
+    RUN_PIXEL_GRABBER = True
     RUN_PIXEL_TO_FACE = True
     RUN_PIXEL_INDEXER = True
 
@@ -60,6 +58,9 @@ if __name__ == "__main__":
     # IMPORTANT unless you're testing something you can just leave it
     # target is what pixels we're trying to find
     TARGET_FILE = 'outputs/pixels_by_labels.json'
+
+    # these will be created later
+    texture_max_width, texture_max_height = None, None
 
     start0 = time.time()
     if RUN_PIXEL_GRABBER:
@@ -76,6 +77,7 @@ if __name__ == "__main__":
         # although this takes forever it is not worth optimizing as it is a task that must be waited on
         # before anything else is run
         pixel_grabber.read_in_image_data()
+        texture_max_width, texture_max_height = pixel_grabber.get_image_dimensions()
 
         # creates the range of acceptable colors by label, in this case just white basically
         pixel_grabber.create_acceptable_colors_by_label(default_acceptable_colors, deviation_default_colors)

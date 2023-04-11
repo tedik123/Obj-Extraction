@@ -9,11 +9,11 @@ import numpy as np
 from PIL import Image, ImageColor
 from obj_helper_functions import PixelGrabber_C
 
-
 import threading
 
 # Create a lock object
 print_lock = threading.Lock()
+
 
 class PixelGrabber:
     # if label name is none we do all them otherwise it's all of them
@@ -173,6 +173,9 @@ class PixelGrabber:
                 neighbors.append((x, y))
         return neighbors
 
+    # returns the width and height of the image
+    def get_image_dimensions(self):
+        return self.max_width, self.max_height
 
     def save_pixels_by_labels(self, output_file_name='pixels_by_labels.json'):
         print("SAVING PIXELS OR TRYING TO WHO KNOWS")
@@ -195,30 +198,6 @@ class PixelGrabber:
             pickle.dump(self.pixels_by_label, f)
         end = time.time()
         print(f"Full file PICKLE dump took {(end - start) / 60} minutes")
-
-    # this grabs each pixel coordinate and uses a tuple pair as key
-    # and the value is the r, g, b at that pixel
-    # probably not the best way to do this
-    def get_pixel_coords(self):
-        start = time.perf_counter()
-        img = Image.open(self.texture_file)
-        pixels = img.load()
-        width, height = img.size
-        mode = img.mode
-        coords_dict = {}
-        # print(type(pixels[100,100]), pixels[100,100])
-        # for x in range(width):
-        #     for y in range(height):
-        #         # get rgb value by coords
-        #         r, g, b = pixels[x, y]
-        #         # coords_dict[(x, y)] = [r, g, b]
-        #         # in case your image has an alpha channel
-        #         # r, g, b, a = pixels[x, y]
-        #         # print(x, y, f"#{r:02x}{g:02x}{b:02x}")
-        img.close()
-        end = time.perf_counter()
-        print("Normal time took", end - start)
-        return coords_dict, width, height, mode, pixels
 
     # reads in image data as a numpy array
     def read_in_image_data(self):
