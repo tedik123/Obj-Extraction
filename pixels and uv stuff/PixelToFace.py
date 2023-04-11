@@ -434,8 +434,7 @@ if __name__ == "__main__":
     start = time.time()
     pixel_to_faces = PixelToFace(TARGET_FILE, max_width, max_height, preload_STRtree=True, save_normals=False,
                                  save_uvs=False)
-    # pixel_to_faces.decompose_all_triangles_STRTree()
+    pixel_to_faces.build_str_tree()
     pixel_to_faces.find_faces_of_targets()
-    # pixel_to_faces.test_pixel_to_coords()
     end = time.time()
     print(f"Full task took {(end - start) / 60} minutes, ({end - start} seconds)")
