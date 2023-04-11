@@ -126,7 +126,7 @@ class ObjToGeometryFiles:
     # stores the vertices making up each face in the right format
     def create_and_save_face_data(self):
         output_file_name = "geometry_files/geometry_faces"
-        face_data = {"faces": []}
+        self.face_data = {"faces": []}
         for face in self.faces_data:
             vertex_data = \
                 {
@@ -140,16 +140,16 @@ class ObjToGeometryFiles:
             vertex_data["a"] = vertices[0]
             vertex_data["b"] = vertices[1]
             vertex_data["c"] = vertices[2]
-            face_data["faces"].append(vertex_data)
+            self.face_data["faces"].append(vertex_data)
         print("Writing face data to json file.")
         # with open("outputs/" + output_file_name, 'w') as fp:
         #     json.dump(face_data, fp)
-        self.write_binary_file(output_file_name, face_data)
+        self.write_binary_file(output_file_name, self.face_data)
         print("Finished writing face data!")
 
     def create_and_save_uv_data(self):
         output_file_name = "geometry_files/geometry_uvs"
-        uvs_data = {"uvs": []}
+        self.uvs_data = {"uvs": []}
         for face in self.faces_data:
             uv_format = \
                 {
@@ -175,17 +175,17 @@ class ObjToGeometryFiles:
 
             uv_format["c"]["x"] = uvs[2][0]
             uv_format["c"]["y"] = uvs[2][1]
-            uvs_data["uvs"].append(uv_format)
+            self.uvs_data["uvs"].append(uv_format)
         print("Writing uv data to json file.")
         # with open("outputs/" + output_file_name, 'w') as fp:
-        #     json.dump(uvs_data, fp)
-        self.write_binary_file(output_file_name, uvs_data)
+        #     json.dump(self.uvs_data, fp)
+        self.write_binary_file(output_file_name, self.uvs_data)
 
         print("Finished writing uv data!")
 
     def create_and_save_normal_data(self):
         output_file_name = "geometry_files/geometry_normals"
-        normals_data = {"normals": []}
+        self.normals_data = {"normals": []}
         # just checking if the first one has normals if it does then it's good enough ig
         if len(self.faces_data[0]["normals"]) > 1:
             for face in self.faces_data:
@@ -199,11 +199,11 @@ class ObjToGeometryFiles:
                 normal_data["a"] = normals[0]
                 normal_data["b"] = normals[1]
                 normal_data["c"] = normals[2]
-                normals_data["normals"].append(normal_data)
+                self.normals_data["normals"].append(normal_data)
             print("Writing normals data to json file.")
             # with open("outputs/" + output_file_name, 'w') as fp:
-            #     json.dump(normals_data, fp)
-            self.write_binary_file(output_file_name, normals_data)
+            #     json.dump(self.normals_data, fp)
+            self.write_binary_file(output_file_name, self.normals_data)
             print("Finished writing normals data!")
 
     def write_binary_file(self, output_file_name, data):

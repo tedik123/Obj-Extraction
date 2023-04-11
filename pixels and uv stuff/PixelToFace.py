@@ -13,7 +13,7 @@ from obj_helper_functions import pixel_coords_to_uv as pixel_coords_to_uv_c
 class PixelToFace:
 
     def __init__(self, target_file_path, max_width, max_height, preload_STRtree=False, save_normals=True,
-                 save_uvs=True):
+                 save_uvs=True, disable_target_pixels_load=False):
         # these are all arrays!!!!!!!!!
         self.target_file_path = target_file_path
 
@@ -25,10 +25,10 @@ class PixelToFace:
         self.save_uvs = save_uvs
         # These must be defined first or the threads won't like it
         self.target_pixels_by_name = None
+        self.faces = None
         self.normals = None
         self.uvs = None
         self.str_tree: STRtree = None
-        self.faces = None
 
         self.max_width = max_width
         self.max_height = max_height
@@ -44,20 +44,23 @@ class PixelToFace:
         # self.read_in_target_pixels()
         # self.convert_pixels_to_points()
         with concurrent.futures.ThreadPoolExecutor(max_workers=thread_count) as executor:
-            target_pixel_future = executor.submit(self.read_in_target_pixels)
+            futures = []
+            if not disable_target_pixels_load:
+                target_pixel_future = executor.submit(self.read_in_target_pixels)
             # set the callback to run convert pixels, since it's dependent
             # target_pixel_future.add_done_callback(lambda future: executor.submit(self.convert_pixels_to_points))
-            futures = [target_pixel_future]
+                futures.append(target_pixel_future)
+
+            # the only time you wouldn't preload STR tree is if you're passing it in and creating new geometry files
+            # i.e. you have a new object file
             if preload_STRtree:
                 futures.append(executor.submit(self.read_in_str_tree))
-
-            futures.append(executor.submit(self.read_in_geometry_uvs))
-            futures.append(executor.submit(self.read_in_faces))
-            if save_normals:
-                futures.append(executor.submit(self.read_in_normals))
+                futures.append(executor.submit(self.read_in_geometry_uvs))
+                futures.append(executor.submit(self.read_in_faces))
+                if save_normals:
+                    futures.append(executor.submit(self.read_in_normals))
             # Set a callback for important_future to submit dependent_function
             concurrent.futures.wait(futures)
-
         print("Finished loading files")
         # self.convert_pixels_to_points()
 
@@ -109,6 +112,14 @@ class PixelToFace:
             self.target_pixels_by_name = pickle.load(file)
         end = time.time()
         print(f"Reading PICKLE file took {(end - start)} seconds")
+
+    def pass_in_geometry_data(self,  faces, normals, uvs):
+        self.faces = faces["faces"]
+        self.normals = normals["normals"]
+        self.uvs = uvs["uvs"]
+
+    def pass_in_target_pixels(self, target_pixels):
+        self.target_pixels_by_name = target_pixels
 
     def read_in_str_tree(self):
         print("Reading in STR tree")

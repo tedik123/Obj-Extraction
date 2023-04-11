@@ -6,10 +6,13 @@ from collections import OrderedDict
 
 class PixelIndexer:
 
-    def __init__(self, label_names, save_normals=False, save_uvs=False):
+    def __init__(self, label_names, faces_found_by_label=None, save_normals=False, save_uvs=False):
         self.faces_found_file_path = 'outputs/faces_found_by_labels'
         self.faces_found_by_labels = None
-        self.read_in_faces_found_by_labels(True)
+        if faces_found_by_label is None:
+            self.read_in_faces_found_by_labels(True)
+        else:
+            self.faces_found_by_labels = faces_found_by_label
         self.label_names = label_names
         self.save_normals = save_normals
         self.save_uvs = save_uvs

@@ -51,7 +51,7 @@ if __name__ == "__main__":
 
     # if you only want to run certain scripts you can change accordingly here
     RUN_PIXEL_GRABBER = False
-    RUN_PIXEL_TO_FACE = False
+    RUN_PIXEL_TO_FACE = True
     RUN_PIXEL_INDEXER = True
 
     # this triangle decomposer only needs to be run once if the base .obj file is the same! So turn it to false, after!
@@ -115,15 +115,32 @@ if __name__ == "__main__":
             obj_to_json.read_in_OBJ_file()
             obj_to_json.insert_face_data()
             obj_to_json.create_json_files()
+        end = time.time()
+        print()
+        print(f"Finished creating geometries...Took {end - start} seconds")
 
-        pixel_to_faces = PixelToFace(TARGET_FILE, texture_max_width, texture_max_height,
-                                     preload_STRtree=not RUN_TRIANGLE_DECOMPOSER,
-                                     save_normals=SAVE_NORMALS, save_uvs=SAVE_UVS)
+        preload_STRtree = not RUN_TRIANGLE_DECOMPOSER
+        start = time.time()
+
+        # if you ran the pixel_grabber we can grab the target pixels without having to load files
+        if RUN_PIXEL_GRABBER:
+            pixel_to_faces = PixelToFace(TARGET_FILE, texture_max_width, texture_max_height,
+                                         preload_STRtree=preload_STRtree,
+                                         save_normals=SAVE_NORMALS, save_uvs=SAVE_UVS, disable_target_pixels_load=True)
+            pixel_to_faces.pass_in_target_pixels(pixel_grabber.pixels_by_label)
+        else:
+            pixel_to_faces = PixelToFace(TARGET_FILE, texture_max_width, texture_max_height,
+                                         preload_STRtree=preload_STRtree,
+                                         save_normals=SAVE_NORMALS, save_uvs=SAVE_UVS, disable_target_pixels_load=False)
+        # if you ran the geometry files we can pass those in as well
+        if not preload_STRtree:
+            pixel_to_faces.pass_in_geometry_data(obj_to_json.face_data, obj_to_json.normals_data, obj_to_json.uvs_data)
+
         end = time.time()
         print()
         print(f"Finished reading in geometries...Took {end - start} seconds")
-        start = time.time()
 
+        start = time.time()
         # create all the points within the obj files
         if RUN_TRIANGLE_DECOMPOSER:
             # then break down those geometry files
@@ -143,7 +160,7 @@ if __name__ == "__main__":
         print()
         print("Starting Pixel Indexer and .obj creation")
         start = time.time()
-        indexer = PixelIndexer(label_names_to_test, SAVE_NORMALS, SAVE_UVS)
+        indexer = PixelIndexer(label_names_to_test, pixel_to_faces.label_faces, SAVE_NORMALS, SAVE_UVS)
         end = time.time()
         print()
         print(f"Finished reading in faces...Took {end - start} seconds")
