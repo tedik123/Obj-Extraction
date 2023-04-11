@@ -31,8 +31,7 @@ if __name__ == "__main__":
 
     label_names_to_test = []
 
-    # texture_file_path = 'obj textures/diffuse.jpg'
-    texture_file_path = 'obj textures/girl_texture.jpg'
+    texture_file_path = 'obj textures/diffuse.jpg'
 
     # if there's a fade or variation in color you will want to raise this to loosen what is an acceptable color
     default_pixel_deviation = 3
@@ -41,23 +40,22 @@ if __name__ == "__main__":
     default_acceptable_colors = [[255, 255, 255]]
     deviation_default_colors = 2
 
-    # base_obj_file_path = "obj files/anatomy.OBJ"
-    base_obj_file_path = "obj files/girl_100k.obj"
+    base_obj_file_path = "obj files/anatomy.OBJ"
 
     # choose whether to save the uvs and normals, if both are false it will only save the vertices and faces
-    SAVE_UVS = True
-    SAVE_NORMALS = True
+    SAVE_UVS = False
+    SAVE_NORMALS = False
 
     # by default will use max threads available - 1
     THREAD_COUNT = None
 
     # if you only want to run certain scripts you can change accordingly here
     RUN_PIXEL_GRABBER = True
-    RUN_PIXEL_TO_FACE = False
-    RUN_PIXEL_INDEXER = False
+    RUN_PIXEL_TO_FACE = True
+    RUN_PIXEL_INDEXER = True
 
     # this triangle decomposer only needs to be run once if the base .obj file is the same! So turn it to false, after!
-    RUN_TRIANGLE_DECOMPOSER = False
+    RUN_TRIANGLE_DECOMPOSER = True
 
     # IMPORTANT unless you're testing something you can just leave it
     # target is what pixels we're trying to find

@@ -109,9 +109,9 @@ class PixelGrabber:
         print(f"Starting run for DFS for label {label_name}")
         label = label_data["label"]
         starting_points = label_data["starting_points"]
-
+        # all min and maxes go in here
+        bounding_list = []
         # the length of arrays starting_points, mins, and maxes must all be equal
-        label_pixels = []
         for i, point in enumerate(starting_points):
             min_X, min_Y = 0, 0
             # we get the max width from the pic
@@ -124,11 +124,13 @@ class PixelGrabber:
                 max_X = label_data["max_X"][i]
             if "max_Y" in label_data:
                 max_Y = label_data["max_Y"][i]
-
-            # combine results into one big array
-            label_pixels += c_executor.DFS(tuple(point), label_name, min_X, min_Y, max_X, max_Y)
-            # label_pixels += self.DFS(tuple(point), label_name, min_X, min_Y, max_X, max_Y)
-            print("len label", len(label_pixels))
+            # stores the 4 starting points if exist
+            bounding_values = [min_X, min_Y, max_X, max_Y]
+            bounding_list.append(bounding_values)
+        # combine results into one big array
+        label_pixels = c_executor.DFS(starting_points, label_name, bounding_list)
+        # label_pixels += self.DFS(tuple(point), label_name, min_X, min_Y, max_X, max_Y)
+        print("len label", len(label_pixels))
         return label_name, label_pixels
 
     # simply gets the coordinates points 1 pixel away in all directions, returns a list

@@ -579,7 +579,7 @@ PYTHON_DEBUG_LIBRARY-ADVANCED:INTERNAL=1
 PYTHON_EXECUTABLE-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: PYTHON_INCLUDE_DIR
 PYTHON_INCLUDE_DIR-ADVANCED:INTERNAL=1
-PYTHON_INCLUDE_DIRS:INTERNAL=C:/Python310/Include
+PYTHON_INCLUDE_DIRS:INTERNAL=C:/Python311/include
 PYTHON_IS_DEBUG:INTERNAL=0
 PYTHON_LIBRARIES:INTERNAL=C:/Python311/libs/python311.lib
 //ADVANCED property for variable: PYTHON_LIBRARY
@@ -602,5 +602,5 @@ pybind11_FOUND:INTERNAL=TRUE
 //Directory where pybind11 headers are located
 pybind11_INCLUDE_DIR:INTERNAL=C:/Users/tedik/PycharmProjects/RandomScripts/pixels and uv stuff/src/pybind11/include
 //Directories where pybind11 and possibly Python headers are located
-pybind11_INCLUDE_DIRS:INTERNAL=C:/Users/tedik/PycharmProjects/RandomScripts/pixels and uv stuff/src/pybind11/include;C:/Python310/Include
+pybind11_INCLUDE_DIRS:INTERNAL=C:/Users/tedik/PycharmProjects/RandomScripts/pixels and uv stuff/src/pybind11/include;C:/Python311/include
 

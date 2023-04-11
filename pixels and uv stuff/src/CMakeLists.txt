@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.25)
 find_package(PythonLibs 3 REQUIRED)
-#set(pybind11_DIR /pybind11)
-#find_package(pybind11 CONFIG)
+
 add_subdirectory(pybind11)
 project(src)
 

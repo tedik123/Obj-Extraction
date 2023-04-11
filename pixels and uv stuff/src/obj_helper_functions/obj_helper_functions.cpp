@@ -99,8 +99,8 @@ py::list get_neighbors_from_points(const vector<pair<int, int>> &points, int max
 struct PairHash {
     template<typename T1, typename T2>
     size_t operator()(const pair<T1, T2> &p) const {
-        size_t h1 = hash < T1 > {}(p.first);
-        size_t h2 = hash < T2 > {}(p.second);
+        size_t h1 = hash<T1>{}(p.first);
+        size_t h2 = hash<T2>{}(p.second);
         return h1 ^ (h2 << 1);
     }
 };
@@ -196,8 +196,9 @@ public:
                     const ColorDict &acceptable_colors,
                     deque<pair<int, int>> &queue,
                     unordered_map<pair<int, int>, tuple<int, int, int>, PairHash> &visited,
-                    deque<pair<int, int>> &accepted_pixels) {
-        if (!visited.contains(current_coords)) {
+                    deque<pair<int, int>> &accepted_pixels,
+                    unordered_map<pair<int, int>, bool, PairHash> &accepted_pixels_map) {
+        if (!visited.contains(current_coords) && !accepted_pixels_map.contains(current_coords)) {
             visited[current_coords] = rgb;
             // if rgb value is not equal to the targeted rgb then we ignore it and don't continue searching from there
             if (!acceptable_colors.contains(rgb)) {
@@ -206,61 +207,73 @@ public:
             // if it's acceptable then add to the queue to continue searching from there as well as you know that it's
             // an acceptable rgb value
             queue.push_back(current_coords);
-            accepted_pixels.push_back(current_coords);
+//            if it's not already added
+//            if (!accepted_pixels_map.contains(current_coords)) {
+                accepted_pixels.push_back(current_coords);
+                accepted_pixels_map[current_coords] = true;
+//            }
+
         }
     }
 
 
 // searching algorithm for neighboring pixels that match
 //deque<pair<int, int>>, should i return a python deque?
-    py::list DFS(const pair<int, int> &starting_coord, const string &label_name,
-                 const int &min_X, const int &min_Y, const int &max_X, const int &max_Y) {
-//    coords_dict.insert({{5, 5}, {6, 6, 6}});
-        int x = starting_coord.first;
-        int y = starting_coord.second;
+    py::list DFS(const vector<pair<int, int>> &starting_coords, const string &label_name,
+                 const vector<tuple<int, int, int, int>> bounding_list) {
         // deque is a doubly linked list, a normal vector is fine
         // queue is just a tuple list of coords
         deque<pair<int, int>> queue;
         // important that this is an unordered_map it's much faster look up time!
-//        unordered_map<pair<int, int>, vector<int>, PairHash> visited;
         unordered_map<pair<int, int>, tuple<int, int, int>, PairHash> visited;
         // this can just be a normal list or vector
         deque<pair<int, int>> accepted_pixels;
-        // add the start to the queue and the visited unordered_map
-        queue.push_back(starting_coord);
+//        we need to add this to see if it's already been added to the visited queue
+        unordered_map<pair<int, int>, bool, PairHash> accepted_pixels_map;
+        int count = 0;
+        for (auto &starting_coord: starting_coords) {
 
-        // the value stored is arbitrary in this case it's rgb from coords dict
-//        visited[starting_coords] = coords_dict[starting_coords];
-        visited[starting_coord] = rgb_lookup(x, y);
-        accepted_pixels.push_back(starting_coord);
-        auto acceptable_colors = acceptable_colors_by_label[label_name];
+            int x = starting_coord.first;
+            int y = starting_coord.second;
 
-        while (!queue.empty()) {
-            auto current_coords = queue.front();
-            queue.pop_front();
-            x = current_coords.first;
-            y = current_coords.second;
+            auto &[min_X, min_Y, max_X, max_Y] = bounding_list[count];
+            count++;
+            // add the start to the queue and the visited unordered_map
+            queue.push_back(starting_coord);
+
+            // the value stored is arbitrary in this case it's rgb from coords dict
+            visited[starting_coord] = rgb_lookup(x, y);
+            accepted_pixels.push_back(starting_coord);
+            auto acceptable_colors = acceptable_colors_by_label[label_name];
+
+            while (!queue.empty()) {
+                auto current_coords = queue.front();
+                queue.pop_front();
+                x = current_coords.first;
+                y = current_coords.second;
 //        remove later this is just to prevent the crashing since we have a limited amount of points
 //            if (!coords_dict.contains(current_coords)) {
 //                cout << "Starting coords do not exist in dict! Skipping this one!" << endl;
 //            } else {
 //                auto pixel_rgb = coords_dict[current_coords];
-            auto pixel_rgb = rgb_lookup(x, y);
+                auto pixel_rgb = rgb_lookup(x, y);
 
-            auto neighbors = get_neighbors_from_point_C_only(x, y, max_width, max_height);
+                auto neighbors = get_neighbors_from_point_C_only(x, y, max_width, max_height);
 
-            // this is no more than 8 long at a time
-            for (const auto &neighbor: neighbors) {
-                auto current_x = neighbor.first;
-                auto current_y = neighbor.second;
-                // need to check that it's within the confines as well
-                if (max_X >= current_x && current_x >= min_X && max_Y >= current_y && current_y >= min_Y) {
-                    DFS_helper(make_pair(current_x, current_y), pixel_rgb, acceptable_colors, queue, visited,
-                               accepted_pixels);
+                // this is no more than 8 long at a time
+                for (const auto &neighbor: neighbors) {
+                    auto current_x = neighbor.first;
+                    auto current_y = neighbor.second;
+                    // need to check that it's within the confines as well
+                    if (max_X >= current_x && current_x >= min_X && max_Y >= current_y && current_y >= min_Y) {
+                        DFS_helper(make_pair(current_x, current_y), pixel_rgb, acceptable_colors, queue, visited,
+                                   accepted_pixels, accepted_pixels_map);
+                    }
                 }
-            }
 //            }
+            }
         }
+
         // return revealed which should be all matching pixels within range
         cout << "visited vs revealed" << endl;
         cout << visited.size() << endl;
@@ -381,8 +394,11 @@ py::list pixel_coords_to_uv(vector<pair<int, int>> &pixel_list, int max_width, i
 
 
 
-PYBIND11_MODULE(obj_helper_functions, m) {
-    m.doc() = R"pbdoc(
+PYBIND11_MODULE(obj_helper_functions, m
+) {
+m.
+
+doc() = R"pbdoc(
         Pybind11 example plugin
         -----------------------
         .. currentmodule:: obj_helper_functions
@@ -394,7 +410,11 @@ PYBIND11_MODULE(obj_helper_functions, m) {
 //    m.def("get_neighbor_list", &get_neighbors,py::call_guard<py::gil_scoped_release>(), R"pbdoc(
 //        Returns a list of tuples of x,y coordinates representing the at most 8 neighbors surrounding a given coordinate.
 //    )pbdoc",py::arg("x_given"), py::arg("y_given"), py::arg("max_x_range"), py::arg("max_y_range"));
-    m.def("get_neighbors_from_point", &get_neighbors_from_point, py::call_guard<py::gil_scoped_release>(), R"pbdoc(
+m.def("get_neighbors_from_point", &get_neighbors_from_point,
+
+py::call_guard<py::gil_scoped_release>(),
+
+R"pbdoc(
                Returns a list of tuples of x,y coordinates representing the at most 8 neighbors surrounding a given coordinate.
 
                Args:
@@ -406,10 +426,14 @@ PYBIND11_MODULE(obj_helper_functions, m) {
                Returns:
                    list of tuples: A list of tuples representing the at most 8 neighbors surrounding the given coordinate.
            )pbdoc",
-          py::arg("x_given"), py::arg("y_given"), py::arg("max_width"), py::arg("max_height"));
+py::arg("x_given"), py::arg("y_given"), py::arg("max_width"), py::arg("max_height"));
 
 
-    m.def("get_neighbors_from_points", &get_neighbors_from_points, py::call_guard<py::gil_scoped_release>(), R"pbdoc(
+m.def("get_neighbors_from_points", &get_neighbors_from_points,
+
+py::call_guard<py::gil_scoped_release>(),
+
+R"pbdoc(
           Returns a 2D vector of tuples containing the neighbors for each point in the input list.
 
           Args:
@@ -420,9 +444,10 @@ PYBIND11_MODULE(obj_helper_functions, m) {
           Returns:
               list of list of tuples: A 2D vector of tuples containing the neighbors for each point in the input list.
       )pbdoc",
-          py::arg("points"), py::arg("max_width"), py::arg("max_height"));
+py::arg("points"), py::arg("max_width"), py::arg("max_height"));
 
-    py::class_<PixelGrabber_C>(m, "PixelGrabber_C", R"pbdoc(
+py::class_<PixelGrabber_C>(m,
+"PixelGrabber_C", R"pbdoc(
         C++ class for extracting pixels of a specified label from a numpy array of image pixels.
 
         Args:
@@ -435,38 +460,45 @@ PYBIND11_MODULE(obj_helper_functions, m) {
             max_height (int): The maximum height of the image.
 
     )pbdoc")
-            .def(py::init<py::array_t<int> &, unordered_map<string, unordered_map<tuple<int, int, int>, bool, TupleHash>>, int, int>())
-            .def("DFS", &PixelGrabber_C::DFS, py::call_guard<py::gil_scoped_release>(),
-                 py::arg("starting_coord"),
-                 py::arg("label_name"),
-                 py::arg("min_X"), py::arg("min_Y"), py::arg("max_X"), py::arg("max_Y"),
-                 R"pbdoc(
+.
+
+def
+(py::init<py::array_t<int> &, unordered_map<string, unordered_map<tuple<int, int, int>, bool, TupleHash>>, int, int>())
+
+.def("DFS", &PixelGrabber_C::DFS,
+
+py::call_guard<py::gil_scoped_release>(),
+        py::arg("starting_coords"),
+        py::arg("label_name"),
+        py::arg("bounding_list"),
+
+R"pbdoc(
         Performs a depth-first search (DFS) on the image data to find all pixels matching a given label.
         Multithreading can be used with this function.
 
         Args:
-            starting_coord (tuple): The starting (x, y) coordinate for the search.
+            starting_coords (list of tuples): The starting (x, y) coordinate for the search.
             label_name (str): The label to search for in the image data.
-            min_X (int): The minimum x coordinate to search within.
-            min_Y (int): The minimum y coordinate to search within.
-            max_X (int): The maximum x coordinate to search within.
-            max_Y (int): The maximum y coordinate to search within.
+            bounding_list (list of tuples of size 4): The max distance that can be searched in any direction min_X, min_Y, max_X, max_Y.
 
         Returns:
             list of tuples: A list of (x, y) coordinates representing the matching pixels for a label.
     )pbdoc")
-            .def("rgb_lookup", &PixelGrabber_C::rgb_lookup, py::arg("y_index"), py::arg("x_index")),
-            m.def("test_numpy_index", &print_array_value, py::arg("numpy_array"), py::arg("y_index"),
-                  py::arg("x_index"));
-    m.def("test_numpy_3D_print", &print_3d_array, py::arg("numpy_array"));
-    m.def("pixel_coords_to_uv", &pixel_coords_to_uv, py::call_guard<py::gil_scoped_release>(),
-          R"pbdoc("Convert pixel coordinates to uv coordinates, returns a list of tuples.")pbdoc", py::arg("pixel_list"), py::arg("max_width"),
-          py::arg("max_height"));
+.def("rgb_lookup", &PixelGrabber_C::rgb_lookup, py::arg("y_index"), py::arg("x_index")),
+m.def("test_numpy_index", &print_array_value, py::arg("numpy_array"), py::arg("y_index"),
+py::arg("x_index"));
+m.def("test_numpy_3D_print", &print_3d_array, py::arg("numpy_array"));
+m.def("pixel_coords_to_uv", &pixel_coords_to_uv,
+
+py::call_guard<py::gil_scoped_release>(),
+
+R"pbdoc("Convert pixel coordinates to uv coordinates, returns a list of tuples.")pbdoc", py::arg("pixel_list"), py::arg("max_width"),
+py::arg("max_height"));
 //    m.def("create_indexed_list_c", &create_indexed_list);
 
 #ifdef VERSION_INFO
-    m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);
+m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);
 #else
-    m.attr("__version__") = "dev";
+m.attr("__version__") = "dev";
 #endif
 }
