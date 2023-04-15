@@ -10,6 +10,7 @@ from PixelGrabber import save_pixels_by_labels
 from ObjFileToGeometryFiles import ObjToGeometryFiles
 from PixelToFace import get_image_dimensions
 
+
 def create_file_names_list():
     ignore_files = [".gitkeep", "human.obj", "file_list.json"]
     mypath = "outputs/OBJ files/"
@@ -24,11 +25,8 @@ def create_file_names_list():
     print("Creating file/label list.")
 
 
-
-
 if __name__ == "__main__":
-    # IMPORTANT  this is an array of strings, if it's empty it will do all of them
-
+    # IMPORTANT  this is an array of strings, if it's empty it will do all of the labels available
     label_names_to_test = []
 
     texture_file_path = 'obj textures/diffuse.jpg'
