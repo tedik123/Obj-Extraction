@@ -29,13 +29,18 @@ You can also enable/disable specific scripts by changing the boolean statements 
 
 These steps should be performed in the Run_All.py file.
 
+### Setup
+1. Install the requirements with "pip install -r requirements.txt"
+2. Open a terminal in the root directory (with a virtual environment) and enter ".\pybindings_setup.bat". This will create the C++ bindings for this code.
+
+
 ### Pixel Grabber
 
 Pixel Grabber is the most important step and consequently has the most setup. It has a variety of 
 options most of which you will want to manipulate depending on your texture.
 1. The first thing to do is to drop in your texture file (.png, .jpg, .jpeg, etc)
 into the "obj textures" folder. 
-2. Then you'll want to change the texture_file_path from "texture.jpg"
+2. Then you'll want to change the texture_file_name from "texture.jpg"
 to whatever your file name is.
 ![img.png](/misc/texture_file_path.png)
 3. Navigate to the starts folder and open the label_starts.json file. It's here you'll want to
@@ -78,7 +83,7 @@ Pixel to face is the most computationally intensive script, and it breaks down a
 into normals, uvs, and faces. It then uses that to figure out what pixel value belongs to which face
 and this is how we get our .obj files ultimately.
 1. Copy over your .obj file into the "obj files" directory.
-2. Base_obj_file_path should be changed to the path of your obj file like this "obj_files/YourFile.obj"
+2. Base_obj_file_name should be changed to the name of your obj file that you put in the "obj files" directory.
 3. You can choose whether the final .obj file should also save the base obj file's uvs and normals by 
 setting the SAVE_UVS and SAVE_NORMALS to true or false.
 ![img.png](/misc/save_normals.png)
