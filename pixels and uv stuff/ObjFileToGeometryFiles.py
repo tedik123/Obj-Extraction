@@ -4,8 +4,8 @@ import pickle
 
 
 class ObjToGeometryFiles:
-    def __init__(self, obj_file_path):
-        self.obj_file_path = obj_file_path
+    def __init__(self, obj_file_name):
+        self.obj_file_path = "obj files/" + obj_file_name
         # set to None so values start at 1 instead of 0 like normal
         self.vertices = [None]
         self.normals = [None]

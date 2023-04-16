@@ -18,13 +18,13 @@ print_lock = threading.Lock()
 class PixelGrabber:
     # if label name is none we do all them otherwise it's all of them
     # takes in an array of label names to do
-    def __init__(self, texture_file_path, label_names=None, pixel_deviation=0):
+    def __init__(self, texture_file_name, label_names=None, pixel_deviation=0):
         # def __init__(self):
         self.pixel_deviation = pixel_deviation
         self.enable_default_color_range = True
         self.label_starts = self.read_in_label_starts()
         # self.texture_file = 'obj textures/diffuse.jpg'
-        self.texture_file = texture_file_path
+        self.texture_file = "obj textures/" + texture_file_name
         self.label_names = label_names
         self.coords_dict, self.max_width, self.max_height, self.mode, self.pixels = None, None, None, None, None
 

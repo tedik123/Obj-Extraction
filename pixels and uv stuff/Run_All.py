@@ -29,16 +29,17 @@ if __name__ == "__main__":
     # IMPORTANT  this is an array of strings, if it's empty it will do all of the labels available
     label_names_to_test = []
 
-    texture_file_path = 'obj textures/diffuse.jpg'
+    texture_file_name = 'texture.jpg'
 
-    # if there's a fade or variation in color you will want to raise this to loosen what is an acceptable color
+    # if there's a fade or variation in color you will want to raise this to loosen what is an acceptable color (globally)
     default_pixel_deviation = 3
 
-    # set white as the default acceptable colors
-    default_acceptable_colors = [[255, 255, 255]]
-    deviation_default_colors = 2
+    # global default acceptable colors, this might be the color of a text that inside the label area
+    default_acceptable_colors = []
+    # as well as the deviation of those default acceptable colors
+    deviation_default_colors = 0
 
-    base_obj_file_path = "obj files/anatomy.OBJ"
+    base_obj_file_name = "your_file.OBJ"
 
     # choose whether to save the uvs and normals, if both are false it will only save the vertices and faces
     SAVE_UVS = False
@@ -66,7 +67,7 @@ if __name__ == "__main__":
     if RUN_PIXEL_GRABBER:
         # first create the object which simply loads in the diffuse.jpg and relevant data
         # also reads in the label starts
-        pixel_grabber = PixelGrabber(texture_file_path, label_names_to_test, default_pixel_deviation)
+        pixel_grabber = PixelGrabber(texture_file_name, label_names_to_test, default_pixel_deviation)
 
         # allows for a default color range to capture more of the label (if you have it), disable it if too aggressive
         # pixel_grabber.disable_default_color_range()
@@ -113,7 +114,7 @@ if __name__ == "__main__":
             start = time.time()
             # we need this to create the geometry files and again only needs
             # to be run once, so it's paired with the triangle decomposer
-            obj_to_json = ObjToGeometryFiles(base_obj_file_path)
+            obj_to_json = ObjToGeometryFiles(base_obj_file_name)
             obj_to_json.read_in_OBJ_file()
             obj_to_json.insert_face_data()
             obj_to_json.create_json_files()
@@ -127,7 +128,7 @@ if __name__ == "__main__":
         # need to grab the texture dimensions
         if texture_max_width is None:
             print("Grabbing texture images")
-            texture_max_width, texture_max_height = get_image_dimensions(texture_file_path)
+            texture_max_width, texture_max_height = get_image_dimensions(texture_file_name)
 
         # if you ran the pixel_grabber we can grab the target pixels without having to load files
         if RUN_PIXEL_GRABBER:
