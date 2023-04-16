@@ -31,6 +31,7 @@ if __name__ == "__main__":
 
     texture_file_name = 'texture.jpg'
 
+
     # if there's a fade or variation in color you will want to raise this to loosen what is an acceptable color (globally)
     default_pixel_deviation = 3
 
@@ -54,7 +55,7 @@ if __name__ == "__main__":
     RUN_PIXEL_INDEXER = True
 
     # this triangle decomposer only needs to be run once if the base .obj file is the same! So turn it to false, after!
-    RUN_TRIANGLE_DECOMPOSER = True
+    RUN_TRIANGLE_DECOMPOSER = False
 
     # IMPORTANT unless you're testing something you can just leave it
     # target is what pixels we're trying to find
