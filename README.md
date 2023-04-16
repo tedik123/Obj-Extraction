@@ -29,18 +29,21 @@ You can also enable/disable specific scripts by changing the boolean statements 
 
 These steps should be performed in the Run_All.py file.
 
+### Setup
+1. Install the requirements with "pip install -r requirements.txt"
+2. Open a terminal in the root directory (with a virtual environment) and enter ".\pybindings_setup.bat". This will create the C++ bindings for this code.
+
+
 ### Pixel Grabber
 
-Pixel Grabber is the most important step and consequently has most setup. It has a variety of 
+Pixel Grabber is the most important step and consequently has the most setup. It has a variety of 
 options most of which you will want to manipulate depending on your texture.
 1. The first thing to do is to drop in your texture file (.png, .jpg, .jpeg, etc)
 into the "obj textures" folder. 
-2. Then you'll want to change the texture_file_path from "diffuse.jpg"
+2. Then you'll want to change the texture_file_name from "texture.jpg"
 to whatever your file name is.
 ![img.png](/misc/texture_file_path.png)
-3. You'll also want to adjust the texture_max_width (and height) to 
-the dimensions of the texture you provided.
-4. Navigate to the starts folder and open the label_starts.json file. It's here you'll want to
+3. Navigate to the starts folder and open the label_starts.json file. It's here you'll want to
 add the data for the labels you want.
    1. Label_name is the name of the label and will also be the name when it's turned into a .obj file
    2. Label is a shorthand name for it can be the same or different
@@ -49,7 +52,7 @@ add the data for the labels you want.
    You can have multiple starts in case the label is split into two separate areas
    4. acceptable_colors_rgb is the rgb values of the label that you want to be included can be any number of rgb values.
    
-   **The following are optional**
+   **The following are optional and do not need to be in the JSON**
 
    5. Min_X, min_Y are the lowest acceptable values, basically not allowing the search to go past
    it.
@@ -61,25 +64,30 @@ add the data for the labels you want.
    a variety of similar colors that makeup a label.
  ![img.png](/misc/json_format.png)
    
-5. Default_pixel_deviation loosens the range of acceptable colors given any rgb value
+4. Default_pixel_deviation loosens the range of acceptable colors given any rgb value
 and is applied globally to all RGBs, so you do not have to add a pixel_deviation field
 to all labels in the json file. Setting it to 0 disables it. Otherwise, it will create
 every combination between +/- the pixel deviation and rgb value.
 ![img.png](/misc/default_pixel_deviation.png)
-6. Default_acceptable_colors is a list of rgb values that are **globally** acceptable,
+5. Default_acceptable_colors is a list of rgb values that are **globally** acceptable,
 this usually means those colors make up some text inside a label area. It can be left blank.
-7. deviation_default_colors only affects the default_acceptable_colors and loosens the range 
+6. deviation_default_colors only affects the default_acceptable_colors and loosens the range 
 of acceptable RGBs. Setting it to 0 turns it off. Otherwise, it will create
 every combination between +/- the pixel deviation and rgb value.
 
+To verify if the label was correctly captured, open the "pixel_change_test.png" file inside the "outputs" folder.
+This image will display all the captured pixels as black to provide a clear visual indication of the pixels that were selected.
 
 ### Pixel To Face
 Pixel to face is the most computationally intensive script, and it breaks down an .obj file
 into normals, uvs, and faces. It then uses that to figure out what pixel value belongs to which face
 and this is how we get our .obj files ultimately.
 1. Copy over your .obj file into the "obj files" directory.
-2. Base_obj_file_path should be changed to the path of your obj file like this "obj_files/YourFile.obj"
-3. If this is your first time running this script set RUN_TRIANGLE_DECOMPOSER to True. This only needs
+2. Base_obj_file_name should be changed to the name of your obj file that you put in the "obj files" directory.
+3. You can choose whether the final .obj file should also save the base obj file's uvs and normals by 
+setting the SAVE_UVS and SAVE_NORMALS to true or false.
+![img.png](/misc/save_normals.png)
+4. If this is your first time running this script set RUN_TRIANGLE_DECOMPOSER to True. This only needs
 to be run once per base obj file, so if you don't change your obj file all subsequent runs can be done 
 with RUN_TRIANGLE_DECOMPOSER to False.
 

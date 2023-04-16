@@ -1,4 +1,5 @@
 *.json
+*.bin
 !pixels and uv stuff/starts/*.json
 !pixels and uv stuff/outputs/.gitkeep
 pixels and uv stuff/outputs/OBJ files/*

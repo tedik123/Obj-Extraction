@@ -1,0 +1,7 @@
+C:\Users\tedik\AppData\Local\JetBrains\Toolbox\apps\CLion\ch-0\231.8109.174\bin\cmake\win\x64\bin\cmake.exe -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - MinGW Makefiles" -S "C:\Users\tedik\PycharmProjects\RandomScripts\pixels and uv stuff\src" -B "C:\Users\tedik\PycharmProjects\RandomScripts\pixels and uv stuff\src\cmake-build-debug"
+-- pybind11 v2.11.0 dev1
+-- pybind11::lto disabled (problems with undefined symbols for MinGW for now)
+-- pybind11::thin_lto disabled (problems with undefined symbols for MinGW for now)
+-- Configuring done
+-- Generating done
+-- Build files have been written to: C:/Users/tedik/PycharmProjects/RandomScripts/pixels and uv stuff/src/cmake-build-debug

@@ -28,6 +28,7 @@ class TriangleDecomposer:
         # self.p1 = {"x": 10, "y": 45}
         # self.p2 = {"x": 13, "y": 40}
         # self.p3 = {"x": 16, "y": 45}
+        # print("pixel coords")
         # print("p1", self.p1)
         # print("p2", self.p2)
         # print("p3", self.p3)
@@ -124,6 +125,93 @@ class TriangleDecomposer:
         # this removes all duplicates from the list!
         return list(set(inside + line1 + line2 + line3))
 
+    # def edge_walk_algo(self):
+    #     buffer = []
+    #     # Sort vertices by y-coordinate
+    #     vertices = [self.p1, self.p2, self.p3]
+    #     vertices.sort(key=lambda p: p["y"])
+    #     print(vertices)
+    #     # vertices.sort(key=lambda p: p[1])
+    #     # Initialize edge variables
+    #     x1, y1 = vertices[0]
+    #     x2, y2 = vertices[0]
+    #     dx1 = (vertices[1]["x"] - vertices[0]["x"]) << 16
+    #     dy1 = (vertices[1]["y"] - vertices[0]["y"]) << 16
+    #     dx2 = (vertices[2]["x"] - vertices[0]["x"]) << 16
+    #     dy2 = (vertices[2]["y"] - vertices[0]["y"]) << 16
+    #     # Fill top half of triangle
+    #     while y1 <= vertices[1]["y"]:
+    #         for x in range(x1 >> 16, x2 >> 16 + 1):
+    #             # buffer[x, y1] = color
+    #             buffer.append((x, y1))
+    #         x1 += dx1
+    #         y1 += dy1
+    #         x2 += dx2
+    #         y2 += dy2
+    #         if y1 == vertices[1]["y"]:
+    #             dx1 = (vertices[2]["x"] - vertices[1]["x"]) << 16
+    #             dy1 = (vertices[2]["y"] - vertices[1]["y"]) << 16
+    #     # Initialize edge variables for bottom half of triangle
+    #     x2, y2 = vertices[1]
+    #     dx2 = (vertices[2]["x"] - vertices[1]["x"]) << 16
+    #     dy2 = (vertices[2]["y"] - vertices[1]["y"]) << 16
+    #     # Fill bottom half of triangle
+    #     while y1 <= vertices[2]["y"]:
+    #         for x in range(x1 >> 16, x2 >> 16 + 1):
+    #             # buffer[x, y1] = color
+    #             buffer.append((x, y1))
+    #         x1 += dx1
+    #         y1 += dy1
+    #         x2 += dx2
+    #         y2 += dy2
+    #     return buffer
+    def edge_walk_algo(self):
+        buffer = []
+        p1 = [self.p1["x"], self.p1["y"]]
+        p2 = [self.p2["x"], self.p2["y"]]
+        p3 = [self.p3["x"], self.p3["y"]]
+        # Sort vertices by y-coordinate
+        vertices = [p1, p2, p3]
+        vertices.sort(key=lambda p: p[1])
+        print(vertices)
+        # Initialize edge variables
+        x1, y1 = vertices[0]
+        x2, y2 = vertices[0]
+        dx1 = (vertices[1][0] - vertices[0][0]) << 16
+        dy1 = (vertices[1][1] - vertices[0][1]) << 16
+        dx2 = (vertices[2][0] - vertices[0][0]) << 16
+        dy2 = (vertices[2][1] - vertices[0][1]) << 16
+
+        # Fill top half of triangle
+        while y1 <= vertices[1][1]:
+            for x_cur in range(x1 >> 16, x2 >> 16 + 1):
+                # buffer[x, y1] = color
+                buffer.append((x_cur, y1))
+                print(x_cur, y1)
+
+            x1 += dx1
+            y1 += dy1
+            x2 += dx2
+            y2 += dy2
+            if y1 == vertices[1][1]:
+                dx1 = (vertices[2][0] - vertices[1][0]) << 16
+                dy1 = (vertices[2][1] - vertices[1][1]) << 16
+
+        # Initialize edge variables for bottom half of triangle
+        x2, y2 = vertices[1]
+        dx2 = (vertices[2][0] - vertices[1][0]) << 16
+        dy2 = (vertices[2][1] - vertices[1][1]) << 16
+
+        # Fill bottom half of triangle
+        while y1 <= vertices[2][1]:
+            for x_cur in range(x1 >> 16, x2 >> 16 + 1):
+                buffer.append((x_cur, y1))
+            x1 += dx1
+            y1 += dy1
+            x2 += dx2
+            y2 += dy2
+        return buffer
+
 
 # https://print-graph-paper.com/virtual-graph-paper
 if __name__ == "__main__":
@@ -160,3 +248,11 @@ if __name__ == "__main__":
     print("line points", line_points)
     all_points = decompose.get_all_points_of_triangle()
     print(f"all lines {len(all_points)}", all_points)
+    just_inside = list(zip(decompose.insideTriangle()))
+    print(f"just inside {len(just_inside)}", just_inside)
+
+    print("########")
+    edge_walk_result = [(2469, 362), (2469, 363) ,(2470, 363), (2470, 364), (2471, 364), (2472, 364), (2470, 365), (2471, 365), (2472, 365), (2473, 365)]
+    print(edge_walk_result, len(edge_walk_result))
+    print("edge walk")
+    print(decompose.edge_walk_algo())

@@ -1,28 +1,35 @@
 import json
+import pickle
 import time
-from concurrent.futures.process import ProcessPoolExecutor
-from collections import deque
+from concurrent.futures.thread import ThreadPoolExecutor
+from concurrent.futures import as_completed, ProcessPoolExecutor, wait
+from multiprocessing import cpu_count
+
+import numpy as np
 from PIL import Image, ImageColor
+from obj_helper_functions import PixelGrabber_C
+
+import threading
+
+# Create a lock object
+print_lock = threading.Lock()
 
 
 class PixelGrabber:
     # if label name is none we do all them otherwise it's all of them
     # takes in an array of label names to do
-    def __init__(self, texture_file_path, label_names=None, pixel_deviation=0, ):
+    def __init__(self, texture_file_name, label_names=None, pixel_deviation=0):
+        # def __init__(self):
         self.pixel_deviation = pixel_deviation
         self.enable_default_color_range = True
         self.label_starts = self.read_in_label_starts()
         # self.texture_file = 'obj textures/diffuse.jpg'
-        self.texture_file = texture_file_path
+        self.texture_file = "obj textures/" + texture_file_name
         self.label_names = label_names
         self.coords_dict, self.max_width, self.max_height, self.mode, self.pixels = None, None, None, None, None
+
         self.acceptable_colors_by_label = {}
         self.default_acceptable_colors_dict = {}
-
-    # opens the texture image and gets all the pixels and width as well the rgb by pixel coordinate
-    def set_and_create_image_data(self):
-        print("Grabbing pixels and rgbs....")
-        self.coords_dict, self.max_width, self.max_height, self.mode, self.pixels = self.get_pixel_coords()
 
     def disable_default_color_range(self):
         self.enable_default_color_range = False
@@ -63,9 +70,13 @@ class PixelGrabber:
             acceptable_colors_dict = self.create_acceptable_colors(acceptable_colors, allow_default_color_range,
                                                                    allowed_pixel_deviation)
             self.acceptable_colors_by_label[label_name] = acceptable_colors_dict
+        # print(self.acceptable_colors_by_label["Deltoid"])
 
     # for each label name it will extract all the pixels belonging to it using the label_starts.json
-    def run_pixel_grabber(self):
+    def run_pixel_grabber(self, thread_count: int = None):
+        print("Starting pixel grabbing process!")
+        c_executor = PixelGrabber_C(self.pixel_data, self.acceptable_colors_by_label, self.max_width, self.max_height)
+
         # the key will be the label_name,
         # and the value will be the array of pixels that make up the label
         self.pixels_by_label = {}
@@ -76,88 +87,54 @@ class PixelGrabber:
                 label_data = self.label_starts[label_name]
                 change_label_starts[label_name] = label_data
             self.label_starts = change_label_starts
-        for label_name, label_data in self.label_starts.items():
-            print(f"Starting run for DFS for label {label_name}")
-            label = label_data["label"]
-            starting_points = label_data["starting_points"]
 
-            # the length of arrays starting_points, mins, and maxes must all be equal
-            label_pixels = []
-            for i, point in enumerate(starting_points):
-                min_X, min_Y = 0, 0
-                # we get the max width from the pic
-                max_X, max_Y = self.max_width, self.max_height
-                if "min_X" in label_data:
-                    min_X = label_data["min_X"][i]
-                if "min_Y" in label_data:
-                    min_Y = label_data["min_Y"][i]
-                if "max_X" in label_data:
-                    max_X = label_data["max_X"][i]
-                if "max_Y" in label_data:
-                    max_Y = label_data["max_Y"][i]
+        if thread_count is None:
+            thread_count = cpu_count() - 1
+        with ThreadPoolExecutor(max_workers=thread_count) as executor:
+            futures = []
+            for label_name, label_data in self.label_starts.items():
+                futures.append(executor.submit(self.process_label_pixels, label_name, label_data, c_executor))
 
-                # combine results into one big array
-                label_pixels += self.DFS(tuple(point), label_name, min_X, min_Y, max_X, max_Y)
-                print("len label", len(label_pixels))
-            self.pixels_by_label[label_name] = label_pixels
+            for future in as_completed(futures):
+                label_name, label_pixels = future.result()
+                # FIXME there's duplicates in the returned list :/
+                # if len(label_pixels) != len(set(label_pixels)):
+                #     print("There are duplicates in the list.")
+                # else:
+                #     print("There are no duplicates in the list.")
+                self.pixels_by_label[label_name] = label_pixels
 
-    # this is the searching algorithm for neighboring pixels that match
-    def DFS(self, starting_coords, label_name, min_X, min_Y, max_X, max_Y):
-        x, y = starting_coords
-        pixel_rgb = self.coords_dict[(x, y)]
-
-        # color = (220, 156, 190)
-        # acceptable_colors = {color: True}
-        # dequeue is a doubly linked list
-        queue = deque()
-        # important that this is a dict it's much faster!
-        visited = {}
-        # accepted_pixels = []
-        accepted_pixels = deque()
-        # add it to the queue and the visited
-        queue.append(starting_coords)
-        # idk what value to store it's arbitrary
-        visited[starting_coords] = pixel_rgb
-        accepted_pixels.append(starting_coords)
-        acceptable_colors = self.acceptable_colors_by_label[label_name]
-        while queue:
-            # queue is just a tuple list of coords
-            # current_coords = queue.pop(0)
-            current_coords = queue.popleft()
-            x, y = current_coords
-            pixel_rgb = self.coords_dict[(x, y)]
-            # print(queue)
-            # print(pixel_rgb)
-            # print(color)
-            neighbors = self.get_neighbors(x, y)
-            # this is no more than 8 long at a time
-
-            for neighbor in neighbors:
-                current_x, current_y = neighbor
-                # need to check that it's within the confines as well
-                if max_X >= current_x >= min_X and max_Y >= current_y >= min_Y:
-                    self.DFS_helper(neighbor, pixel_rgb, acceptable_colors, queue, visited, accepted_pixels)
-        # return revealed which should be all matching pixels within range
-        print("visited vs revealed")
-        print(len(visited.values()))
-        print(len(accepted_pixels))
-        return accepted_pixels
-
-    # this is the helper function for the search algorithm to make it more readable
-    def DFS_helper(self, current_coords, rgb, acceptable_colors: dict, queue, visited: dict, accepted_pixels):
-        if current_coords not in visited:
-            visited[current_coords] = rgb
-            # if rgb value is not equal to the targeted rgb then we ignore it and don't continue searching from there
-            if tuple(rgb) not in acceptable_colors:
-                return
-            # if it's acceptable then add to the queue to continue searching from there as well as you know that it's
-            # an acceptable rgb value
-            queue.append(current_coords)
-            accepted_pixels.append(current_coords)
-        return
+    # this is used for the threads to do their own isolated work
+    def process_label_pixels(self, label_name, label_data, c_executor: PixelGrabber_C):
+        print(f"Starting run for DFS for label {label_name}")
+        label = label_data["label"]
+        starting_points = label_data["starting_points"]
+        # all min and maxes go in here
+        bounding_list = []
+        # the length of arrays starting_points, mins, and maxes must all be equal
+        for i, point in enumerate(starting_points):
+            min_X, min_Y = 0, 0
+            # we get the max width from the pic
+            max_X, max_Y = self.max_width, self.max_height
+            if "min_X" in label_data:
+                min_X = label_data["min_X"][i]
+            if "min_Y" in label_data:
+                min_Y = label_data["min_Y"][i]
+            if "max_X" in label_data:
+                max_X = label_data["max_X"][i]
+            if "max_Y" in label_data:
+                max_Y = label_data["max_Y"][i]
+            # stores the 4 starting points if exist
+            bounding_values = [min_X, min_Y, max_X, max_Y]
+            bounding_list.append(bounding_values)
+        # combine results into one big array
+        label_pixels = c_executor.DFS(starting_points, label_name, bounding_list)
+        # label_pixels += self.DFS(tuple(point), label_name, min_X, min_Y, max_X, max_Y)
+        print("len label", len(label_pixels))
+        return label_name, label_pixels
 
     # simply gets the coordinates points 1 pixel away in all directions, returns a list
-    def get_neighbors(self, x_given, y_given):
+    def get_neighbors_original(self, x_given, y_given):
         neighbors = []
         # bottom left row_given+1, column_given - 1
         if not (x_given + 1 >= self.max_width) and not (y_given - 1 < 0):
@@ -185,22 +162,27 @@ class PixelGrabber:
             neighbors.append((x_given + 1, y_given))
         return neighbors
 
-    # TODO so you can do multiple colors at a time
-    # takes in a HEX VALUE FOR COLOR! use '#hex_value'
-    def change_pixels_test(self, color='#000000'):
-        print("CHANGING SOMETHING", flush=True)
-        img = Image.open(self.texture_file)
-        image_pixels = img.load()
-        for label_name, pixels in self.pixels_by_label.items():
-            print(f"{label_name}: pixels length test", len(pixels), flush=True)
-            # print("pixel type", type(pixels[0]))
-            for pixel in pixels:
-                image_pixels[pixel] = ImageColor.getcolor(color, "RGB")
-        img.save('outputs/pixel_change_test.png')
-        print("Finished saving change pixel test image.")
+    # this is correct and works fine
+    # returns a list of indicies representing the neighbors of the current coordinate
+    def get_neighbors(self, x_given, y_given):
+        neighbors = []
+        # Define offsets for each direction
+        offsets = [(1, -1), (0, -1), (-1, -1), (-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0)]
+        for dx, dy in offsets:
+            # Calculate the x and y coordinates for the neighboring cell
+            x, y = x_given + dx, y_given + dy
+            # Check if the neighboring cell is within bounds
+            if 0 <= x < self.max_width and 0 <= y < self.max_height:
+                neighbors.append((x, y))
+        return neighbors
+
+    # returns the width and height of the image
+    def get_image_dimensions(self):
+        return self.max_width, self.max_height
 
     def save_pixels_by_labels(self, output_file_name='pixels_by_labels.json'):
         print("SAVING PIXELS OR TRYING TO WHO KNOWS")
+        start = time.time()
         with open("outputs/" + output_file_name, 'w') as fp:
             # uvs_list = list(uv_dict.values())
             # print("uvs_list", len(uvs_list))
@@ -208,26 +190,34 @@ class PixelGrabber:
             json.dump(self.pixels_by_label, fp)
             print("Finished saving pixels by labels json file.")
             fp.flush()
+        end = time.time()
+        print(f"Full file JSON dump took {(end - start) / 60} minutes")
 
-    # this grabs each pixel coordinate and uses a tuple pair as key
-    # and the value is the r, g, b at that pixel
-    # probably not the best way to do this
-    def get_pixel_coords(self):
+        start = time.time()
+        print("Creating faces found by labels pickle file!")
+
+        with open("outputs/" + "pixels_by_labels.bin", 'wb') as f:
+            print("Writing STR tree binary")
+            pickle.dump(self.pixels_by_label, f)
+        end = time.time()
+        print(f"Full file PICKLE dump took {(end - start) / 60} minutes")
+
+    # reads in image data as a numpy array
+    def read_in_image_data(self):
+        # texture_file_path = "diffuse.jpg"
+        start = time.perf_counter()
+        print("Numpy image....")
         img = Image.open(self.texture_file)
-        pixels = img.load()
-        width, height = img.size
-        mode = img.mode
-        coords_dict = {}
-        for x in range(width):
-            for y in range(height):
-                # get rgb value by coords
-                r, g, b = pixels[x, y]
-                coords_dict[(x, y)] = [r, g, b]
-                # in case your image has an alpha channel
-                # r, g, b, a = pixels[x, y]
-                # print(x, y, f"#{r:02x}{g:02x}{b:02x}")
-        img.close()
-        return coords_dict, width, height, mode, pixels
+        self.max_width, self.max_height = img.size
+        self.pixel_data = np.array(img)
+        end = time.perf_counter()
+        print(f"NUMPY pillow Time {end - start}")
+        # numpy is flipped!
+        # print(data[10][10])
+        # print(data[y][x])
+        print(self.pixel_data.dtype)
+        print(self.pixel_data.shape)
+        # return data
 
     # this takes in a color that you want all your labels to accept, this is helpful if the label has some sort of
     # text in the center
@@ -289,60 +279,57 @@ class PixelGrabber:
                     current_result = (r, g, b)
                     dict_to_store[current_result] = True
 
-    # ignore this because it returns a dictionary which we don't want
-    def convert_pixel_coords_to_uv(self, coords: dict, width, height):
-        # u is width, v is height
-        # coords tuple will be key
-        uv_dict = {}
-        for coord, rgb in coords.items():
-            x, y = coord
-            r, g, b = rgb
-            u = x / width
-            # since 0, 0 is at the bottom left! very important
-            v = 1 - y / height
-            uv_dict[coord] = (u, v)
-        return uv_dict
+    def change_pixels_for_label(self, image_pixels, label_name, pixels_to_change, color):
+        with print_lock:
+            print(f"{label_name}: pixels length test", len(pixels_to_change), flush=True)
+        # very important you do this once! otherwise it's extremely slow!
+        rgb_value = ImageColor.getcolor(color, "RGB")
+        for pixel in pixels_to_change:
+            image_pixels[pixel] = rgb_value
 
-    # we actually don't need to use this because in the end we only use pixels not uvs!
-    # also the way it is now needs to be changed as it won't work with the updated version
-    def convert_pixel_coords_to_uv_list(self, coords: list, width, height):
-        # u is width, v is height
-        uvs_list = []
-        for coord in coords:
-            x, y = coord
-            # r, g, b = rgb
-            u = x / width
-            # since 0, 0 is at the bottom left! very important
-            v = 1 - y / height
-            uvs_list.append([u, v])
-        return uvs_list
+    # TODO so you can do multiple colors at a time
+    def run_change_pixels_test(self, color='#000000'):
+        print("Running pixel change test!")
+        img = Image.open(self.texture_file)
+        image_pixels = img.load()
+        # noinspection PyUnresolvedReferences
+        print(image_pixels[0, 0])
 
+        with ThreadPoolExecutor() as executor:
+            futures = []
+            for label_name, pixels_to_change in self.pixels_by_label.items():
+                # noinspection PyTypeChecker
+                future = executor.submit(self.change_pixels_for_label, image_pixels, label_name, pixels_to_change,
+                                         color)
+                futures.append(future)
 
-# these two need to be static functions because how processes need
-# to pickle data as it's returned, and if it's in a class
-# like it was before it fails the pickling process
-def run_change_pixels_test(texture_file, pixels_by_label, color='#000000'):
-    print("Running pixel change test!")
-    img = Image.open(texture_file)
-    image_pixels = img.load()
-    for label_name, pixels in pixels_by_label.items():
-        print(f"{label_name}: pixels length test", len(pixels), flush=True)
-        # print("pixel type", type(pixels[0]))
-        for pixel in pixels:
-            image_pixels[pixel] = ImageColor.getcolor(color, "RGB")
-    img.save('outputs/pixel_change_test.png')
-    print("Finished saving change pixel test image.", flush=True)
+            wait(futures)
+
+        img.save('outputs/pixel_change_test.png')
+        print("Finished saving change pixel test image.", flush=True)
 
 
-def save_pixels_by_labels(pixels_by_label, output_file_name='pixels_by_labels.json'):
+def save_pixels_by_labels(pixels_by_label, output_file_name='pixels_by_labels'):
     print("Saving pixels by labels", flush=True)
-    with open("outputs/" + output_file_name, 'w') as fp:
-        # uvs_list = list(uv_dict.values())
-        # print("uvs_list", len(uvs_list))
-        print("length of pixels by labels", len(pixels_by_label), flush=True)
-        json.dump(pixels_by_label, fp)
-        print("Finished saving pixels by labels json file.", flush=True)
-        fp.flush()
+    # start = time.time()
+    # with open("outputs/" + output_file_name + ".json", 'w') as fp:
+    #     # uvs_list = list(uv_dict.values())
+    #     # print("uvs_list", len(uvs_list))
+    #     print("length of pixels by labels", len(pixels_by_label), flush=True)
+    #     json.dump(pixels_by_label, fp)
+    #     print("Finished saving pixels by labels json file.", flush=True)
+    #     fp.flush()
+    #
+    # end = time.time()
+    # print(f"Full file JSON dump took {(end - start) } seconds")
+
+    start = time.time()
+    print("Creating faces found by labels pickle file!")
+    with open("outputs/" + f"{output_file_name}.bin", 'wb') as f:
+        print("Writing label binary")
+        pickle.dump(pixels_by_label, f, protocol=pickle.HIGHEST_PROTOCOL)
+    end = time.time()
+    print(f"Full file PICKLE dump took {(end - start)} seconds")
 
 
 if __name__ == "__main__":
@@ -366,11 +353,11 @@ if __name__ == "__main__":
     pixel_grabber = PixelGrabber(texture_file_path, label_names_to_test, default_pixel_deviation)
 
     # this is for the future processes
-    executor = ProcessPoolExecutor(max_workers=2)
+    executor = ProcessPoolExecutor(max_workers=1)
 
     # although this takes forever it is not worth optimizing as it is a task that must be waited on
     # before anything else is run
-    pixel_grabber.set_and_create_image_data()
+    pixel_grabber.read_in_image_data()
 
     # creates the range of acceptable colors by label, in this case just white basically
     pixel_grabber.create_acceptable_colors_by_label(default_acceptable_colors, deviation_default_colors)
@@ -378,28 +365,20 @@ if __name__ == "__main__":
     # then run the actual pixel_grabber algo
     pixel_grabber.run_pixel_grabber()
 
-    # print("Saving pixels by labels file!")
-    #  to save the pixels by label
+    # to save the pixels by label
     # you can specify an output file name as an argument if you want (optional)
     output_file_name = "pixels_by_labels.json"
     futures = [executor.submit(save_pixels_by_labels, pixel_grabber.pixels_by_label, output_file_name)]
     # pixel_grabber.save_pixels_by_labels() # run for better print statements without process pool
 
-    # print("Running change pixels test!")
     # if you are testing, you can visualize the changes with the change_pixels_test
     # you can specify a specific hex color default is '#000000'
     hex_color = '#000000'
-    futures.append(
-        executor.submit(run_change_pixels_test, pixel_grabber.texture_file, pixel_grabber.pixels_by_label,
-                        hex_color))
-    # for future in as_completed(futures):
-    #     print("finished")
+    pixel_grabber.run_change_pixels_test(hex_color)
 
-    # print(futures[0].result())
-    # wait(futures)
-    # pixel_grabber.change_pixels_test() # run for better print statements without process pool
     executor.shutdown(wait=True, cancel_futures=False)
-    print("Finished saving pixel change test file and pixel by label.json file")
+
+    print("Finished saving pixel change test file and pixels_by_labels.json file")
     end = time.time()
     print()
     print(f"Finished finding pixels...Took {end - start} seconds")

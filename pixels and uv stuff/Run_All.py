@@ -1,13 +1,15 @@
 import json
 import time
 from concurrent.futures import ProcessPoolExecutor
-from os import listdir, getcwd
+from os import listdir
 from os.path import isfile, join
 from PixelToFace import PixelToFace
 from PixelGrabber import PixelGrabber
 from PixelIndexer import PixelIndexer
-from PixelGrabber import run_change_pixels_test, save_pixels_by_labels
-from ObjFileToJSONFiles import ObjToJSON
+from PixelGrabber import save_pixels_by_labels
+from ObjFileToGeometryFiles import ObjToGeometryFiles
+from PixelToFace import get_image_dimensions
+
 
 def create_file_names_list():
     ignore_files = [".gitkeep", "human.obj", "file_list.json"]
@@ -24,36 +26,28 @@ def create_file_names_list():
 
 
 if __name__ == "__main__":
-    # IMPORTANT  this is an array of strings, if it's empty it will do all of them
-    #label_names_to_test = ["Flexor Carpi Ulnaris","Flexor Carpi Radialis","Flexor Digitorum Superficialis","Flexor Digitorum Longus","Gracilis","Gastrocnemius","Iliopsoas","Infraspinatus","Latissimus Dorsi","Levator Scapulae","Pectineus","Peroneus Longus"]
-    #["Flexor Carpi Ulnaris","Flexor Carpi Radialis","Flexor Digitorum Superficialis","Flexor Digitorum Longus","Gracilis","Gastrocnemius","Iliopsoas","Infraspinatus","Iliotibial Tract","Latissimus Dorsi","Levator Scapulae","Pectineus","Peroneus Longus"]
+    # IMPORTANT  this is an array of strings, if it's empty it will do all of the labels available
+    label_names_to_test = []
 
-    label_names_to_test = ["Vastus Medialis", "Vastus Lateralis", "Trapezius",
-                            "Teres Minor", "Teres Major", "Tensor Fasciae Latae",
-                            "Tibialis Anterior", "Soleus", "Semitendinosus", "Serratus Anterior", "Rectus Abdominis",
-                            "Rhomboids", "Pronator Teres", "Palmaris Longus"]
+    texture_file_name = 'texture.jpg'
 
-    # label_names_to_test = ["Anconeus", "Adductor Longus", "Adductor Magnus", "Abductor Pollicis Longus", "Brachialis", "Biceps Brachii", "Biceps Femoris", "Brachioradialis", "Coracobrachialis", "Deltoid", "Extensor Carpi Radialis Brevis", "Extensor Carpi Radialis Longus", "Extensor Carpi Ulnaris", "Extensor Digitorum", "Extensor Digitorum Longus", "Extensor Digiti Minimi", "External Oblique", "Extensor Pollicis Brevis", "Erector Spinae"]
-    # # grab last two for testing
-    # label_names_to_test = label_names_to_test[-2:]
 
-    label_names_to_test = ["Trapezius", "Teres Minor"]
-
-    texture_file_path = 'obj textures/diffuse.jpg'
-    # define the dimensions of the image
-    texture_max_width, texture_max_height = 4096, 4096
-    # muscle_names_to_test = muscle_names_to_test[-1:]
-    #muscle_names_to_test = []
-    # muscle_names_to_test = []
-
-    # if there's a fade or variation in color you will want to raise this to loosen what is an acceptable color
+    # if there's a fade or variation in color you will want to raise this to loosen what is an acceptable color (globally)
     default_pixel_deviation = 3
 
-    # set white as the default acceptable colors
-    default_acceptable_colors = [[255, 255, 255]]
-    deviation_default_colors = 2
+    # global default acceptable colors, this might be the color of a text that inside the label area
+    default_acceptable_colors = []
+    # as well as the deviation of those default acceptable colors
+    deviation_default_colors = 0
 
-    base_obj_file_path = "obj files/Anatomy.OBJ"
+    base_obj_file_name = "your_file.OBJ"
+
+    # choose whether to save the uvs and normals, if both are false it will only save the vertices and faces
+    SAVE_UVS = False
+    SAVE_NORMALS = False
+
+    # by default will use max threads available - 1
+    THREAD_COUNT = None
 
     # if you only want to run certain scripts you can change accordingly here
     RUN_PIXEL_GRABBER = True
@@ -65,32 +59,37 @@ if __name__ == "__main__":
 
     # IMPORTANT unless you're testing something you can just leave it
     # target is what pixels we're trying to find
-    TARGET_FILE = 'outputs/pixels_by_labels.json'
+    TARGET_FILE = 'outputs/pixels_by_labels.bin'
+
+    # these will be created later
+    texture_max_width, texture_max_height = None, None
 
     start0 = time.time()
     if RUN_PIXEL_GRABBER:
         # first create the object which simply loads in the diffuse.jpg and relevant data
         # also reads in the label starts
-        pixel_grabber = PixelGrabber(texture_file_path, label_names_to_test, default_pixel_deviation)
+        pixel_grabber = PixelGrabber(texture_file_name, label_names_to_test, default_pixel_deviation)
 
         # allows for a default color range to capture more of the label (if you have it), disable it if too aggressive
         # pixel_grabber.disable_default_color_range()
 
         # this is for the future processes
-        executor = ProcessPoolExecutor(max_workers=2)
+        executor = ProcessPoolExecutor(max_workers=1)
+
         # although this takes forever it is not worth optimizing as it is a task that must be waited on
         # before anything else is run
-        pixel_grabber.set_and_create_image_data()
+        pixel_grabber.read_in_image_data()
+        texture_max_width, texture_max_height = pixel_grabber.get_image_dimensions()
 
         # creates the range of acceptable colors by label, in this case just white basically
         pixel_grabber.create_acceptable_colors_by_label(default_acceptable_colors, deviation_default_colors)
 
         # then run the actual pixel_grabber algo
-        pixel_grabber.run_pixel_grabber()
+        pixel_grabber.run_pixel_grabber(THREAD_COUNT)
 
         #  to save the pixels by label
         # you can specify an output file name as an argument if you want (optional)
-        output_file_name = "pixels_by_labels.json"
+        output_file_name = "pixels_by_labels"
         futures = [executor.submit(save_pixels_by_labels, pixel_grabber.pixels_by_label, output_file_name)]
 
         # pixel_grabber.save_pixels_by_labels() # run for better print statements without process pool
@@ -98,13 +97,10 @@ if __name__ == "__main__":
         # if you are testing, you can visualize the changes with the change_pixels_test
         # you can specify a specific hex color default is '#000000'
         hex_color = '#000000'
-        futures.append(
-            executor.submit(run_change_pixels_test, pixel_grabber.texture_file, pixel_grabber.pixels_by_label,
-                            hex_color))
-        # pixel_grabber.change_pixels_test() # run for better print statements without process pool
+        pixel_grabber.run_change_pixels_test(hex_color)
 
         executor.shutdown(wait=True, cancel_futures=False)
-        print("Finished saving pixel change test file and pixel by label.json file")
+        print("Finished saving pixel change test file and pixel by label file")
 
         end = time.time()
         print()
@@ -115,29 +111,54 @@ if __name__ == "__main__":
     if RUN_PIXEL_TO_FACE:
         print("Starting pixels to faces code!")
 
-        start = time.time()
         if RUN_TRIANGLE_DECOMPOSER:
+            start = time.time()
             # we need this to create the geometry files and again only needs
             # to be run once, so it's paired with the triangle decomposer
-            obj_to_json = ObjToJSON(base_obj_file_path)
+            obj_to_json = ObjToGeometryFiles(base_obj_file_name)
             obj_to_json.read_in_OBJ_file()
             obj_to_json.insert_face_data()
             obj_to_json.create_json_files()
+            end = time.time()
+            print()
+            print(f"Finished creating geometries...Took {end - start} seconds")
 
-        pixel_to_faces = PixelToFace(TARGET_FILE)
+        preload_STRtree = not RUN_TRIANGLE_DECOMPOSER
+        start = time.time()
+
+        # need to grab the texture dimensions
+        if texture_max_width is None:
+            print("Grabbing texture images")
+            texture_max_width, texture_max_height = get_image_dimensions(texture_file_name)
+
+        # if you ran the pixel_grabber we can grab the target pixels without having to load files
+        if RUN_PIXEL_GRABBER:
+            pixel_to_faces = PixelToFace(TARGET_FILE, texture_max_width, texture_max_height,
+                                         preload_STRtree=preload_STRtree,
+                                         save_normals=SAVE_NORMALS, save_uvs=SAVE_UVS, disable_target_pixels_load=True)
+            pixel_to_faces.pass_in_target_pixels(pixel_grabber.pixels_by_label)
+        else:
+            pixel_to_faces = PixelToFace(TARGET_FILE, texture_max_width, texture_max_height,
+                                         preload_STRtree=preload_STRtree,
+                                         save_normals=SAVE_NORMALS, save_uvs=SAVE_UVS, disable_target_pixels_load=False)
+        # if you ran the geometry files we can pass those in as well
+        if not preload_STRtree:
+            pixel_to_faces.pass_in_geometry_data(obj_to_json.face_data, obj_to_json.normals_data, obj_to_json.uvs_data)
+
         end = time.time()
         print()
         print(f"Finished reading in geometries...Took {end - start} seconds")
-        start = time.time()
 
+        start = time.time()
         # create all the points within the obj files
         if RUN_TRIANGLE_DECOMPOSER:
-
             # then break down those geometry files
-            pixel_to_faces.decompose_all_triangles(texture_max_width, texture_max_height)
+            # pixel_to_faces.decompose_all_triangles(texture_max_width, texture_max_height)
+            pixel_to_faces.build_str_tree()
 
         # then search through target_uvs
-        pixel_to_faces.find_faces_of_targets()
+        pixel_to_faces.find_faces_of_targets(THREAD_COUNT)
+
         end = time.time()
         print(end - start)
         print(f"Pixel to face search took {(end - start) / 60} minutes")
@@ -148,7 +169,10 @@ if __name__ == "__main__":
         print()
         print("Starting Pixel Indexer and .obj creation")
         start = time.time()
-        indexer = PixelIndexer(label_names_to_test)
+        if RUN_PIXEL_TO_FACE:
+            indexer = PixelIndexer(label_names_to_test, pixel_to_faces.label_faces, SAVE_NORMALS, SAVE_UVS)
+        else:
+            indexer = PixelIndexer(label_names_to_test, save_normals=SAVE_NORMALS, save_uvs=SAVE_UVS)
         end = time.time()
         print()
         print(f"Finished reading in faces...Took {end - start} seconds")
