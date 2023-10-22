@@ -10,7 +10,6 @@ from PyQt5.QtWidgets import QApplication, qApp, QFileDialog, QListWidget, QSplit
 
 # adding ocr support
 from PIL import Image
-import pytesseract
 
 Home_Path = os.path.expanduser("~")
 
@@ -186,8 +185,6 @@ class QImageViewer(QMainWindow):
                 QMessageBox.information(self, "Image Viewer", "Cannot load %s." % fileName)
                 return
             self.setWindowTitle("Image Viewer : " + fileName)
-            # self.imageLabel.setPixmap(QPixmap.fromImage(image))
-            # test for image pixel finder thingy
             self.log = LogObject(self)
             self.imageLabel.setPixmap( QPixmap.fromImage(image))
 
@@ -197,12 +194,10 @@ class QImageViewer(QMainWindow):
             self.printAct.setEnabled(True)
             self.fitToWidthAct.setEnabled(True)
             self.fitToWindowAct.setEnabled(True)
-            self.readImageAct.setEnabled(True)
             self.updateActions()
 
             if not self.fitToWindowAct.isChecked():
                 self.fitToWidth()
-                # self.imageLabel.adjustSize()
 
     def print_(self):
         dialog = QPrintDialog(self.printer, self)
@@ -253,40 +248,6 @@ class QImageViewer(QMainWindow):
             # Load the image file into a pillow object
             new_image = Image.open(file_name)
 
-            # Create a new Tesseract engine using  the PyTesseract English language model
-            if new_image.mode == 'RGBA':
-                new_image = new_image.convert('RGB')
-
-            if new_image.mode == 'RGB':
-                engine = pytesseract.image_to_string(new_image, lang='eng')
-                # Extract the text from the image
-
-                text = engine
-                serialNumber = self.extractSerialNumber(text)
-
-                # Display the text in a scrollable text box
-                self.imageName.setPlainText(self.imageName.toPlainText() + "\n" + serialNumber)
-                self.textEdit.setPlainText(text)
-            else:
-                QMessageBox.information(self, "OCR Text", "Image is not in RGB format")
-
-    def extractSerialNumber(self, text):
-        lines = text.split('\n')
-        for i, line in enumerate(lines, 1):
-            # print (i,'>> ', line)
-            if 'SERIAL No.:' in line:
-                serial_number_line = lines[i - 1]
-                # print ('***** ', serial_number_line)
-
-                serial_number_parts = serial_number_line.split('SERIAL No.:')
-                if len(serial_number_parts) >= 2:
-                    serial_number_text = serial_number_parts[1].strip()
-                    serial_info = serial_number_text.split('/')
-                    if len(serial_info) >= 2:
-                        serial_data = serial_info[0].strip() + '-' + serial_info[1].strip() + '\n'
-                        return serial_data.replace(' ', '')
-
-        return '>> Serial Number Not Found <<\n'
 
     def about(self):
         QMessageBox.about(self, "About Image Viewer",
@@ -314,7 +275,6 @@ class QImageViewer(QMainWindow):
         self.fitToWidthAct = QAction("Fit to &Width", self, shortcut="Ctrl+w", enabled=False, triggered=self.fitToWidth)
         self.fitToWindowAct = QAction("&Fit to Window", self, enabled=False, checkable=True, shortcut="Ctrl+F",
                                       triggered=self.fitToWindow)
-        self.readImageAct = QAction("&Decode Image", self, shortcut="Ctrl+d", enabled=False, triggered=self.readImage)
         self.aboutAct = QAction("&About", self, triggered=self.about)
         self.aboutQtAct = QAction("About &Qt", self, triggered=qApp.aboutQt)
 
@@ -324,7 +284,6 @@ class QImageViewer(QMainWindow):
         self.fileMenu.addAction(self.printAct)
         self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.exitAct)
-
         self.viewMenu = QMenu("&View", self)
         self.viewMenu.addAction(self.zoomInAct)
         self.viewMenu.addAction(self.zoomOutAct)
@@ -333,8 +292,6 @@ class QImageViewer(QMainWindow):
         self.viewMenu.addSeparator()
         self.viewMenu.addAction(self.fitToWindowAct)
 
-        self.ocrMenu = QMenu("&OCR", self)
-        self.ocrMenu.addAction(self.readImageAct)
 
         self.helpMenu = QMenu("&Help", self)
         self.helpMenu.addAction(self.aboutAct)
@@ -342,7 +299,6 @@ class QImageViewer(QMainWindow):
 
         self.menuBar().addMenu(self.fileMenu)
         self.menuBar().addMenu(self.viewMenu)
-        self.menuBar().addMenu(self.ocrMenu)
         self.menuBar().addMenu(self.helpMenu)
 
     def updateActions(self):
@@ -350,7 +306,6 @@ class QImageViewer(QMainWindow):
         self.zoomOutAct.setEnabled(not self.fitToWindowAct.isChecked())
         self.fitToWidthAct.setEnabled(not self.fitToWindowAct.isChecked())
         self.normalSizeAct.setEnabled(not self.fitToWindowAct.isChecked())
-        self.readImageAct.setEnabled(not self.fitToWindowAct.isChecked())
 
     def scaleImage(self, factor):
         self.scaleFactor *= factor
