@@ -8,41 +8,12 @@ from PyQt5.QtWidgets import QLabel, QSizePolicy, QScrollArea, QMessageBox, QMain
     QGraphicsPixmapItem
 from PyQt5.QtWidgets import QApplication, qApp, QFileDialog, QListWidget, QSplitter, QTextEdit, QFileSystemModel
 
-# adding ocr support
 from PIL import Image
 
+# CUSTOM
+from CustomLabel import CustomLabel
+
 Home_Path = os.path.expanduser("~")
-
-class LogObject(QObject):
-    MousePixmapSignal = pyqtSignal(QPoint, QColor)
-
-# https://gist.github.com/acbetter/32c575803ec361c3e82064e60db4e3e0
-# modified by converting to label instead
-class CustomLabel(QLabel):
-    # def __init__(self, log, *args, **kwargs):
-    def __init__(self,  *args, **kwargs):
-        QLabel.__init__(self, *args, **kwargs)
-        # self.setAcceptHoverEvents(True)
-        self.setMouseTracking(True)
-        # self.mouseMoveEvent()
-        # self.log = log
-
-    def mouseMoveEvent(self, event):
-        point = event.pos()
-        color = QColor(self.pixmap().toImage().pixel(point.x(), point.y()))
-        # self.log.MousePixmapSignal.emit(point, color)
-        print("Moved!!", color.getRgb())
-        QLabel.mouseMoveEvent(self, event)
-
-    # this is the hover mouse event
-    def enterEvent(self, event):
-        QApplication.setOverrideCursor(Qt.CrossCursor)
-        QLabel.enterEvent(self, event)
-
-    def leaveEvent(self, event):
-        QApplication.setOverrideCursor(Qt.ArrowCursor)
-        QLabel.leaveEvent(self, event)
-
 
 
 class QImageViewer(QMainWindow):
@@ -66,6 +37,7 @@ class QImageViewer(QMainWindow):
         self.imageLabel.setBackgroundRole(QPalette.Base)
         self.imageLabel.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
         self.imageLabel.setScaledContents(True)
+        self.imageLabel.mouseMovePixelColor.connect(self.changeTextColor)
 
         self.scrollArea = QScrollArea()
         self.scrollArea.setBackgroundRole(QPalette.Dark)
@@ -87,10 +59,18 @@ class QImageViewer(QMainWindow):
 
         self.textEdit = QTextEdit()
         self.textEdit.setReadOnly(True)
+        self.textEdit.setAutoFillBackground(True)
+        self.textEdit.setPlainText("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas ")
 
         self.imageName = QTextEdit()
         self.imageName.setAlignment(Qt.AlignCenter)
         self.imageName.setReadOnly(True)
+
+    def changeTextColor(self, point, color):
+        print("COLOR", color)
+        self.textEdit.setTextBackgroundColor(color)
+        #change the background color of text edit
+        self.textEdit.setStyleSheet("background-color: rgb(%d, %d, %d)" % (color.red(), color.green(), color.blue()))
 
     def createLayouts(self):
         V_splitter = QSplitter(Qt.Vertical)
@@ -177,7 +157,7 @@ class QImageViewer(QMainWindow):
             fileName = file_name
 
         if fileName:
-            self.textEdit.clear()
+            # self.textEdit.clear()
             self.imageName.setPlainText(fileName)
 
             image = QImage(fileName)
@@ -185,8 +165,8 @@ class QImageViewer(QMainWindow):
                 QMessageBox.information(self, "Image Viewer", "Cannot load %s." % fileName)
                 return
             self.setWindowTitle("Image Viewer : " + fileName)
-            self.log = LogObject(self)
-            self.imageLabel.setPixmap( QPixmap.fromImage(image))
+            self.imageLabel.setPixmap(QPixmap.fromImage(image))
+            self.imageLabel.setQImage()
 
             self.scaleFactor = 1.0
 
@@ -241,14 +221,6 @@ class QImageViewer(QMainWindow):
 
         self.updateActions()
 
-    def readImage(self):
-        file_name = self.windowTitle().split(":")[1].strip()
-        # print ("Processing Image : ", file_name)
-        if file_name:
-            # Load the image file into a pillow object
-            new_image = Image.open(file_name)
-
-
     def about(self):
         QMessageBox.about(self, "About Image Viewer",
                           "<p>The <b>Image Viewer</b> example shows how to combine "
@@ -291,7 +263,6 @@ class QImageViewer(QMainWindow):
         self.viewMenu.addAction(self.fitToWidthAct)
         self.viewMenu.addSeparator()
         self.viewMenu.addAction(self.fitToWindowAct)
-
 
         self.helpMenu = QMenu("&Help", self)
         self.helpMenu.addAction(self.aboutAct)
