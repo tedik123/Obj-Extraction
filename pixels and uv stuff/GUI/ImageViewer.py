@@ -20,7 +20,6 @@ class QImageViewer(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.printer = QPrinter()
         self.scaleFactor = 0.0
 
         self.createWidgets()
@@ -171,7 +170,6 @@ class QImageViewer(QMainWindow):
             self.scaleFactor = 1.0
 
             self.scrollArea.setVisible(True)
-            self.printAct.setEnabled(True)
             self.fitToWidthAct.setEnabled(True)
             self.fitToWindowAct.setEnabled(True)
             self.updateActions()
@@ -179,16 +177,6 @@ class QImageViewer(QMainWindow):
             if not self.fitToWindowAct.isChecked():
                 self.fitToWidth()
 
-    def print_(self):
-        dialog = QPrintDialog(self.printer, self)
-        if dialog.exec_():
-            painter = QPainter(self.printer)
-            rect = painter.viewport()
-            size = self.imageLabel.pixmap().size()
-            size.scale(rect.size(), Qt.KeepAspectRatio)
-            painter.setViewport(rect.x(), rect.y(), size.width(), size.height())
-            painter.setWindow(self.imageLabel.pixmap().rect())
-            painter.drawPixmap(0, 0, self.imageLabel.pixmap())
 
     def zoomIn(self):
         self.scaleImage(1.25)
@@ -234,12 +222,10 @@ class QImageViewer(QMainWindow):
                           "ability to automatically resize its contents "
                           "(QScrollArea.widgetResizable), can be used to implement "
                           "zooming and scaling features.</p>"
-                          "<p>In addition the example shows how to use QPainter to "
-                          "print an image.</p>")
+                          )
 
     def createActions(self):
         self.openAct = QAction("&Open...", self, shortcut="Ctrl+O", triggered=self.open)
-        self.printAct = QAction("&Print...", self, shortcut="Ctrl+P", enabled=False, triggered=self.print_)
         self.exitAct = QAction("E&xit", self, shortcut="Ctrl+Q", triggered=self.close)
         self.zoomInAct = QAction("Zoom &In (25%)", self, shortcut="Ctrl++", enabled=False, triggered=self.zoomIn)
         self.zoomOutAct = QAction("Zoom &Out (25%)", self, shortcut="Ctrl+-", enabled=False, triggered=self.zoomOut)
@@ -253,7 +239,6 @@ class QImageViewer(QMainWindow):
     def createMenus(self):
         self.fileMenu = QMenu("&File", self)
         self.fileMenu.addAction(self.openAct)
-        self.fileMenu.addAction(self.printAct)
         self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.exitAct)
         self.viewMenu = QMenu("&View", self)
