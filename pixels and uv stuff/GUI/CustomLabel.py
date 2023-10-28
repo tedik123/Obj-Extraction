@@ -19,6 +19,12 @@ class CustomLabel(QLabel):
     # TODO converting QT coordinates to pixel coordinates with scaling consideration!
     # https://stackoverflow.com/questions/59611751/pyqt5-image-coordinates
 
+    # this might be useful?
+    # https://stackoverflow.com/questions/69869064/how-to-get-pixel-location-and-draw-a-dot-on-that-location-using-pyqt5
+
+    # and this?
+    # https://stackoverflow.com/questions/63378825/coordinates-of-an-image-pyqt
+
     # def __init__(self, log, *args, **kwargs):
     def __init__(self, *args, **kwargs):
         QLabel.__init__(self, *args, **kwargs)
