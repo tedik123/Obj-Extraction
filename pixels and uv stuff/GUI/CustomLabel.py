@@ -18,10 +18,6 @@ class CustomLabel(QLabel):
     # this might be useful?
     # https://stackoverflow.com/questions/69869064/how-to-get-pixel-location-and-draw-a-dot-on-that-location-using-pyqt5
 
-    # and this?
-    # https://stackoverflow.com/questions/63378825/coordinates-of-an-image-pyqt
-
-    # def __init__(self, log, *args, **kwargs):
     def __init__(self, *args, **kwargs):
         QLabel.__init__(self, *args, **kwargs)
         # self.setAcceptHoverEvents(True)
@@ -65,8 +61,6 @@ class CustomLabel(QLabel):
         if self.hasScaledContents():
             x = pos.x() * pixmapRect.width() / contentsRect.width()
             y = pos.y() * pixmapRect.height() / contentsRect.height()
-            print("X", x)
-            print("Y", y)
             pos = QtCore.QPoint(int(x), int(y))
         else:
             align = self.alignment()
