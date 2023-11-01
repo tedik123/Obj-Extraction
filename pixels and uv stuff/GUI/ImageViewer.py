@@ -74,11 +74,11 @@ class QImageViewer(QMainWindow):
         example_scroll = QScrollArea()
         example_widget = QWidget()
         example_scroll.setWidget(example_widget)
+
         # set the scroll area so it vertically allows for scrolling
         example_scroll.setWidgetResizable(True)
         example_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
         example_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-
 
         vertical_layout = QVBoxLayout()
         example_widget.setLayout(vertical_layout)
@@ -255,6 +255,12 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     imageViewer = QImageViewer()
     imageViewer.show()
+    # this awkwardness forces it to appear on the non-main monitor
+    LEFT_MONITOR = app.screens()[-1]
+    imageViewer.windowHandle().setScreen(LEFT_MONITOR)
+    imageViewer.showFullScreen()
+    imageViewer.showNormal()
+
     sys.exit(app.exec_())
 
     # credit for the code that inspired this goes to the following:
