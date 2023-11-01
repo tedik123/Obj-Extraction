@@ -6,6 +6,7 @@ The main script is Run_all.py.**
 # General
 
 ## Setup
+   *Python 3.9 or higher required*
 
    **Requirements** - Run `pip install -r requirements.txt` to get the basic python files required to run everything.
    
