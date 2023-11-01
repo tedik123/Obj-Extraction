@@ -5,7 +5,7 @@ from PyQt5.QtCore import Qt, QDir, pyqtSignal, QObject, QPoint
 from PyQt5.QtGui import QImage, QPixmap, QPalette, QPainter, QColor
 from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
 from PyQt5.QtWidgets import QLabel, QSizePolicy, QScrollArea, QMessageBox, QMainWindow, QMenu, QAction, \
-    QGraphicsPixmapItem
+    QGraphicsPixmapItem, QWidget, QVBoxLayout, QSpacerItem, QBoxLayout
 from PyQt5.QtWidgets import QApplication, qApp, QFileDialog, QListWidget, QSplitter, QTextEdit, QFileSystemModel
 
 from PIL import Image
@@ -58,7 +58,7 @@ class QImageViewer(QMainWindow):
     def changeTextColor(self, point, color):
         print("COLOR", color)
         self.textEdit.setTextBackgroundColor(color)
-        #change the background color of text edit
+        # change the background color of text edit
         self.textEdit.setStyleSheet("background-color: rgb(%d, %d, %d)" % (color.red(), color.green(), color.blue()))
 
     def createLayouts(self):
@@ -71,16 +71,39 @@ class QImageViewer(QMainWindow):
         H_splitter = QSplitter(Qt.Horizontal)
         # H_splitter.addWidget(self.directoryList)
         # H_splitter.addWidget(self.fileList)
+        example_scroll = QScrollArea()
+        example_widget = QWidget()
+        example_scroll.setWidget(example_widget)
+        # set the scroll area so it vertically allows for scrolling
+        example_scroll.setWidgetResizable(True)
+        example_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        example_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
+
+        vertical_layout = QVBoxLayout()
+        example_widget.setLayout(vertical_layout)
         example_label = QLabel()
-        example_label.setText("Something random and long")
-        H_splitter.addWidget(example_label)
+        example_label.setText("Something random and long 1")
+        # second example label widget
+        example_label2 = QLabel()
+        example_label2.setText("Something random and long 2")
+        # create 10 more example_labels
+        for i in range(100):
+            example_label = QLabel()
+            example_label.setText("Something random and long " + str(i))
+            vertical_layout.insertWidget(0, example_label)
+        # vertical_layout.insertWidget(0, example_label2)
+        # vertical_layout.insertWidget(0, example_label)
+        # this pushes everything to the top
+        vertical_layout.addStretch()
+
+        H_splitter.addWidget(example_scroll)
 
         # combine the two splitters
         H_splitter.addWidget(V_splitter)
         H_splitter.setSizes([200, 700])
 
         self.setCentralWidget(H_splitter)
-
 
     def listopen(self):
         self.open("list")
@@ -226,7 +249,6 @@ class QImageViewer(QMainWindow):
     def adjustScrollBar(self, scrollBar, factor):
         scrollBar.setValue(int(factor * scrollBar.value()
                                + ((factor - 1) * scrollBar.pageStep() / 2)))
-
 
 
 if __name__ == '__main__':
