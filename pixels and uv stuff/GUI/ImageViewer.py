@@ -12,6 +12,7 @@ from PIL import Image
 
 # CUSTOM
 from CustomLabel import CustomLabel
+from PixelRgbList.PixelList import PixelList
 
 Home_Path = os.path.expanduser("~")
 
@@ -20,21 +21,31 @@ class QImageViewer(QMainWindow):
     def __init__(self):
         super().__init__()
 
+        # TO BE CREATED
+        self.pixelList = None
+        self.textEdit = None
+        self.imageContainer = None
+        self.imageLabel = None
+
         self.scaleFactor = 0.0
 
+        # creation section
         self.createWidgets()
         self.createLayouts()
         self.createActions()
         self.createMenus()
-        # self.fileList.setEnabled(True)
 
         self.setWindowTitle("Image Viewer")
         self.resize(1200, 800)
+
+
+
 
     def createWidgets(self):
         self.createImageLabel()
         self.createImageContainer()
         self.createTextEdit()
+        self.pixelList = PixelList()
 
     def createTextEdit(self):
         self.textEdit = QTextEdit()
@@ -69,35 +80,8 @@ class QImageViewer(QMainWindow):
         V_splitter.setSizes([450, 150])
 
         H_splitter = QSplitter(Qt.Horizontal)
-        # H_splitter.addWidget(self.directoryList)
-        # H_splitter.addWidget(self.fileList)
-        example_scroll = QScrollArea()
-        example_widget = QWidget()
-        example_scroll.setWidget(example_widget)
 
-        # set the scroll area so it vertically allows for scrolling
-        example_scroll.setWidgetResizable(True)
-        example_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
-        example_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-
-        vertical_layout = QVBoxLayout()
-        example_widget.setLayout(vertical_layout)
-        example_label = QLabel()
-        example_label.setText("Something random and long 1")
-        # second example label widget
-        example_label2 = QLabel()
-        example_label2.setText("Something random and long 2")
-        # create 10 more example_labels
-        for i in range(100):
-            example_label = QLabel()
-            example_label.setText("Something random and long " + str(i))
-            vertical_layout.insertWidget(0, example_label)
-        # vertical_layout.insertWidget(0, example_label2)
-        # vertical_layout.insertWidget(0, example_label)
-        # this pushes everything to the top
-        vertical_layout.addStretch()
-
-        H_splitter.addWidget(example_scroll)
+        H_splitter.addWidget(self.pixelList)
 
         # combine the two splitters
         H_splitter.addWidget(V_splitter)
