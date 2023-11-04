@@ -1,0 +1,1 @@
+from .generated.StartingPointItem import Ui_StartingPointItem
