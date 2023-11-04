@@ -62,7 +62,7 @@ class QImageViewer(QMainWindow):
     def createImageLabel(self):
         self.imageLabel = CustomLabel()
         self.imageLabel.setBackgroundRole(QPalette.Base)
-        self.imageLabel.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        # self.imageLabel.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
         self.imageLabel.setScaledContents(True)
         self.imageLabel.mouseMovePixelColor.connect(self.changeTextColor)
 
