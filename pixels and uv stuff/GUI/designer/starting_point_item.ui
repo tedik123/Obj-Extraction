@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>PixelListItem</class>
- <widget class="QWidget" name="PixelListItem">
+ <class>StartingPointItem</class>
+ <widget class="QWidget" name="StartingPointItem">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -15,19 +15,26 @@
   </property>
   <layout class="QHBoxLayout" name="main_layout">
    <item>
-    <layout class="QGridLayout" name="grid_layout" columnstretch="0,0,0,0,0,0,0,0,0,0,0,0,0">
+    <layout class="QGridLayout" name="grid_layout" columnstretch="0,0,0,0,0,0,0,0,0,0,0,0">
      <property name="horizontalSpacing">
       <number>7</number>
      </property>
-     <item row="1" column="4">
-      <widget class="QLabel" name="start_x_label">
+     <item row="3" column="9">
+      <widget class="QLabel" name="max_y_label">
        <property name="text">
-        <string>X:</string>
+        <string>Max_y</string>
        </property>
       </widget>
      </item>
-     <item row="3" column="6">
-      <widget class="QSpinBox" name="max_x_input">
+     <item row="1" column="11">
+      <widget class="QPushButton" name="delete_button">
+       <property name="text">
+        <string>Delete</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="8">
+      <widget class="QSpinBox" name="min_y_input">
        <property name="autoFillBackground">
         <bool>false</bool>
        </property>
@@ -39,38 +46,15 @@
        </property>
       </widget>
      </item>
-     <item row="3" column="9">
-      <widget class="QLabel" name="max_y_label">
+     <item row="0" column="0" colspan="5">
+      <widget class="QLabel" name="name_label">
        <property name="text">
-        <string>Max_y</string>
+        <string>Starting Point 1</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="12">
-      <widget class="QPushButton" name="delete_button">
-       <property name="text">
-        <string>Delete</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="0">
-      <spacer name="verticalSpacer">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-       <property name="sizeType">
-        <enum>QSizePolicy::Minimum</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>20</width>
-         <height>40</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="3" column="8">
-      <widget class="QSpinBox" name="min_y_input">
+     <item row="3" column="6">
+      <widget class="QSpinBox" name="max_x_input">
        <property name="autoFillBackground">
         <bool>false</bool>
        </property>
@@ -89,40 +73,10 @@
        </property>
       </widget>
      </item>
-     <item row="3" column="3">
-      <widget class="QSpinBox" name="min_x_input">
-       <property name="showGroupSeparator" stdset="0">
-        <bool>false</bool>
-       </property>
-       <property name="maximum">
-        <number>255</number>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="4">
-      <widget class="QLabel" name="max_x_label">
-       <property name="text">
-        <string>Max_X</string>
-       </property>
-      </widget>
-     </item>
      <item row="3" column="1">
       <widget class="QLabel" name="min_x_label">
        <property name="text">
         <string>Min_X</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="8">
-      <widget class="QSpinBox" name="start_y_input">
-       <property name="autoFillBackground">
-        <bool>false</bool>
-       </property>
-       <property name="buttonSymbols">
-        <enum>QAbstractSpinBox::UpDownArrows</enum>
-       </property>
-       <property name="maximum">
-        <number>255</number>
        </property>
       </widget>
      </item>
@@ -146,6 +100,30 @@
        </property>
       </widget>
      </item>
+     <item row="1" column="4">
+      <widget class="QLabel" name="start_x_label">
+       <property name="text">
+        <string>X:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="3">
+      <widget class="QSpinBox" name="min_x_input">
+       <property name="showGroupSeparator" stdset="0">
+        <bool>false</bool>
+       </property>
+       <property name="maximum">
+        <number>255</number>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="4">
+      <widget class="QLabel" name="max_x_label">
+       <property name="text">
+        <string>Max_X</string>
+       </property>
+      </widget>
+     </item>
      <item row="1" column="6">
       <widget class="QSpinBox" name="start_x_input">
        <property name="showGroupSeparator" stdset="0">
@@ -156,22 +134,31 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="0" colspan="5">
-      <widget class="QLabel" name="label_2">
-       <property name="text">
-        <string>Starting Point 1</string>
+     <item row="1" column="8">
+      <widget class="QSpinBox" name="start_y_input">
+       <property name="autoFillBackground">
+        <bool>false</bool>
+       </property>
+       <property name="buttonSymbols">
+        <enum>QAbstractSpinBox::UpDownArrows</enum>
+       </property>
+       <property name="maximum">
+        <number>255</number>
        </property>
       </widget>
      </item>
-     <item row="1" column="11">
-      <spacer name="delete_spacer">
+     <item row="3" column="0">
+      <spacer name="verticalSpacer">
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Minimum</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
-         <width>40</width>
-         <height>20</height>
+         <width>20</width>
+         <height>40</height>
         </size>
        </property>
       </spacer>

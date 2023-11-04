@@ -81,11 +81,12 @@ class QImageViewer(QMainWindow):
 
         H_splitter = QSplitter(Qt.Horizontal)
 
-        H_splitter.addWidget(self.pixelList)
+        # H_splitter.addWidget(self.pixelList)
+        self.addDockWidget(Qt.LeftDockWidgetArea, self.pixelList)
 
         # combine the two splitters
         H_splitter.addWidget(V_splitter)
-        H_splitter.setSizes([200, 700])
+        H_splitter.setSizes([700])
 
         self.setCentralWidget(H_splitter)
 
