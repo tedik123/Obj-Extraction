@@ -8,12 +8,14 @@ VENV_PATH = "../../venv/Scripts/python.exe"
 
 PROCESS = None
 
+
 class CodeChangeHandler(FileSystemEventHandler):
     def on_any_event(self, event):
         if event.is_directory:
             return
         print(f'Code changed: {event.src_path}')
         restart_app()
+
 
 def restart_app():
     global PROCESS
@@ -24,6 +26,7 @@ def restart_app():
 
     # Start a new process
     PROCESS = subprocess.Popen([VENV_PATH, MAIN_PYTHON_FILE_NAME])
+
 
 if __name__ == '__main__':
     observer = Observer()

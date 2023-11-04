@@ -12,7 +12,7 @@ from PIL import Image
 
 # CUSTOM
 from CustomLabel import CustomLabel
-from PixelRgbList.PixelList import PixelList
+from PixelRgbList.PixelListView import PixelListView
 
 Home_Path = os.path.expanduser("~")
 
@@ -45,7 +45,7 @@ class QImageViewer(QMainWindow):
         self.createImageLabel()
         self.createImageContainer()
         self.createTextEdit()
-        self.pixelList = PixelList()
+        self.pixelList = PixelListView()
 
     def createTextEdit(self):
         self.textEdit = QTextEdit()
