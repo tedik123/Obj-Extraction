@@ -5,7 +5,7 @@ from typing import List, Union
 @dataclass
 class LabelData:
     label: str
-    starting_points: List[List[Union[int, int]]]
+    starting_points: List[List[int]]
     acceptable_colors_rgb: List[List[int]]
     pixel_deviation: int = 0
     min_X: Union[List[int], None] = None
@@ -18,4 +18,8 @@ class LabelData:
 class PixelListModel:
 
     def __init__(self):
-        pass
+        self.starting_points: List[int] = []
+
+    def add_starting_point(self, x: int, y: int):
+        self.starting_points.append([x, y])
+

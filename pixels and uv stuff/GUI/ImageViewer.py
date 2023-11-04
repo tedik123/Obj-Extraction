@@ -11,8 +11,10 @@ from PyQt5.QtWidgets import QApplication, qApp, QFileDialog, QListWidget, QSplit
 from PIL import Image
 
 # CUSTOM
-from CustomLabel import CustomLabel
+from ImageContainerView import ImageContainerView
 from PixelRgbList.PixelListView import PixelListView
+from PixelRgbList.PixelListController import PixelListController
+from PixelRgbList.PixelListModel import PixelListModel
 
 Home_Path = os.path.expanduser("~")
 
@@ -38,14 +40,14 @@ class QImageViewer(QMainWindow):
         self.setWindowTitle("Image Viewer")
         self.resize(1200, 800)
 
-
-
+        # WARNING This is just for testing!
+        self.set_default_image()
 
     def createWidgets(self):
+        self.pixelList = PixelListController(PixelListModel(), PixelListView())
         self.createImageLabel()
         self.createImageContainer()
         self.createTextEdit()
-        self.pixelList = PixelListView()
 
     def createTextEdit(self):
         self.textEdit = QTextEdit()
@@ -60,11 +62,12 @@ class QImageViewer(QMainWindow):
         self.imageContainer.setVisible(False)
 
     def createImageLabel(self):
-        self.imageLabel = CustomLabel()
+        self.imageLabel = ImageContainerView()
         self.imageLabel.setBackgroundRole(QPalette.Base)
         # self.imageLabel.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
         self.imageLabel.setScaledContents(True)
         self.imageLabel.mouseMovePixelColor.connect(self.changeTextColor)
+        self.imageLabel.mouseLeftClick.connect(self.pixelList.handle_mouse_image_left_click)
 
     def changeTextColor(self, point, color):
         print("COLOR", color)
@@ -82,7 +85,7 @@ class QImageViewer(QMainWindow):
         H_splitter = QSplitter(Qt.Horizontal)
 
         # H_splitter.addWidget(self.pixelList)
-        self.addDockWidget(Qt.LeftDockWidgetArea, self.pixelList)
+        self.addDockWidget(Qt.LeftDockWidgetArea, self.pixelList.view)
 
         # combine the two splitters
         H_splitter.addWidget(V_splitter)
@@ -92,6 +95,28 @@ class QImageViewer(QMainWindow):
 
     def listopen(self):
         self.open("list")
+
+    # this is just for testing remove later!
+    def set_default_image(self):
+        fileName = "C:/Users/tedik/Downloads/frog_state.png"
+        if fileName:
+            image = QImage(fileName)
+            if image.isNull():
+                QMessageBox.information(self, "Image Viewer", "Cannot load %s." % fileName)
+                return
+            self.setWindowTitle("Image Viewer : " + fileName)
+            self.imageLabel.setPixmap(QPixmap.fromImage(image))
+            self.imageLabel.setQImage()
+
+            self.scaleFactor = 1.0
+
+            self.imageContainer.setVisible(True)
+            self.fitToWidthAct.setEnabled(True)
+            self.fitToWindowAct.setEnabled(True)
+            self.updateActions()
+
+            if not self.fitToWindowAct.isChecked():
+                self.fitToWidth()
 
     def open(self, file_name):
         options = QFileDialog.Options()
@@ -112,7 +137,7 @@ class QImageViewer(QMainWindow):
             file_name = Home_Path
             fileName, _ = QFileDialog.getOpenFileName(self, 'File Dialog - Select Image File Name', file_name,
                                                       'Images (*.png *.jpeg *.jpg *.bmp *.gif)', options=options)
-
+        print("FILE NAME", fileName)
         if file_name != Home_Path:
             fileName = file_name
 

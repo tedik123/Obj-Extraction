@@ -18,7 +18,12 @@ PROCESS = None
 
 class CodeChangeHandler(FileSystemEventHandler):
     def on_any_event(self, event):
+        print(event)
         if event.is_directory:
+            return
+        # I wish there was a way for a watcher to ignore anything in pycache
+        if "__pycache__" in event.src_path:
+            # print("IGNORED")
             return
 
         print(f'Code changed: {event.src_path}')

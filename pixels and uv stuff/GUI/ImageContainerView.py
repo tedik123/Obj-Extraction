@@ -7,13 +7,13 @@ from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QLabel, QApplication
 
 
-
 # https://gist.github.com/acbetter/32c575803ec361c3e82064e60db4e3e0
 # modified by converting to label instead
 # create pixel signal
 # and emit it when mouse moves
-class CustomLabel(QLabel):
+class ImageContainerView(QLabel):
     mouseMovePixelColor = pyqtSignal(QPoint, QColor)
+    mouseLeftClick = pyqtSignal(QPoint)
 
     # this might be useful?
     # https://stackoverflow.com/questions/69869064/how-to-get-pixel-location-and-draw-a-dot-on-that-location-using-pyqt5
@@ -37,14 +37,27 @@ class CustomLabel(QLabel):
         self.mouseMovePixelColor.emit(point, QColor(r, g, b, a))
         super().mouseMoveEvent(event)
 
+    def mousePressEvent(self, event):
+        point = self.getMousePositionOnImage(event.pos())
+        color = QColor(self.QImage.pixel(point.x(), point.y()))
+        print("Pressed!", color.getRgb(), point)
+        r, g, b, a = color.getRgb()
+        if event.button() == Qt.LeftButton:
+            self.mouseLeftClick.emit(point)
+        if event.button() == Qt.MiddleButton:
+            print("Middle button pressed")
+        if event.button() == Qt.RightButton:
+            print("Right button pressed")
+        super().mousePressEvent(event)
+
     # this is the hover mouse event
     def enterEvent(self, event):
         QApplication.setOverrideCursor(Qt.CrossCursor)
-        super().enterEvent( event)
+        super().enterEvent(event)
 
     def leaveEvent(self, event):
         QApplication.setOverrideCursor(Qt.ArrowCursor)
-        super().leaveEvent( event)
+        super().leaveEvent(event)
 
     def getMousePositionOnImage(self, pos) -> QtCore.QPoint or None:
         # https://stackoverflow.com/questions/59611751/pyqt5-image-coordinates
@@ -62,6 +75,8 @@ class CustomLabel(QLabel):
             x = pos.x() * pixmapRect.width() / contentsRect.width()
             y = pos.y() * pixmapRect.height() / contentsRect.height()
             pos = QtCore.QPoint(int(x), int(y))
+
+
         else:
             align = self.alignment()
             # for historical reasons, QRect (which is based on integer values),
