@@ -14,3 +14,4 @@ class StartingPointsView(CustomDockWidget):
         self.vertical_layout.insertWidget(index_to_insert, PixelStartingPointItem(index_to_insert, point))
         # self.vertical_layout.addWidget(PixelStartingPointItem(point))
         print("children list", self.vertical_layout.count())
+

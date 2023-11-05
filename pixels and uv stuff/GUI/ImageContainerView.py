@@ -58,7 +58,8 @@ class ImageContainerView(QLabel):
         super().enterEvent(event)
 
     def leaveEvent(self, event):
-        QApplication.setOverrideCursor(Qt.ArrowCursor)
+        # as the name implies this actually restores the cursor to whatever it should actually be
+        QApplication.restoreOverrideCursor()
         super().leaveEvent(event)
 
     def getMousePositionOnImage(self, pos) -> QtCore.QPoint or None:

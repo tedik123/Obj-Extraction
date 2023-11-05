@@ -6,6 +6,8 @@ from abc import ABC, abstractmethod
 class CustomDockWidget(QDockWidget):
     def __init__(self, title: str = None, parent=None):
         super().__init__(parent)
+        # TODO remove this? or make it so you can scale it?
+        self.setMinimumSize(400, 300)
         self.setFeatures(QDockWidget.AllDockWidgetFeatures)
         self.setWindowTitle(title)
         self.setStyleSheet("QDockWidget { font-family: 'Roboto Lt'; font-size: 12pt; }")

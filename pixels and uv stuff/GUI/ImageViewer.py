@@ -70,6 +70,7 @@ class QImageViewer(QMainWindow):
         # self.imageLabel.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
         self.imageLabel.setScaledContents(True)
         # warning I should move these out somewhere, i don't think it makes sense to be here
+        # TODO
         self.imageLabel.mouseMovePixelColor.connect(self.changeTextColor)
         self.imageLabel.mouseLeftClick.connect(self.pixel_data_controller.handle_mouse_image_left_click)
         self.imageLabel.mouseRightClick.connect(self.pixel_data_controller.handle_mouse_image_right_click)
@@ -92,6 +93,7 @@ class QImageViewer(QMainWindow):
         # H_splitter.addWidget(self.pixelList)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.pixel_data_controller.starting_points_view)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.pixel_data_controller.rgb_view)
+
 
         # combine the two splitters
         H_splitter.addWidget(V_splitter)
