@@ -12,9 +12,10 @@ from PIL import Image
 
 # CUSTOM
 from ImageContainerView import ImageContainerView
-from PixelRgbList.PixelListView import PixelListView
-from PixelRgbList.PixelListController import PixelListController
-from PixelRgbList.PixelListModel import PixelListModel
+from PixelData.StartingPointsView import StartingPointsView
+from PixelData.PixelDataController import PixelDataController
+from PixelData.PixelDataModel import PixelDataModel
+from PixelData.RgbView import RgbView
 
 Home_Path = os.path.expanduser("~")
 
@@ -24,7 +25,9 @@ class QImageViewer(QMainWindow):
         super().__init__()
 
         # TO BE CREATED
-        self.pixelList = None
+        self.pixel_data_controller = None
+        # i should reuse this for when I create the rgb one, it should use the same model
+        self.label_model = PixelDataModel()
         self.textEdit = None
         self.imageContainer = None
         self.imageLabel = None
@@ -44,8 +47,7 @@ class QImageViewer(QMainWindow):
         self.set_default_image()
 
     def createWidgets(self):
-        self.pixelList = PixelListController(PixelListModel(), PixelListView())
-        self.pixelList2 = PixelListController(PixelListModel(), PixelListView())
+        self.pixel_data_controller = PixelDataController(self.label_model, StartingPointsView(), RgbView())
         self.createImageLabel()
         self.createImageContainer()
         self.createTextEdit()
@@ -67,8 +69,10 @@ class QImageViewer(QMainWindow):
         self.imageLabel.setBackgroundRole(QPalette.Base)
         # self.imageLabel.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
         self.imageLabel.setScaledContents(True)
+        # warning I should move these out somewhere, i don't think it makes sense to be here
         self.imageLabel.mouseMovePixelColor.connect(self.changeTextColor)
-        self.imageLabel.mouseLeftClick.connect(self.pixelList.handle_mouse_image_left_click)
+        self.imageLabel.mouseLeftClick.connect(self.pixel_data_controller.handle_mouse_image_left_click)
+        self.imageLabel.mouseRightClick.connect(self.pixel_data_controller.handle_mouse_image_right_click)
 
     def changeTextColor(self, point, color):
         print("COLOR", color)
@@ -86,8 +90,8 @@ class QImageViewer(QMainWindow):
         H_splitter = QSplitter(Qt.Horizontal)
 
         # H_splitter.addWidget(self.pixelList)
-        self.addDockWidget(Qt.LeftDockWidgetArea, self.pixelList.view)
-        self.addDockWidget(Qt.LeftDockWidgetArea, self.pixelList2.view)
+        self.addDockWidget(Qt.LeftDockWidgetArea, self.pixel_data_controller.starting_points_view)
+        self.addDockWidget(Qt.LeftDockWidgetArea, self.pixel_data_controller.rgb_view)
 
         # combine the two splitters
         H_splitter.addWidget(V_splitter)

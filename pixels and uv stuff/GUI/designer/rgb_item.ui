@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>rgb_item</class>
- <widget class="QWidget" name="rgb_item">
+ <class>RgbItem</class>
+ <widget class="QWidget" name="RgbItem">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -138,14 +138,7 @@
             <bool>false</bool>
            </property>
            <property name="flat">
-            <bool>true</bool>
-           </property>
-           <property name="color" stdset="0">
-            <color>
-             <red>0</red>
-             <green>0</green>
-             <blue>0</blue>
-            </color>
+            <bool>false</bool>
            </property>
           </widget>
          </item>

@@ -11,13 +11,13 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
-class Ui_rgb_item(object):
-    def setupUi(self, rgb_item):
-        rgb_item.setObjectName("rgb_item")
-        rgb_item.resize(347, 122)
-        self.main_layout = QtWidgets.QVBoxLayout(rgb_item)
+class Ui_RgbItem(object):
+    def setupUi(self, RgbItem):
+        RgbItem.setObjectName("RgbItem")
+        RgbItem.resize(347, 122)
+        self.main_layout = QtWidgets.QVBoxLayout(RgbItem)
         self.main_layout.setObjectName("main_layout")
-        self.main_widget = QtWidgets.QWidget(rgb_item)
+        self.main_widget = QtWidgets.QWidget(RgbItem)
         self.main_widget.setObjectName("main_widget")
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout(self.main_widget)
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
@@ -80,20 +80,19 @@ class Ui_rgb_item(object):
         self.preview_color_btn.setText("")
         self.preview_color_btn.setAutoDefault(False)
         self.preview_color_btn.setDefault(False)
-        self.preview_color_btn.setFlat(True)
-        self.preview_color_btn.setProperty("color", QtGui.QColor(0, 0, 0))
+        self.preview_color_btn.setFlat(False)
         self.preview_color_btn.setObjectName("preview_color_btn")
         self.verticalLayout_5.addWidget(self.preview_color_btn, 0, QtCore.Qt.AlignHCenter)
         self.horizontalLayout_2.addWidget(self.color_preview_widget, 0, QtCore.Qt.AlignHCenter|QtCore.Qt.AlignVCenter)
         self.main_layout.addWidget(self.main_widget, 0, QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
 
-        self.retranslateUi(rgb_item)
-        QtCore.QMetaObject.connectSlotsByName(rgb_item)
+        self.retranslateUi(RgbItem)
+        QtCore.QMetaObject.connectSlotsByName(RgbItem)
 
-    def retranslateUi(self, rgb_item):
+    def retranslateUi(self, RgbItem):
         _translate = QtCore.QCoreApplication.translate
-        rgb_item.setWindowTitle(_translate("rgb_item", "Form"))
-        self.r_label.setText(_translate("rgb_item", "R"))
-        self.g_label.setText(_translate("rgb_item", "G"))
-        self.b_label.setText(_translate("rgb_item", "B"))
-        self.preview_label.setText(_translate("rgb_item", "Color Preview"))
+        RgbItem.setWindowTitle(_translate("RgbItem", "Form"))
+        self.r_label.setText(_translate("RgbItem", "R"))
+        self.g_label.setText(_translate("RgbItem", "G"))
+        self.b_label.setText(_translate("RgbItem", "B"))
+        self.preview_label.setText(_translate("RgbItem", "Color Preview"))

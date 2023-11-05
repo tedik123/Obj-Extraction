@@ -15,7 +15,7 @@ class LabelData:
     enable_default_range: bool = False
 
 
-class PixelListModel:
+class PixelDataModel:
 
     def __init__(self):
         self.starting_points: List[int] = []
@@ -23,3 +23,6 @@ class PixelListModel:
     def add_starting_point(self, x: int, y: int):
         self.starting_points.append([x, y])
 
+    def add_rgb_value(self, r: int, g: int, b: int):
+        pass
+        # self.acceptable_colors_rgb.append([r, g, b])

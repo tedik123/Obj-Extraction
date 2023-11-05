@@ -96,7 +96,7 @@ class Ui_StartingPointItem(object):
     def retranslateUi(self, StartingPointItem):
         _translate = QtCore.QCoreApplication.translate
         StartingPointItem.setWindowTitle(_translate("StartingPointItem", "Form"))
-        self.max_y_label.setText(_translate("StartingPointItem", "Max_y"))
+        self.max_y_label.setText(_translate("StartingPointItem", "Max_Y"))
         self.delete_button.setText(_translate("StartingPointItem", "Delete"))
         self.name_label.setText(_translate("StartingPointItem", "Starting Point 1"))
         self.min_y_label.setText(_translate("StartingPointItem", "Min_Y"))

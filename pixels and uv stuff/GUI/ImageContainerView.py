@@ -14,6 +14,7 @@ from PyQt5.QtWidgets import QLabel, QApplication
 class ImageContainerView(QLabel):
     mouseMovePixelColor = pyqtSignal(QPoint, QColor)
     mouseLeftClick = pyqtSignal(QPoint)
+    mouseRightClick = pyqtSignal(QColor)
 
     # this might be useful?
     # https://stackoverflow.com/questions/69869064/how-to-get-pixel-location-and-draw-a-dot-on-that-location-using-pyqt5
@@ -48,6 +49,7 @@ class ImageContainerView(QLabel):
             print("Middle button pressed")
         if event.button() == Qt.RightButton:
             print("Right button pressed")
+            self.mouseRightClick.emit(color)
         super().mousePressEvent(event)
 
     # this is the hover mouse event

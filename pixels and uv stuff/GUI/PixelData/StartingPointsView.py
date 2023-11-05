@@ -1,13 +1,10 @@
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QScrollArea, QWidget, QVBoxLayout, QLabel, QSizePolicy, QDockWidget
 from PyQt5.QtCore import QPoint
-from PyQt5.QtGui import QColor
 
-from .PixelListStartingPointItem import PixelStartingPointItem
-from .SubComponents.CustomDockWidget import CustomDockWidget
+from .PixelStartingPointItem import PixelStartingPointItem
+from SubComponents import CustomDockWidget
 
 
-class PixelListView(CustomDockWidget):
+class StartingPointsView(CustomDockWidget):
     def __init__(self, parent=None):
         super().__init__(title="Starting Point", parent=parent)
 

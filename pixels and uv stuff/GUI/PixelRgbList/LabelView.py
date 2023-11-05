@@ -1,5 +1,0 @@
-
-
-
-class LabelView:
-    pass
