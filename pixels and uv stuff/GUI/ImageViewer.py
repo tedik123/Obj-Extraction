@@ -45,6 +45,7 @@ class QImageViewer(QMainWindow):
 
     def createWidgets(self):
         self.pixelList = PixelListController(PixelListModel(), PixelListView())
+        self.pixelList2 = PixelListController(PixelListModel(), PixelListView())
         self.createImageLabel()
         self.createImageContainer()
         self.createTextEdit()
@@ -86,6 +87,7 @@ class QImageViewer(QMainWindow):
 
         # H_splitter.addWidget(self.pixelList)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.pixelList.view)
+        self.addDockWidget(Qt.LeftDockWidgetArea, self.pixelList2.view)
 
         # combine the two splitters
         H_splitter.addWidget(V_splitter)
