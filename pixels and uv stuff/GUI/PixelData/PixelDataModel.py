@@ -23,6 +23,10 @@ class PixelDataModel:
     def add_starting_point(self, x: int, y: int):
         self.starting_points.append([x, y])
 
-    def add_rgb_value(self, r: int, g: int, b: int):
+    def add_rgb_value(self, r: int, g: int, b: int, index=None):
         pass
         # self.acceptable_colors_rgb.append([r, g, b])
+
+    def increment_rgb_value(self, rgb_value: int, color_index: int, item_index: int):
+        pass
+        # self.acceptable_colors_rgb[item_index][color_index] = rgb_value

@@ -33,7 +33,7 @@ class ImageContainerView(QLabel):
     def mouseMoveEvent(self, event):
         point = self.getMousePositionOnImage(event.pos())
         color = QColor(self.QImage.pixel(point.x(), point.y()))
-        print("Moved!!", color.getRgb(), point)
+        # print("Moved!!", color.getRgb(), point)
         r, g, b, a = color.getRgb()
         self.mouseMovePixelColor.emit(point, QColor(r, g, b, a))
         super().mouseMoveEvent(event)
@@ -109,5 +109,5 @@ class ImageContainerView(QLabel):
             # a QPoint, which is integer based
             pos = (pos - pixmapRect.topLeft()).toPoint()
 
-        print('X={}, Y={}'.format(pos.x(), pos.y()))
+        # print('X={}, Y={}'.format(pos.x(), pos.y()))
         return pos

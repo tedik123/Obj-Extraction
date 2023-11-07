@@ -76,7 +76,7 @@ class QImageViewer(QMainWindow):
         self.imageLabel.mouseRightClick.connect(self.pixel_data_controller.handle_mouse_image_right_click)
 
     def changeTextColor(self, point, color):
-        print("COLOR", color)
+        # print("COLOR", color)
         self.textEdit.setTextBackgroundColor(color)
         # change the background color of text edit
         self.textEdit.setStyleSheet("background-color: rgb(%d, %d, %d)" % (color.red(), color.green(), color.blue()))
