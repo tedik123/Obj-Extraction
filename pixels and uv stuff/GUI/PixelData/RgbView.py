@@ -12,7 +12,6 @@ class RgbView(CustomDockWidget):
         super().__init__(title="Rgb Values", parent=parent)
         self.rgb_items_list = []
 
-    # TODO
     def add_item_to_vertical_layout(self, r, g, b):
         # always insert 1 before the addStretch item
         index_to_insert = self.vertical_layout.count() - 1
