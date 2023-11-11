@@ -3,6 +3,8 @@ import subprocess
 import time
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
+from timeit import default_timer as timer
+from datetime import timedelta
 
 MAIN_PYTHON_FILE_NAME = "ImageViewer.py"
 VENV_PATH = "../../venv/Scripts/python.exe"
@@ -15,19 +17,30 @@ DIRECTORY_TO_WATCH = "../../pixels and uv stuff/GUI"
 PROCESS = None
 
 
-
 class CodeChangeHandler(FileSystemEventHandler):
     def on_any_event(self, event):
-        print(event)
+        start = timer()
+
+        compile_ui = False
         if event.is_directory:
             return
         # I wish there was a way for a watcher to ignore anything in pycache
         if "__pycache__" in event.src_path:
             # print("IGNORED")
             return
+        if event.src_path.endswith(".ui"):
+            compile_ui = True
+        if event.event_type == "modified":
+            # get file name
+            file_name = os.path.basename(event.src_path)
+            print(f"Noticed modifications in {file_name}")
 
+        print(event)
         print(f'Code changed: {event.src_path}')
-        restart_app()
+        restart_app(compile_ui)
+
+        end = timer()
+        print("Recompiled in: ", timedelta(seconds=end - start))
 
 
 def snake_to_title(snake_str):
@@ -53,15 +66,17 @@ def convert_ui_files():
     print("Conversion complete.")
 
 
-def restart_app():
+def restart_app(compile_ui=False):
     global PROCESS
     if PROCESS:
         # Kill the existing process
         PROCESS.terminate()
         PROCESS = None
 
-    # convert all .ui files to .py
-    convert_ui_files()
+    if compile_ui:
+        # convert all .ui files to .py
+        convert_ui_files()
+
     # Start a new process
     PROCESS = subprocess.Popen([VENV_PATH, MAIN_PYTHON_FILE_NAME])
 
@@ -70,7 +85,6 @@ if __name__ == '__main__':
     observer = Observer()
     observer.schedule(CodeChangeHandler(), path=DIRECTORY_TO_WATCH, recursive=True)
     observer.start()
-
 
     try:
         while True:

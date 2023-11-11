@@ -1,7 +1,12 @@
 from PyQt5.QtCore import pyqtSignal
-from SubComponents import CustomDockWidget
-from .RgbItem import RgbItem
 
+# I do this ugliness because pycharm intellisense is just not working :( and i want intellisense
+try:
+    from SubComponents import CustomDockWidget
+except:
+    from ..SubComponents import CustomDockWidget
+
+from .RgbItem import RgbItem
 
 class RgbView(CustomDockWidget):
     color_chosen = pyqtSignal(list, int)
@@ -11,6 +16,7 @@ class RgbView(CustomDockWidget):
     def __init__(self, parent=None):
         super().__init__(title="Rgb Values", parent=parent)
         self.rgb_items_list = []
+
 
     def add_item_to_vertical_layout(self, r, g, b):
         # always insert 1 before the addStretch item

@@ -1,7 +1,8 @@
 from PyQt5.QtWidgets import QWidget
 
-from generated_design import Ui_StartingPointItem
 from PyQt5.QtCore import QPoint
+
+from generated_design import Ui_StartingPointItem
 
 
 class PixelStartingPointItem(QWidget, Ui_StartingPointItem):
