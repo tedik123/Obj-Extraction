@@ -5,13 +5,20 @@ from PyQt5.QtCore import Qt, QDir, pyqtSignal, QObject, QPoint
 from PyQt5.QtGui import QImage, QPixmap, QPalette, QPainter, QColor
 from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
 from PyQt5.QtWidgets import QLabel, QSizePolicy, QScrollArea, QMessageBox, QMainWindow, QMenu, QAction, \
-    QGraphicsPixmapItem
+    QGraphicsPixmapItem, QWidget, QVBoxLayout, QSpacerItem, QBoxLayout
 from PyQt5.QtWidgets import QApplication, qApp, QFileDialog, QListWidget, QSplitter, QTextEdit, QFileSystemModel
 
 from PIL import Image
 
 # CUSTOM
-from CustomLabel import CustomLabel
+from MainController import MainController
+from Base.LabelSelectorView import LabelSelectorView
+from Base.LabelSelectorController import LabelSelectorController
+from ImageContainerView import ImageContainerView
+from PixelData.StartingPointsView import StartingPointsView
+from PixelData.PixelDataController import PixelDataController
+from PixelData.PixelDataModel import PixelDataModel
+from PixelData.RgbView import RgbView
 
 Home_Path = os.path.expanduser("~")
 
@@ -20,121 +27,122 @@ class QImageViewer(QMainWindow):
     def __init__(self):
         super().__init__()
 
+        # TO BE CREATED
+        self.main_controller = None
+        self.pixel_data_controller = None
+        self.label_selector_controller = None
+        # i should reuse this for when I create the rgb one, it should use the same model
+        self.label_model = PixelDataModel()
+        self.textEdit = None
+        self.imageContainer = None
+        self.imageLabel = None
+        self.label_selector = None
+
         self.scaleFactor = 0.0
 
+        # creation section
         self.createWidgets()
         self.createLayouts()
         self.createActions()
         self.createMenus()
-        self.fileList.setEnabled(True)
 
         self.setWindowTitle("Image Viewer")
         self.resize(1200, 800)
 
+        # WARNING This is just for testing!
+        self.set_default_image()
+
     def createWidgets(self):
-        self.imageLabel = CustomLabel()
-        self.imageLabel.setBackgroundRole(QPalette.Base)
-        self.imageLabel.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
-        self.imageLabel.setScaledContents(True)
-        self.imageLabel.mouseMovePixelColor.connect(self.changeTextColor)
+        self.pixel_data_controller = PixelDataController(self.label_model, StartingPointsView(), RgbView())
+        self.label_selector_controller = LabelSelectorController(self.label_model, LabelSelectorView())
+        self.main_controller = MainController(self.pixel_data_controller, self.label_selector_controller,
+                                              self.label_model)
 
-        self.scrollArea = QScrollArea()
-        self.scrollArea.setBackgroundRole(QPalette.Dark)
-        self.scrollArea.setWidget(self.imageLabel)
-        self.scrollArea.setVisible(False)
+        # pass in the reference to the main controller so you can handle communication
+        self.pixel_data_controller.set_main_controller(self.main_controller)
+        self.label_selector_controller.set_main_controller(self.main_controller)
 
-        self.directoryList = QListWidget()
-        # self.directoryModel = QFileSystemModel()
-        # self.directoryModel.setRootPath('')
-        # self.directoryList.setRootIndex(self.directoryModel.index(QDir.homePath()))
-        self.populateDirectoryList('')
-        self.directoryList.doubleClicked.connect(self.selectDirectory)
+        self.createImageLabel()
+        self.createImageContainer()
+        self.createTextEdit()
 
-        self.fileList = QListWidget(self)
-        self.fileList.setSelectionMode(QListWidget.SingleSelection)
-        self.fileList.setEnabled(False)
-        self.populateFileList(Home_Path)
-        self.fileList.itemClicked.connect(self.listopen)
-
+    def createTextEdit(self):
         self.textEdit = QTextEdit()
         self.textEdit.setReadOnly(True)
         self.textEdit.setAutoFillBackground(True)
         self.textEdit.setPlainText("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas ")
 
-        self.imageName = QTextEdit()
-        self.imageName.setAlignment(Qt.AlignCenter)
-        self.imageName.setReadOnly(True)
+    def createImageContainer(self):
+        self.imageContainer = QScrollArea()
+        self.imageContainer.setBackgroundRole(QPalette.Dark)
+        self.imageContainer.setWidget(self.imageLabel)
+        self.imageContainer.setVisible(False)
+
+    def createImageLabel(self):
+        self.imageLabel = ImageContainerView()
+        self.imageLabel.setBackgroundRole(QPalette.Base)
+        # self.imageLabel.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        self.imageLabel.setScaledContents(True)
+        # warning I should move these out somewhere, i don't think it makes sense to be here
+        # TODO
+        self.imageLabel.mouseMovePixelColor.connect(self.changeTextColor)
+        self.imageLabel.mouseLeftClick.connect(self.pixel_data_controller.handle_mouse_image_left_click)
+        self.imageLabel.mouseRightClick.connect(self.pixel_data_controller.handle_mouse_image_right_click)
 
     def changeTextColor(self, point, color):
-        print("COLOR", color)
+        # print("COLOR", color)
         self.textEdit.setTextBackgroundColor(color)
-        #change the background color of text edit
+        # change the background color of text edit
         self.textEdit.setStyleSheet("background-color: rgb(%d, %d, %d)" % (color.red(), color.green(), color.blue()))
 
     def createLayouts(self):
         V_splitter = QSplitter(Qt.Vertical)
-        V_splitter.addWidget(self.imageName)
-        V_splitter.addWidget(self.scrollArea)
+        # V_splitter.addWidget(self.imageName)
+        V_splitter.addWidget(self.imageContainer)
         V_splitter.addWidget(self.textEdit)
-        V_splitter.setSizes([5, 450, 150])
+        V_splitter.setSizes([450, 150])
 
         H_splitter = QSplitter(Qt.Horizontal)
-        H_splitter.addWidget(self.directoryList)
-        H_splitter.addWidget(self.fileList)
+
+        # H_splitter.addWidget(self.pixelList)
+        self.addDockWidget(Qt.LeftDockWidgetArea, self.label_selector_controller.label_selector_view)
+        self.addDockWidget(Qt.LeftDockWidgetArea, self.pixel_data_controller.starting_points_view)
+        self.addDockWidget(Qt.LeftDockWidgetArea, self.pixel_data_controller.rgb_view)
 
         # combine the two splitters
         H_splitter.addWidget(V_splitter)
-        H_splitter.setSizes([130, 130, 700])
+        H_splitter.setSizes([700])
 
         self.setCentralWidget(H_splitter)
-
-    def populateDirectoryList(self, new_path):
-        home = QDir.homePath()
-        self.directoryList.clear()
-
-        if len(new_path) > 0 and new_path != '':
-            path = new_path
-        else:
-            path = home
-
-        self.directoryList.addItem(new_path)
-        self.directoryList.addItem("..")
-
-        # store the directory information in a list to be sorted
-        dir_list = os.listdir(path)
-        dir_list.sort()
-
-        for this_dir in dir_list:
-            # filter out the files and hidden directories - only show directories
-            if os.path.isdir(os.path.join(path, this_dir)) and not this_dir.startswith('.'):
-                self.directoryList.addItem(path + "/" + this_dir)
-
-        # self.repaint()
-
-    def selectDirectory(self, item):
-        self.fileList.clear()
-        directory = self.directoryList.currentItem().text()
-        # print (directory)
-
-        if directory == "..":
-            directory = os.path.expanduser("~")
-
-        self.populateDirectoryList(directory)
-        self.populateFileList(directory)
-
-    def populateFileList(self, directory):
-        self.fileList.clear()
-        for file in os.listdir(directory):
-            if file.endswith('.png') or file.endswith('.jpg') or file.endswith('.jpeg') or file.endswith(
-                    '.bmp') or file.endswith('.gif'):
-                self.fileList.addItem(file)
 
     def listopen(self):
         self.open("list")
 
+    # this is just for testing remove later!
+    def set_default_image(self):
+        fileName = "C:/Users/tedik/Downloads/frog_state.png"
+        if fileName:
+            image = QImage(fileName)
+            if image.isNull():
+                QMessageBox.information(self, "Image Viewer", "Cannot load %s." % fileName)
+                return
+            self.setWindowTitle("Image Viewer : " + fileName)
+            self.imageLabel.setPixmap(QPixmap.fromImage(image))
+            self.imageLabel.setQImage()
+
+            self.scaleFactor = 1.0
+
+            self.imageContainer.setVisible(True)
+            self.fitToWidthAct.setEnabled(True)
+            self.fitToWindowAct.setEnabled(True)
+            self.updateActions()
+
+            if not self.fitToWindowAct.isChecked():
+                self.fitToWidth()
+
     def open(self, file_name):
         options = QFileDialog.Options()
-        current_path = self.directoryList.item(0).text()
+        current_path = QDir.homePath()
 
         # fileName = QFileDialog.getOpenFileName(self, "Open File", QDir.currentPath())
         try:
@@ -151,14 +159,11 @@ class QImageViewer(QMainWindow):
             file_name = Home_Path
             fileName, _ = QFileDialog.getOpenFileName(self, 'File Dialog - Select Image File Name', file_name,
                                                       'Images (*.png *.jpeg *.jpg *.bmp *.gif)', options=options)
-
+        print("FILE NAME", fileName)
         if file_name != Home_Path:
             fileName = file_name
 
         if fileName:
-            # self.textEdit.clear()
-            self.imageName.setPlainText(fileName)
-
             image = QImage(fileName)
             if image.isNull():
                 QMessageBox.information(self, "Image Viewer", "Cannot load %s." % fileName)
@@ -169,14 +174,13 @@ class QImageViewer(QMainWindow):
 
             self.scaleFactor = 1.0
 
-            self.scrollArea.setVisible(True)
+            self.imageContainer.setVisible(True)
             self.fitToWidthAct.setEnabled(True)
             self.fitToWindowAct.setEnabled(True)
             self.updateActions()
 
             if not self.fitToWindowAct.isChecked():
                 self.fitToWidth()
-
 
     def zoomIn(self):
         self.scaleImage(1.25)
@@ -190,8 +194,8 @@ class QImageViewer(QMainWindow):
         self.scaleImage(1.0)
 
     def fitToWidth(self):
-        if self.scrollArea.width() > 0 and self.imageLabel.pixmap().width() > 0:
-            zoomfactor = self.scrollArea.width() / self.imageLabel.pixmap().width()
+        if self.imageContainer.width() > 0 and self.imageLabel.pixmap().width() > 0:
+            zoomfactor = self.imageContainer.width() / self.imageLabel.pixmap().width()
         else:
             zoomfactor = 1
 
@@ -203,7 +207,7 @@ class QImageViewer(QMainWindow):
 
     def fitToWindow(self):
         fitToWindow = self.fitToWindowAct.isChecked()
-        self.scrollArea.setWidgetResizable(fitToWindow)
+        self.imageContainer.setWidgetResizable(fitToWindow)
         if not fitToWindow:
             self.normalSize()
 
@@ -267,8 +271,8 @@ class QImageViewer(QMainWindow):
         self.scaleFactor *= factor
         self.imageLabel.resize(self.scaleFactor * self.imageLabel.pixmap().size())
 
-        self.adjustScrollBar(self.scrollArea.horizontalScrollBar(), factor)
-        self.adjustScrollBar(self.scrollArea.verticalScrollBar(), factor)
+        self.adjustScrollBar(self.imageContainer.horizontalScrollBar(), factor)
+        self.adjustScrollBar(self.imageContainer.verticalScrollBar(), factor)
         self.repaint()
 
         self.zoomInAct.setEnabled(self.scaleFactor < 3.0)
@@ -278,18 +282,17 @@ class QImageViewer(QMainWindow):
         scrollBar.setValue(int(factor * scrollBar.value()
                                + ((factor - 1) * scrollBar.pageStep() / 2)))
 
-    def populateimageList(self, directory):
-        self.imageList.clear()
-        for file in os.listdir(directory):
-            if file.endswith('.png') or file.endswith('.jpg') or file.endswith('.jpeg') or file.endswith(
-                    '.bmp') or file.endswith('.gif'):
-                self.imageList.addItem(file)
-
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     imageViewer = QImageViewer()
     imageViewer.show()
+    # this awkwardness forces it to appear on the non-main monitor
+    LEFT_MONITOR = app.screens()[-1]
+    imageViewer.windowHandle().setScreen(LEFT_MONITOR)
+    imageViewer.showFullScreen()
+    imageViewer.showNormal()
+
     sys.exit(app.exec_())
 
     # credit for the code that inspired this goes to the following:

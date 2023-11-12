@@ -5,6 +5,20 @@ The main script is Run_all.py.**
 
 # General
 
+## Setup
+   *Python 3.9 or higher required*
+
+   **Requirements** - Run `pip install -r requirements.txt` to get the basic python files required to run everything.
+   
+   **Bindings** - run the `pybindings_setup.bat` file to create the C++ bindings.
+   Otherwise, the code will not work. WARNING: Run the bindings after installing the requirements 
+   and the script assumes your virtual env directory is `venv` at the root of the project.
+
+   **Dev** - If doing any GUI work you need the following: `pip install pyqt5 pyqt5-tools watchdog`
+   and if you want hot reloading for the GUI run `Watcher.py` and it will reload on save.
+
+## Info
+
 **PixelGrabber** reads in from the label_starts.json file and finds all pixels that match
 (in your texture file) the acceptable colors parameter given starting points via depth first search.
 

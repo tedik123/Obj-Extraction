@@ -12,7 +12,6 @@ pixels and uv stuff/outputs/*.png
 /pixels and uv stuff/obj textures/**
 /pixels and uv stuff/obj textures/*
 !/pixels and uv stuff/obj textures/.gitkeep
-
 #
 pixels and uv stuff/outputs/geometry_files/*
 !pixels and uv stuff/outputs/geometry_files/.gitkeep
