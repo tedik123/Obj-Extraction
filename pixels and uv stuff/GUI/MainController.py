@@ -1,11 +1,20 @@
+from PixelData.PixelDataController import PixelDataController
+from Base.LabelSelectorController import LabelSelectorController
+from PixelData.PixelDataModel import PixelDataModel
+
 class MainController:
     """This is used to handle communication between all the different controllers"""
 
-    def __init__(self, pixel_data_controller, label_selector_controller, pixel_data_model):
+    def __init__(self, pixel_data_controller: PixelDataController, label_selector_controller: LabelSelectorController,
+                 pixel_data_model: PixelDataModel):
         self._pixel_data_controller = pixel_data_controller
         self._label_selector_controller = label_selector_controller
         self._pixel_data_model = pixel_data_model
+        # syncs the current label with all other components
         self.current_label = "Your Label"
+        self._pixel_data_controller.add_new_label(self.current_label, True)
+        self._label_selector_controller.add_new_label(self.current_label, True)
+
 
     def change_current_label(self, name):
         self._pixel_data_controller.change_current_label(name)

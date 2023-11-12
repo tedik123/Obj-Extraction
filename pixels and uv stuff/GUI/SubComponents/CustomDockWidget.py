@@ -16,7 +16,6 @@ class CustomDockWidget(QDockWidget):
         # I Don't know if I even need this
         self.main_widget = QWidget()
         self.scrollArea.setWidget(self.main_widget)
-
         # set the scroll area so it vertically allows for scrolling
         self.scrollArea.setWidgetResizable(True)
         # self.scrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)

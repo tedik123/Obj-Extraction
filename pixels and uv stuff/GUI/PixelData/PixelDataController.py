@@ -16,8 +16,9 @@ class PixelDataController:
         # and current_label should change depending on which is selected
         # self.labels = []
         # warning this is not initially tied to the labelSelector
-        self.current_label = "Your Label"
-        self.add_new_label(self.current_label)
+        # self.current_label = "Your Label"
+        self.current_label = None
+        # self.add_new_label(self.current_label)
         self.set_events()
 
     def set_main_controller(self, main_controller):
@@ -31,8 +32,10 @@ class PixelDataController:
         self.current_label = label_name
 
     # TODO make it more dynamic
-    def add_new_label(self, label: str):
+    def add_new_label(self, label: str, is_initial=False):
         self.model.add_new_label(label)
+        if is_initial:
+            self.current_label = label
 
     def edit_label(self, label:str):
         self.current_label = label

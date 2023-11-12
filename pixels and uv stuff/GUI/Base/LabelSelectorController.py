@@ -18,7 +18,12 @@ class LabelSelectorController:
         self.label_selector_view.drop_down_item_selected.connect(self.main_controller.change_current_label)
         self.label_selector_view.edited_label.connect(self.main_controller.edit_label)
 
-    def add_new_label(self, label_name: str):
+    """Adds a new label,
+     if is_initial is true will ignore adding to model (flag should only be used for initialization)"""
+    def add_new_label(self, label_name: str, is_initial=False):
+        if is_initial:
+            self.label_selector_view.handle_new_label_added(label_name)
+            return
         try:
             self.model.add_new_label(label_name)
             self.label_selector_view.handle_new_label_added(label_name)
