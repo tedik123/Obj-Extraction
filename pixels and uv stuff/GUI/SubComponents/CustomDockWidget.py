@@ -24,6 +24,7 @@ class CustomDockWidget(QDockWidget):
 
         self.vertical_layout = QVBoxLayout()
         self.main_widget.setLayout(self.vertical_layout)
+        self.vertical_layout.setSpacing(0)
         # self.vertical_layout.insertWidget(0, PixelStartingPointItem())
 
         self.vertical_layout.addStretch()

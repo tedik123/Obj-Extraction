@@ -11,16 +11,31 @@ class PixelDataController:
         self.model: PixelDataModel = model
         self.starting_points_view: StartingPointsView = starting_points_view
         self.rgb_view: RgbView = rgb_view
+        self.main_controller = None
         # this should be like a list of the labels they've made,
         # and current_label should change depending on which is selected
         # self.labels = []
-        self.current_label = "TEST"
-        self.add_label(self.current_label)
+        # warning this is not initially tied to the labelSelector
+        self.current_label = "Your Label"
+        self.add_new_label(self.current_label)
         self.set_events()
 
+    def set_main_controller(self, main_controller):
+        self.main_controller = main_controller
+
+    def change_current_label(self, label_name: str):
+        # we need to get the model entry and then pass that down to rgbview
+        label_data = self.model.label_data[label_name]
+        self.rgb_view.populate_new_data(label_data)
+        self.starting_points_view.populate_new_data(label_data)
+        self.current_label = label_name
+
     # TODO make it more dynamic
-    def add_label(self, label: str):
-        self.model.add_label(label)
+    def add_new_label(self, label: str):
+        self.model.add_new_label(label)
+
+    def edit_label(self, label:str):
+        self.current_label = label
 
     def handle_mouse_image_left_click(self, q_point):
         self.model.add_starting_point(self.current_label, q_point.x(), q_point.y())

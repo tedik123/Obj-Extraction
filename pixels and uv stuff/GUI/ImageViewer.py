@@ -11,6 +11,9 @@ from PyQt5.QtWidgets import QApplication, qApp, QFileDialog, QListWidget, QSplit
 from PIL import Image
 
 # CUSTOM
+from MainController import MainController
+from Base.LabelSelectorView import LabelSelectorView
+from Base.LabelSelectorController import LabelSelectorController
 from ImageContainerView import ImageContainerView
 from PixelData.StartingPointsView import StartingPointsView
 from PixelData.PixelDataController import PixelDataController
@@ -25,12 +28,15 @@ class QImageViewer(QMainWindow):
         super().__init__()
 
         # TO BE CREATED
+        self.main_controller = None
         self.pixel_data_controller = None
+        self.label_selector_controller = None
         # i should reuse this for when I create the rgb one, it should use the same model
         self.label_model = PixelDataModel()
         self.textEdit = None
         self.imageContainer = None
         self.imageLabel = None
+        self.label_selector = None
 
         self.scaleFactor = 0.0
 
@@ -48,6 +54,14 @@ class QImageViewer(QMainWindow):
 
     def createWidgets(self):
         self.pixel_data_controller = PixelDataController(self.label_model, StartingPointsView(), RgbView())
+        self.label_selector_controller = LabelSelectorController(self.label_model, LabelSelectorView())
+        self.main_controller = MainController(self.pixel_data_controller, self.label_selector_controller,
+                                              self.label_model)
+
+        # pass in the reference to the main controller so you can handle communication
+        self.pixel_data_controller.set_main_controller(self.main_controller)
+        self.label_selector_controller.set_main_controller(self.main_controller)
+
         self.createImageLabel()
         self.createImageContainer()
         self.createTextEdit()
@@ -91,9 +105,9 @@ class QImageViewer(QMainWindow):
         H_splitter = QSplitter(Qt.Horizontal)
 
         # H_splitter.addWidget(self.pixelList)
+        self.addDockWidget(Qt.LeftDockWidgetArea, self.label_selector_controller.label_selector_view)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.pixel_data_controller.starting_points_view)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.pixel_data_controller.rgb_view)
-
 
         # combine the two splitters
         H_splitter.addWidget(V_splitter)

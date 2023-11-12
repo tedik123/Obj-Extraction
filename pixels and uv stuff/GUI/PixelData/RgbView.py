@@ -40,3 +40,13 @@ class RgbView(CustomDockWidget):
 
     def set_single_color_value(self, color_value: int, color_index: int, index: int):
         self.rgb_items_list[index].set_single_color_value(color_value, color_index)
+
+    def populate_new_data(self, label_data):
+        for rgb_item in self.rgb_items_list:
+            rgb_item.setParent(None)
+            rgb_item.deleteLater()
+        self.rgb_items_list = []
+        for rgb_value in label_data.acceptable_colors_rgb:
+            self.add_item_to_vertical_layout(rgb_value[0], rgb_value[1], rgb_value[2])
+        self.show()
+        print("POPULATED NEW DATA")
