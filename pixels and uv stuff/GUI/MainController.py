@@ -18,7 +18,8 @@ class MainController:
 
     def change_current_label(self, name):
         self._pixel_data_controller.change_current_label(name)
-        self._label_selector_controller.change_current_label(name)
+        abr = self._pixel_data_model.get_abr(name)
+        self._label_selector_controller.change_current_label(name, abr)
         self.current_label = name
 
     def edit_label(self, new_label_name):

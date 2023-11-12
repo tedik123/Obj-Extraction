@@ -6,11 +6,15 @@
   <component name="ChangeListManager">
     <list default="true" id="4b5556dc-d59a-407d-9d84-b4c58a945a3c" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/generated_design/generated/LabelSelector.py" beforeDir="false" afterPath="$PROJECT_DIR$/generated_design/generated/LabelSelector.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pixels and uv stuff/GUI/Base/LabelSelectorController.py" beforeDir="false" afterPath="$PROJECT_DIR$/pixels and uv stuff/GUI/Base/LabelSelectorController.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pixels and uv stuff/GUI/Base/LabelSelectorView.py" beforeDir="false" afterPath="$PROJECT_DIR$/pixels and uv stuff/GUI/Base/LabelSelectorView.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pixels and uv stuff/GUI/MainController.py" beforeDir="false" afterPath="$PROJECT_DIR$/pixels and uv stuff/GUI/MainController.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pixels and uv stuff/GUI/PixelData/PixelDataController.py" beforeDir="false" afterPath="$PROJECT_DIR$/pixels and uv stuff/GUI/PixelData/PixelDataController.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pixels and uv stuff/GUI/SubComponents/CustomDockWidget.py" beforeDir="false" afterPath="$PROJECT_DIR$/pixels and uv stuff/GUI/SubComponents/CustomDockWidget.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pixels and uv stuff/GUI/PixelData/PixelDataModel.py" beforeDir="false" afterPath="$PROJECT_DIR$/pixels and uv stuff/GUI/PixelData/PixelDataModel.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pixels and uv stuff/GUI/PixelData/PixelStartingPointItem.py" beforeDir="false" afterPath="$PROJECT_DIR$/pixels and uv stuff/GUI/PixelData/PixelStartingPointItem.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pixels and uv stuff/GUI/PixelData/StartingPointsView.py" beforeDir="false" afterPath="$PROJECT_DIR$/pixels and uv stuff/GUI/PixelData/StartingPointsView.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pixels and uv stuff/GUI/designer/label_selector.ui" beforeDir="false" afterPath="$PROJECT_DIR$/pixels and uv stuff/GUI/designer/label_selector.ui" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -100,7 +104,7 @@
       <workItem from="1699584088318" duration="243000" />
       <workItem from="1699584342555" duration="2649000" />
       <workItem from="1699726253958" duration="15554000" />
-      <workItem from="1699810325305" duration="3075000" />
+      <workItem from="1699810325305" duration="7692000" />
     </task>
     <servers />
   </component>

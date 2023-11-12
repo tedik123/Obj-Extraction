@@ -37,14 +37,14 @@ class Ui_LabelSelector(object):
         self.main_layout.addWidget(self.abr_label, 1, 3, 1, 1, QtCore.Qt.AlignHCenter)
         spacerItem1 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.main_layout.addItem(spacerItem1, 2, 0, 1, 1)
-        self.abr_label_2 = QtWidgets.QLineEdit(self.container)
+        self.abr_input = QtWidgets.QLineEdit(self.container)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.abr_label_2.sizePolicy().hasHeightForWidth())
-        self.abr_label_2.setSizePolicy(sizePolicy)
-        self.abr_label_2.setObjectName("abr_label_2")
-        self.main_layout.addWidget(self.abr_label_2, 1, 4, 1, 1, QtCore.Qt.AlignHCenter)
+        sizePolicy.setHeightForWidth(self.abr_input.sizePolicy().hasHeightForWidth())
+        self.abr_input.setSizePolicy(sizePolicy)
+        self.abr_input.setObjectName("abr_input")
+        self.main_layout.addWidget(self.abr_input, 1, 4, 1, 1, QtCore.Qt.AlignHCenter)
         self.dropdown_label = QtWidgets.QLabel(self.container)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -83,7 +83,7 @@ class Ui_LabelSelector(object):
         self.retranslateUi(LabelSelector)
         QtCore.QMetaObject.connectSlotsByName(LabelSelector)
         LabelSelector.setTabOrder(self.dropdown, self.name_input)
-        LabelSelector.setTabOrder(self.name_input, self.abr_label_2)
+        LabelSelector.setTabOrder(self.name_input, self.abr_input)
 
     def retranslateUi(self, LabelSelector):
         _translate = QtCore.QCoreApplication.translate

@@ -92,7 +92,7 @@
          </spacer>
         </item>
         <item row="1" column="4" alignment="Qt::AlignHCenter">
-         <widget class="QLineEdit" name="abr_label_2">
+         <widget class="QLineEdit" name="abr_input">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -169,7 +169,7 @@
  <tabstops>
   <tabstop>dropdown</tabstop>
   <tabstop>name_input</tabstop>
-  <tabstop>abr_label_2</tabstop>
+  <tabstop>abr_input</tabstop>
  </tabstops>
  <resources/>
  <connections/>
