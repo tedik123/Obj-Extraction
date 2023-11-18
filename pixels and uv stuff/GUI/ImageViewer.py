@@ -20,7 +20,7 @@ from PixelData.StartingPointsView import StartingPointsView
 from PixelData.PixelDataController import PixelDataController
 from PixelData.PixelDataModel import PixelDataModel
 from PixelData.RgbView import RgbView
-
+from ImageContainerController import ImageContainerController
 from Workers.PixelGrabberWorker import PixelGrabberWorker
 
 Home_Path = os.path.expanduser("~")
@@ -35,6 +35,7 @@ class QImageViewer(QMainWindow):
         self.main_controller = None
         self.pixel_data_controller = None
         self.label_selector_controller = None
+        self.image_container_controller = None
         # create and move pixel grabber worker to thread
         self.pixel_grabber_worker = PixelGrabberWorker()
         self.pixel_grabber_worker_thread = QThread()
@@ -42,8 +43,6 @@ class QImageViewer(QMainWindow):
         self.pixel_grabber_worker_thread.start()
         file_name = "C:/Users/tedik/PycharmProjects/RandomScripts/pixels and uv stuff/obj textures/diffuse.jpg"
         self.pixel_grabber_worker.finished_loading_image.connect(partial(print, f"finished loading {file_name}"))
-        # self.pixel_grabber_worker.finished.connect(lambda: print("hi"))
-
 
         # i should reuse this for when I create the rgb one, it should use the same model
         self.label_model = PixelDataModel()
@@ -76,8 +75,7 @@ class QImageViewer(QMainWindow):
         self.pixel_data_controller.set_main_controller(self.main_controller)
         self.label_selector_controller.set_main_controller(self.main_controller)
 
-        self.createImageLabel()
-        self.createImageContainer()
+        self.createAndSetImageContainerToController()
         self.createTextEdit()
 
     def createTextEdit(self):
@@ -86,28 +84,24 @@ class QImageViewer(QMainWindow):
         self.textEdit.setAutoFillBackground(True)
         self.textEdit.setPlainText("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas ")
 
-    def createImageContainer(self):
+    def createAndSetImageContainerToController(self):
         self.imageContainer = QScrollArea()
         self.imageContainer.setBackgroundRole(QPalette.Dark)
+        self.imageLabel = ImageContainerView()
         self.imageContainer.setWidget(self.imageLabel)
         self.imageContainer.setVisible(False)
-
-    def createImageLabel(self):
-        self.imageLabel = ImageContainerView()
-        self.imageLabel.setBackgroundRole(QPalette.Base)
-        # self.imageLabel.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
-        self.imageLabel.setScaledContents(True)
-        # warning I should move these out somewhere, i don't think it makes sense to be here
-        # TODO
+        self.image_container_controller = ImageContainerController(self.imageLabel)
+        self.image_container_controller.set_pixel_data_controller(self.pixel_data_controller)
+        # this is literally just for testing!
         self.imageLabel.mouseMovePixelColor.connect(self.changeTextColor)
-        self.imageLabel.mouseLeftClick.connect(self.pixel_data_controller.handle_mouse_image_left_click)
-        self.imageLabel.mouseRightClick.connect(self.pixel_data_controller.handle_mouse_image_right_click)
+
 
     def changeTextColor(self, point, color):
         # print("COLOR", color)
         self.textEdit.setTextBackgroundColor(color)
+        self.textEdit.setPlainText("Point: %d, %d\nColor: %d, %d, %d" % (point.x(), point.y(), color.red(), color.green(), color.blue()))
         # change the background color of text edit
-        self.textEdit.setStyleSheet("background-color: rgb(%d, %d, %d)" % (color.red(), color.green(), color.blue()))
+        self.textEdit.setStyleSheet("background-color: rgb(%d, %d, %d); font-size: 20px" % (color.red(), color.green(), color.blue()))
 
     def createLayouts(self):
         V_splitter = QSplitter(Qt.Vertical)
@@ -142,10 +136,10 @@ class QImageViewer(QMainWindow):
                 QMessageBox.information(self, "Image Viewer", "Cannot load %s." % fileName)
                 return
             self.setWindowTitle("Image Viewer : " + fileName)
-            self.imageLabel.setPixmap(QPixmap.fromImage(image))
-            self.imageLabel.setQImage()
+            self.image_container_controller.set_image(image)
 
             self.scaleFactor = 1.0
+
 
             self.imageContainer.setVisible(True)
             self.fitToWidthAct.setEnabled(True)

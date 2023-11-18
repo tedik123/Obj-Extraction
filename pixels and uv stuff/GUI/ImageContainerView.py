@@ -3,7 +3,7 @@ from typing import Optional
 
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtCore import Qt, QPoint, QObject, pyqtSignal
-from PyQt5.QtGui import QColor
+from PyQt5.QtGui import QColor, QPalette, QPainter
 from PyQt5.QtWidgets import QLabel, QApplication
 
 
@@ -25,6 +25,8 @@ class ImageContainerView(QLabel):
         self.setMouseTracking(True)
         self.QImage = None
         # self.mouseMoveEvent()
+        self.setBackgroundRole(QPalette.Base)
+        self.setScaledContents(True)
         # self.log = log
 
     def setQImage(self):
@@ -45,6 +47,8 @@ class ImageContainerView(QLabel):
         r, g, b, a = color.getRgb()
         if event.button() == Qt.LeftButton:
             self.mouseLeftClick.emit(point)
+            self.draw_point(point)
+
         if event.button() == Qt.MiddleButton:
             print("Middle button pressed")
         if event.button() == Qt.RightButton:
@@ -112,3 +116,15 @@ class ImageContainerView(QLabel):
 
         # print('X={}, Y={}'.format(pos.x(), pos.y()))
         return pos
+
+    def draw_point(self, point):
+        pixmap = self.pixmap().copy()
+        painter = QPainter(pixmap)
+        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setBrush(QtGui.QColor("black"))
+        length = 100
+        rect = QtCore.QRect(100, 100, length, length)
+        rect.moveCenter(point)
+        painter.drawEllipse(rect)
+        painter.end()
+        self.setPixmap(pixmap)

@@ -40,6 +40,9 @@ class PixelDataController:
     def edit_label(self, label: str):
         self.current_label = label
 
+    def get_label(self):
+        return self.current_label
+
     def handle_mouse_image_left_click(self, q_point):
         self.model.add_starting_point(self.current_label, q_point.x(), q_point.y())
         self.starting_points_view.add_item_to_vertical_layout(q_point)

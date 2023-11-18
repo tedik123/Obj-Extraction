@@ -121,7 +121,7 @@
         <bool>false</bool>
        </property>
        <property name="maximum">
-        <number>255</number>
+        <number>999999</number>
        </property>
       </widget>
      </item>
@@ -168,7 +168,7 @@
         <enum>QAbstractSpinBox::UpDownArrows</enum>
        </property>
        <property name="maximum">
-        <number>255</number>
+        <number>999999</number>
        </property>
       </widget>
      </item>
