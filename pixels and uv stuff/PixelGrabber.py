@@ -196,7 +196,7 @@ class PixelGrabber:
         start = time.time()
         print("Creating faces found by labels pickle file!")
 
-        with open("outputs/" + "pixels_by_labels.bin", 'wb') as f:
+        with open("outputs/" + f"{output_file_name}.bin", 'wb') as f:
             print("Writing STR tree binary")
             pickle.dump(self.pixels_by_label, f)
         end = time.time()
