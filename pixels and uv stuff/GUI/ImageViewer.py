@@ -20,10 +20,13 @@ from PixelData.PixelDataController import PixelDataController
 from PixelData.PixelDataModel import PixelDataModel
 from PixelData.RgbView import RgbView
 
+# from Workers.PixelGrabberWorker import PixelGrabberWorker
+
 Home_Path = os.path.expanduser("~")
 
 
 class QImageViewer(QMainWindow):
+
     def __init__(self):
         super().__init__()
 
@@ -31,6 +34,11 @@ class QImageViewer(QMainWindow):
         self.main_controller = None
         self.pixel_data_controller = None
         self.label_selector_controller = None
+        # self.pixel_grabber_worker = PixelGrabberWorker()
+        # self.pixel_grabber_worker.finished.connect(lambda x: self.resize(100, 100))
+        # self.pixel_grabber_worker.finished.connect(lambda: print("hi"))
+
+
         # i should reuse this for when I create the rgb one, it should use the same model
         self.label_model = PixelDataModel()
         self.textEdit = None
@@ -121,6 +129,7 @@ class QImageViewer(QMainWindow):
     # this is just for testing remove later!
     def set_default_image(self):
         fileName = "C:/Users/tedik/Downloads/frog_state.png"
+        fileName = "C:/Users/tedik/PycharmProjects/RandomScripts/pixels and uv stuff/obj textures/diffuse.jpg"
         if fileName:
             image = QImage(fileName)
             if image.isNull():
@@ -139,6 +148,8 @@ class QImageViewer(QMainWindow):
 
             if not self.fitToWindowAct.isChecked():
                 self.fitToWidth()
+            # self.pixel_grabber_worker.load_image(fileName)
+
 
     def open(self, file_name):
         options = QFileDialog.Options()

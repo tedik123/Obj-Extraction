@@ -18,11 +18,22 @@ print_lock = threading.Lock()
 class PixelGrabber:
     # if label name is none we do all them otherwise it's all of them
     # takes in an array of label names to do
-    def __init__(self, texture_file_path, label_names=None, pixel_deviation=0):
+    """"
+    Takes a texture_file_path and saves it for later,
+    label_names to test only (optional),
+    pixel_deviation: how much color variance past the passed in values
+    read_in_label_starts whether to read in the starts immediately
+    """
+
+    def __init__(self, texture_file_path=None, label_names=None, pixel_deviation=0, read_in_label_starts=True):
         # def __init__(self):
         self.pixel_deviation = pixel_deviation
         self.enable_default_color_range = True
-        self.label_starts = self.read_in_label_starts()
+
+        self.label_starts = None
+        if read_in_label_starts:
+            self.label_starts = self.read_in_label_starts()
+
         # self.texture_file = 'obj textures/diffuse.jpg'
         self.texture_file = texture_file_path
         self.label_names = label_names
@@ -33,6 +44,9 @@ class PixelGrabber:
 
     def disable_default_color_range(self):
         self.enable_default_color_range = False
+
+    def set_texture_file_path(self, texture_file_path: str):
+        self.texture_file = texture_file_path
 
     def read_in_label_starts(self):
         print("Loading in label starts...")
@@ -340,7 +354,7 @@ if __name__ == "__main__":
     # if there's a fade or variation in color you will want to raise this to loosen what is an acceptable color
     default_pixel_deviation = 3
 
-    texture_file_path = 'obj textures/diffuse.jpg'
+    texture_file_path = '../pixels and uv stuff/obj textures/diffuse.jpg'
 
     # set white as the default acceptable colors
     default_acceptable_colors = [[255, 255, 255]]

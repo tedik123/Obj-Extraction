@@ -212,7 +212,7 @@ class ObjToGeometryFiles:
 
 if __name__ == "__main__":
     start = time.time()
-    base_obj_file_path = "obj files/Anatomy.OBJ"
+    base_obj_file_path = "../pixels and uv stuff/obj files/Anatomy.OBJ"
     obj_to_json = ObjToGeometryFiles(base_obj_file_path)
     obj_to_json.read_in_OBJ_file()
     obj_to_json.insert_face_data()

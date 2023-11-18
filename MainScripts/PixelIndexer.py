@@ -27,7 +27,7 @@ class PixelIndexer:
         else:
             print("Reading binary version")
             print(f"Opening outputs/faces_found_by_labels" + ".bin")
-            with open('outputs/faces_found_by_labels.bin', 'rb') as file:
+            with open('../pixels and uv stuff/outputs/faces_found_by_labels.bin', 'rb') as file:
                 self.faces_found_by_labels = pickle.load(file)
 
     def create_indexed_faces(self):

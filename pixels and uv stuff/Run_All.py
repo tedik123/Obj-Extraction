@@ -3,12 +3,12 @@ import time
 from concurrent.futures import ProcessPoolExecutor
 from os import listdir
 from os.path import isfile, join
-from PixelToFace import PixelToFace
-from PixelGrabber import PixelGrabber
-from PixelIndexer import PixelIndexer
-from PixelGrabber import save_pixels_by_labels
-from ObjFileToGeometryFiles import ObjToGeometryFiles
-from PixelToFace import get_image_dimensions
+from MainScripts.PixelToFace import PixelToFace
+from MainScripts.PixelGrabber import PixelGrabber
+from MainScripts import PixelIndexer
+from MainScripts.PixelGrabber import save_pixels_by_labels
+from MainScripts.ObjToGeometryFiles import ObjToGeometryFiles
+from MainScripts.PixelToFace import get_image_dimensions
 
 
 def create_file_names_list():

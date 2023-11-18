@@ -5,7 +5,7 @@ import time
 
 from PIL import Image
 
-from Triangles import Triangle
+from .Triangles import Triangle
 from shapely import STRtree, points as Points
 import pickle
 from multiprocessing import cpu_count
@@ -110,7 +110,7 @@ class PixelToFace:
         # print(f"Reading JSON file took {(end - start)} seconds")
 
         start = time.time()
-        with open("outputs/pixels_by_labels.bin", 'rb') as file:
+        with open("../pixels and uv stuff/outputs/pixels_by_labels.bin", 'rb') as file:
             self.target_pixels_by_name = pickle.load(file)
         end = time.time()
         print(f"Reading PICKLE file took {(end - start)} seconds")
@@ -125,7 +125,7 @@ class PixelToFace:
 
     def read_in_str_tree(self):
         print("Reading in STR tree")
-        with open("outputs/STRtree.bin", "rb") as f:
+        with open("../pixels and uv stuff/outputs/STRtree.bin", "rb") as f:
             self.str_tree = pickle.load(f)
 
     # builds a tree of all the triangles that make up the obj file for faster search
@@ -436,7 +436,7 @@ def get_image_dimensions(texture_file):
 
 if __name__ == "__main__":
     max_width, max_height = 4096, 4096
-    TARGET_FILE = 'outputs/pixels_by_labels.json'
+    TARGET_FILE = '../pixels and uv stuff/outputs/pixels_by_labels.json'
 
     start = time.time()
     pixel_to_faces = PixelToFace(TARGET_FILE, max_width, max_height, preload_STRtree=True, save_normals=False,
