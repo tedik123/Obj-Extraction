@@ -6,8 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="4b5556dc-d59a-407d-9d84-b4c58a945a3c" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pixels and uv stuff/GUI/ImageViewer.py" beforeDir="false" afterPath="$PROJECT_DIR$/pixels and uv stuff/GUI/ImageViewer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pixels and uv stuff/GUI/Workers/PixelGrabberWorker.py" beforeDir="false" afterPath="$PROJECT_DIR$/pixels and uv stuff/GUI/Workers/PixelGrabberWorker.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pixels and uv stuff/GUI/ImageContainerView.py" beforeDir="false" afterPath="$PROJECT_DIR$/pixels and uv stuff/GUI/ImageContainerView.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -128,7 +127,7 @@
       <workItem from="1699726253958" duration="15554000" />
       <workItem from="1699810325305" duration="9054000" />
       <workItem from="1700279397156" duration="9817000" />
-      <workItem from="1700327425097" duration="3301000" />
+      <workItem from="1700327425097" duration="4121000" />
     </task>
     <servers />
   </component>

@@ -77,7 +77,7 @@ class ImageContainerView(QLabel):
         if self.hasScaledContents():
             x = pos.x() * pixmapRect.width() / contentsRect.width()
             y = pos.y() * pixmapRect.height() / contentsRect.height()
-            pos = QtCore.QPoint(int(x), int(y))
+            pos = QtCore.QPoint(round(x), round(y))
 
 
         else:
@@ -107,7 +107,8 @@ class ImageContainerView(QLabel):
                 return
             # translate coordinates to the image position and convert it back to
             # a QPoint, which is integer based
-            pos = (pos - pixmapRect.topLeft()).toPoint()
+            pos = (pos - pixmapRect.topLeft())
+            pos = QtCore.QPoint(round(pos.x), round(pos.y))
 
         # print('X={}, Y={}'.format(pos.x(), pos.y()))
         return pos
