@@ -13,12 +13,18 @@ class StartingPointsView(CustomDockWidget):
         self.start_point_list = []
 
     def add_item_to_vertical_layout(self, point: QPoint, label_data=None):
+        # warning if you ever insert a new item in here this will break everything!
         # always insert 1 before the addStretch item
         index_to_insert = self.vertical_layout.count() - 1
         start_point = PixelStartingPointItem(index_to_insert, point)
         start_point.changed_max_or_min.connect(self.max_or_min_changed.emit)
         start_point.changed_point_value.connect(self.start_value_changed.emit)
-        # todo label data where we set the min and max
+
+        if label_data:
+            start_point.set_max_or_min_value("min_X", label_data.min_X[index_to_insert])
+            start_point.set_max_or_min_value("max_X", label_data.max_X[index_to_insert])
+            start_point.set_max_or_min_value("min_Y", label_data.min_Y[index_to_insert])
+            start_point.set_max_or_min_value("max_Y", label_data.max_Y[index_to_insert])
 
         self.vertical_layout.insertWidget(index_to_insert, start_point)
         self.start_point_list.append(start_point)
