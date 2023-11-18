@@ -7,14 +7,7 @@
     <list default="true" id="4b5556dc-d59a-407d-9d84-b4c58a945a3c" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pixels and uv stuff/GUI/ImageViewer.py" beforeDir="false" afterPath="$PROJECT_DIR$/pixels and uv stuff/GUI/ImageViewer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pixels and uv stuff/ObjFileToGeometryFiles.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainScripts/ObjToGeometryFiles.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pixels and uv stuff/PixelGrabber.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainScripts/PixelGrabber.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pixels and uv stuff/PixelIndexer.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainScripts/PixelIndexer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pixels and uv stuff/PixelToFace.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainScripts/PixelToFace.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pixels and uv stuff/Run_All.py" beforeDir="false" afterPath="$PROJECT_DIR$/pixels and uv stuff/Run_All.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pixels and uv stuff/TriangleDecomposer.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainScripts/TriangleDecomposer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pixels and uv stuff/Triangles.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainScripts/Triangles.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pixels and uv stuff/UtilityFunctions.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainScripts/UtilityFunctions.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pixels and uv stuff/GUI/Workers/PixelGrabberWorker.py" beforeDir="false" afterPath="$PROJECT_DIR$/pixels and uv stuff/GUI/Workers/PixelGrabberWorker.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -135,6 +128,7 @@
       <workItem from="1699726253958" duration="15554000" />
       <workItem from="1699810325305" duration="9054000" />
       <workItem from="1700279397156" duration="9817000" />
+      <workItem from="1700327425097" duration="3301000" />
     </task>
     <servers />
   </component>
@@ -157,7 +151,7 @@
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/RandomScripts$Watcher.coverage" NAME="Watcher Coverage Results" MODIFIED="1700289558395" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/pixels and uv stuff/GUI" />
+    <SUITE FILE_PATH="coverage/RandomScripts$Watcher.coverage" NAME="Watcher Coverage Results" MODIFIED="1700329621212" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/pixels and uv stuff/GUI" />
     <SUITE FILE_PATH="coverage/RandomScripts$Run_All.coverage" NAME="Run_All Coverage Results" MODIFIED="1700283430909" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/pixels and uv stuff" />
   </component>
 </project>

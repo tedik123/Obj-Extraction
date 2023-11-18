@@ -1,7 +1,8 @@
 import sys
 import os
+from functools import partial
 
-from PyQt5.QtCore import Qt, QDir, pyqtSignal, QObject, QPoint
+from PyQt5.QtCore import Qt, QDir, pyqtSignal, QObject, QPoint, QThread
 from PyQt5.QtGui import QImage, QPixmap, QPalette, QPainter, QColor
 from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
 from PyQt5.QtWidgets import QLabel, QSizePolicy, QScrollArea, QMessageBox, QMainWindow, QMenu, QAction, \
@@ -20,7 +21,7 @@ from PixelData.PixelDataController import PixelDataController
 from PixelData.PixelDataModel import PixelDataModel
 from PixelData.RgbView import RgbView
 
-# from Workers.PixelGrabberWorker import PixelGrabberWorker
+from Workers.PixelGrabberWorker import PixelGrabberWorker
 
 Home_Path = os.path.expanduser("~")
 
@@ -34,8 +35,13 @@ class QImageViewer(QMainWindow):
         self.main_controller = None
         self.pixel_data_controller = None
         self.label_selector_controller = None
-        # self.pixel_grabber_worker = PixelGrabberWorker()
-        # self.pixel_grabber_worker.finished.connect(lambda x: self.resize(100, 100))
+        # create and move pixel grabber worker to thread
+        self.pixel_grabber_worker = PixelGrabberWorker()
+        self.pixel_grabber_worker_thread = QThread()
+        self.pixel_grabber_worker.moveToThread(self.pixel_grabber_worker_thread)
+        self.pixel_grabber_worker_thread.start()
+        file_name = "C:/Users/tedik/PycharmProjects/RandomScripts/pixels and uv stuff/obj textures/diffuse.jpg"
+        self.pixel_grabber_worker.finished_loading_image.connect(partial(print, f"finished loading {file_name}"))
         # self.pixel_grabber_worker.finished.connect(lambda: print("hi"))
 
 
@@ -148,7 +154,7 @@ class QImageViewer(QMainWindow):
 
             if not self.fitToWindowAct.isChecked():
                 self.fitToWidth()
-            # self.pixel_grabber_worker.load_image(fileName)
+            self.pixel_grabber_worker.load_image(fileName)
 
 
     def open(self, file_name):
