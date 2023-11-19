@@ -87,7 +87,50 @@ class PixelGrabber:
         # print(self.acceptable_colors_by_label["Deltoid"])
 
     # for each label name it will extract all the pixels belonging to it using the label_starts.json
-    def run_pixel_grabber(self, thread_count: int = None):
+    def run_pixel_grabber(self, label_data=None, thread_count: int = None):
+        print("Starting pixel grabbing process!")
+
+        # the key will be the label_name,
+        # and the value will be the array of pixels that make up the label
+        self.pixels_by_label = {}
+        # label_data is passed in from the GUI
+        # fixme we should have a better process for acceptable colors and such
+        # but since we don't have we need to assume it's not created everytime
+        if label_data:
+            self.label_starts = label_data
+            default_acceptable_colors = [[255, 255, 255]]
+            deviation_default_colors = 2
+            self.create_acceptable_colors_by_label(default_acceptable_colors, deviation_default_colors)
+
+        # need to extract only the labels names we want if provided a list
+        elif self.label_names:
+            change_label_starts = {}
+            for label_name in self.label_names:
+                label_data = self.label_starts[label_name]
+                change_label_starts[label_name] = label_data
+            self.label_starts = change_label_starts
+
+        c_executor = PixelGrabber_C(self.pixel_data, self.acceptable_colors_by_label, self.max_width, self.max_height)
+
+        if thread_count is None:
+            thread_count = cpu_count() - 1
+        with ThreadPoolExecutor(max_workers=thread_count) as executor:
+            futures = []
+            for label_name, label_data in self.label_starts.items():
+                futures.append(executor.submit(self.process_label_pixels, label_name, label_data, c_executor))
+
+            for future in as_completed(futures):
+                label_name, label_pixels = future.result()
+                # FIXME there's duplicates in the returned list :/
+                if len(label_pixels) != len(set(label_pixels)):
+                    print("There are duplicates in the list.")
+                else:
+                    print("There are no duplicates in the list.")
+                self.pixels_by_label[label_name] = label_pixels
+            return self.pixels_by_label
+
+    # this is specifically for the GUI
+    def run_pixel_grabber_gui(self, label_data, thread_count: int = None):
         print("Starting pixel grabbing process!")
         c_executor = PixelGrabber_C(self.pixel_data, self.acceptable_colors_by_label, self.max_width, self.max_height)
 
@@ -95,12 +138,6 @@ class PixelGrabber:
         # and the value will be the array of pixels that make up the label
         self.pixels_by_label = {}
         # need to extract only the labels names we want if provided a list
-        if self.label_names:
-            change_label_starts = {}
-            for label_name in self.label_names:
-                label_data = self.label_starts[label_name]
-                change_label_starts[label_name] = label_data
-            self.label_starts = change_label_starts
 
         if thread_count is None:
             thread_count = cpu_count() - 1
@@ -117,6 +154,7 @@ class PixelGrabber:
                 # else:
                 #     print("There are no duplicates in the list.")
                 self.pixels_by_label[label_name] = label_pixels
+            return self.pixels_by_label
 
     # this is used for the threads to do their own isolated work
     def process_label_pixels(self, label_name, label_data, c_executor: PixelGrabber_C):
@@ -130,14 +168,16 @@ class PixelGrabber:
             min_X, min_Y = 0, 0
             # we get the max width from the pic
             max_X, max_Y = self.max_width, self.max_height
-            if "min_X" in label_data:
-                min_X = label_data["min_X"][i]
-            if "min_Y" in label_data:
-                min_Y = label_data["min_Y"][i]
-            if "max_X" in label_data:
-                max_X = label_data["max_X"][i]
-            if "max_Y" in label_data:
-                max_Y = label_data["max_Y"][i]
+            # pay attention to case!
+            # walrus operator assigns to min_x and max_x if they exist
+            if "min_X" in label_data and (min_x := label_data["min_X"][i]) > -1:
+                min_X = min_x
+            if "min_Y" in label_data and (min_y := label_data["min_Y"][i]) > -1:
+                min_Y = min_y
+            if "max_X" in label_data and (max_x := label_data["max_X"][i]) > -1:
+                max_X = max_x
+            if "max_Y" in label_data and (max_y := label_data["max_Y"][i]) > -1:
+                max_Y = max_y
             # stores the 4 starting points if exist
             bounding_values = [min_X, min_Y, max_X, max_Y]
             bounding_list.append(bounding_values)
@@ -319,7 +359,8 @@ class PixelGrabber:
 
             wait(futures)
 
-        img.save('outputs/pixel_change_test.png')
+        # img.save('outputs/pixel_change_test.png')
+        img.save('pixel_change_test.png')
         print("Finished saving change pixel test image.", flush=True)
 
 

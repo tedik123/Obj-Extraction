@@ -3,7 +3,7 @@ from typing import Optional
 
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtCore import Qt, QPoint, QObject, pyqtSignal
-from PyQt5.QtGui import QColor, QPalette, QPainter
+from PyQt5.QtGui import QColor, QPalette, QPainter, QPixmap
 from PyQt5.QtWidgets import QLabel, QApplication
 
 
@@ -24,6 +24,7 @@ class ImageContainerView(QLabel):
         # self.setAcceptHoverEvents(True)
         self.setMouseTracking(True)
         self.QImage = None
+        self.point_set = None
         # self.mouseMoveEvent()
         self.setBackgroundRole(QPalette.Base)
         self.setScaledContents(True)
@@ -122,9 +123,37 @@ class ImageContainerView(QLabel):
         painter = QPainter(pixmap)
         painter.setRenderHint(QPainter.Antialiasing)
         painter.setBrush(QtGui.QColor("black"))
-        length = 100
-        rect = QtCore.QRect(100, 100, length, length)
+        length = 10
+        rect = QtCore.QRect(10, 10, length, length)
         rect.moveCenter(point)
         painter.drawEllipse(rect)
         painter.end()
         self.setPixmap(pixmap)
+
+    def draw_points(self, points, clear_old=False):
+        if clear_old:
+            self.point_set = None
+            self.setPixmap(self.pixmap().copy())
+            pixmap = QPixmap.fromImage(self.QImage)
+        else:
+            pixmap = self.pixmap().copy()
+        painter = QPainter(pixmap)
+        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setBrush(QtGui.QColor("black"))
+
+        # check which points are new
+        if self.point_set:
+            new_points = [x for x in points if x not in self.point_set]
+        else:
+            new_points = points
+        # draw the points then save them locally on next call check only which new points to draw
+        for point in new_points:
+            painter.drawPoint(point[0], point[1])
+        if self.point_set is None:
+            self.point_set = set(points)
+        else:
+            # add new points to set
+            self.point_set.update(points)
+        painter.end()
+        self.setPixmap(pixmap)
+        self.parentWidget().update()

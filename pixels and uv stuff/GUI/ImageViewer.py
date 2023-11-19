@@ -36,16 +36,18 @@ class QImageViewer(QMainWindow):
         self.pixel_data_controller = None
         self.label_selector_controller = None
         self.image_container_controller = None
+
+        # i should reuse this for when I create the rgb one, it should use the same model
+        self.label_model = PixelDataModel()
+
         # create and move pixel grabber worker to thread
-        self.pixel_grabber_worker = PixelGrabberWorker()
+        self.pixel_grabber_worker = PixelGrabberWorker(self.label_model)
         self.pixel_grabber_worker_thread = QThread()
         self.pixel_grabber_worker.moveToThread(self.pixel_grabber_worker_thread)
         self.pixel_grabber_worker_thread.start()
         file_name = "C:/Users/tedik/PycharmProjects/RandomScripts/pixels and uv stuff/obj textures/diffuse.jpg"
         self.pixel_grabber_worker.finished_loading_image.connect(partial(print, f"finished loading {file_name}"))
 
-        # i should reuse this for when I create the rgb one, it should use the same model
-        self.label_model = PixelDataModel()
         self.textEdit = None
         self.imageContainer = None
         self.imageLabel = None
@@ -68,14 +70,17 @@ class QImageViewer(QMainWindow):
     def createWidgets(self):
         self.pixel_data_controller = PixelDataController(self.label_model, StartingPointsView(), RgbView())
         self.label_selector_controller = LabelSelectorController(self.label_model, LabelSelectorView())
-        self.main_controller = MainController(self.pixel_data_controller, self.label_selector_controller,
-                                              self.label_model)
+        self.createAndSetImageContainerToController()
+        self.main_controller = MainController(self.pixel_data_controller,
+                                              self.label_selector_controller,
+                                              self.image_container_controller,
+                                              self.label_model
+                                              )
 
         # pass in the reference to the main controller so you can handle communication
         self.pixel_data_controller.set_main_controller(self.main_controller)
         self.label_selector_controller.set_main_controller(self.main_controller)
 
-        self.createAndSetImageContainerToController()
         self.createTextEdit()
 
     def createTextEdit(self):
@@ -90,8 +95,9 @@ class QImageViewer(QMainWindow):
         self.imageLabel = ImageContainerView()
         self.imageContainer.setWidget(self.imageLabel)
         self.imageContainer.setVisible(False)
-        self.image_container_controller = ImageContainerController(self.imageLabel)
+        self.image_container_controller = ImageContainerController(self.imageLabel, pixel_data_model=self.label_model)
         self.image_container_controller.set_pixel_data_controller(self.pixel_data_controller)
+        self.image_container_controller.set_pixel_grabber_work(self.pixel_grabber_worker)
         # this is literally just for testing!
         self.imageLabel.mouseMovePixelColor.connect(self.changeTextColor)
 

@@ -15,8 +15,6 @@ class PixelDataController:
         # this should be like a list of the labels they've made,
         # and current_label should change depending on which is selected
         # self.labels = []
-        # warning this is not initially tied to the labelSelector
-        # self.current_label = "Your Label"
         self.current_label = None
         # self.add_new_label(self.current_label)
         self.set_events()

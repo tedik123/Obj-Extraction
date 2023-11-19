@@ -1,14 +1,19 @@
 from dataclasses import dataclass, field
 from typing import List, Union
 
+from PyQt5.QtCore import QObject, pyqtSignal
+
 
 @dataclass
 class LabelData:
+    # name is actually label for all intents and purposes
     name: str
     abr: str = ""
+    # this label field isn't actually used anywhere but it's required nonetheless...lol
+    label: str = "test"
     starting_points: List[List[int]] = field(default_factory=list)
     acceptable_colors_rgb: List[List[int]] = field(default_factory=list)
-    pixel_deviation: int = 0
+    pixel_deviation: int = 3
     min_X: List[int] = field(default_factory=list)
     max_X: List[int] = field(default_factory=list)
     min_Y: List[int] = field(default_factory=list)
@@ -16,11 +21,14 @@ class LabelData:
     enable_default_range: bool = False
 
 
-class PixelDataModel:
+class PixelDataModel(QObject):
+    point_updated = pyqtSignal()
 
     def __init__(self):
+        super().__init__()
         # dict of labeldata
         self.label_data: dict[str, LabelData] = {}
+        self.pixel_data_by_label: dict[str, List[List[int]]] = {}
 
     def get_abr(self, name):
         return self.label_data[name].abr
@@ -34,19 +42,31 @@ class PixelDataModel:
         if new_name in self.label_data:
             raise ValueError("Label already exists")
         self.label_data[new_name] = self.label_data.pop(old_name)
+        self.pixel_data_by_label[new_name] = self.pixel_data_by_label.pop(old_name)
 
     def edit_abr(self, name: str, new_abr: str):
         print(f"current label {name} setting new abr to {new_abr}")
         self.label_data[name].abr = new_abr
         return self.label_data[name].abr
 
+    def set_pixel_data_by_label(self, pixels_by_label: dict[str, List[List[int]]]):
+        for label, pixels in pixels_by_label.items():
+            self.pixel_data_by_label[label] = pixels
+
+    def get_pixel_data_by_label(self, label):
+        if label not in self.pixel_data_by_label:
+            return []
+        return self.pixel_data_by_label[label]
+
+    # TODO this should check if a point exists already
     def add_starting_point(self, name: str, x: int, y: int):
         data = self.label_data[name]
         data.starting_points.append([x, y])
-        data.min_X.append(0)
-        data.max_X.append(0)
-        data.min_Y.append(0)
-        data.max_Y.append(0)
+        data.min_X.append(-1)
+        data.max_X.append(-1)
+        data.min_Y.append(-1)
+        data.max_Y.append(-1)
+        self.point_updated.emit()
 
     def add_rgb_value(self, name: str, r: int, g: int, b: int):
         self.label_data[name].acceptable_colors_rgb.append([r, g, b])
@@ -80,3 +100,6 @@ class PixelDataModel:
                 return self.label_data[name].max_Y[index]
             case _:
                 raise ValueError("Invalid min or max value")
+
+    def get_label_data(self, label):
+        return self.label_data[label]
