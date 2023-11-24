@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import List, Union
 
-from PyQt5.QtCore import QObject, pyqtSignal
+from PyQt6.QtCore import QObject, pyqtSignal
 
 
 @dataclass
@@ -37,6 +37,7 @@ class PixelDataModel(QObject):
         if self.label_data.get(name):
             raise ValueError("Label already exists")
         self.label_data[name] = LabelData(name)
+        self.pixel_data_by_label[name] = []
 
     def edit_label(self, old_name: str, new_name: str):
         if new_name in self.label_data:
@@ -51,6 +52,7 @@ class PixelDataModel(QObject):
 
     def set_pixel_data_by_label(self, pixels_by_label: dict[str, List[List[int]]]):
         for label, pixels in pixels_by_label.items():
+            print(type(pixels))
             self.pixel_data_by_label[label] = pixels
 
     def get_pixel_data_by_label(self, label):

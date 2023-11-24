@@ -2,12 +2,12 @@ import sys
 import os
 from functools import partial
 
-from PyQt5.QtCore import Qt, QDir, pyqtSignal, QObject, QPoint, QThread
-from PyQt5.QtGui import QImage, QPixmap, QPalette, QPainter, QColor
-from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
-from PyQt5.QtWidgets import QLabel, QSizePolicy, QScrollArea, QMessageBox, QMainWindow, QMenu, QAction, \
-    QGraphicsPixmapItem, QWidget, QVBoxLayout, QSpacerItem, QBoxLayout
-from PyQt5.QtWidgets import QApplication, qApp, QFileDialog, QListWidget, QSplitter, QTextEdit, QFileSystemModel
+from PyQt6.QtCore import Qt, QDir, pyqtSignal, QObject, QPoint, QThread
+from PyQt6.QtGui import QImage, QPixmap, QPalette, QPainter, QColor, QAction
+from PyQt6.QtPrintSupport import QPrintDialog, QPrinter
+from PyQt6.QtWidgets import QLabel, QSizePolicy, QScrollArea, QMessageBox, QMainWindow, QMenu, \
+    QGraphicsPixmapItem, QWidget, QVBoxLayout, QSpacerItem, QBoxLayout, QTabWidget
+from PyQt6.QtWidgets import QApplication,  QFileDialog, QListWidget, QSplitter, QTextEdit
 
 from PIL import Image
 
@@ -22,7 +22,7 @@ from PixelData.PixelDataModel import PixelDataModel
 from PixelData.RgbView import RgbView
 from ImageContainerController import ImageContainerController
 from Workers.PixelGrabberWorker import PixelGrabberWorker
-
+from ObjView.ObjView import ObjView
 Home_Path = os.path.expanduser("~")
 
 
@@ -32,6 +32,7 @@ class QImageViewer(QMainWindow):
         super().__init__()
 
         # TO BE CREATED
+        self.obj_view = None
         self.main_controller = None
         self.pixel_data_controller = None
         self.label_selector_controller = None
@@ -91,7 +92,7 @@ class QImageViewer(QMainWindow):
 
     def createAndSetImageContainerToController(self):
         self.imageContainer = QScrollArea()
-        self.imageContainer.setBackgroundRole(QPalette.Dark)
+        self.imageContainer.setBackgroundRole(QPalette.ColorRole.Dark)
         self.imageLabel = ImageContainerView()
         self.imageContainer.setWidget(self.imageLabel)
         self.imageContainer.setVisible(False)
@@ -110,21 +111,28 @@ class QImageViewer(QMainWindow):
         self.textEdit.setStyleSheet("background-color: rgb(%d, %d, %d); font-size: 20px" % (color.red(), color.green(), color.blue()))
 
     def createLayouts(self):
-        V_splitter = QSplitter(Qt.Vertical)
-        # V_splitter.addWidget(self.imageName)
-        V_splitter.addWidget(self.imageContainer)
-        V_splitter.addWidget(self.textEdit)
-        V_splitter.setSizes([450, 150])
+        self.V_splitter = QSplitter(Qt.Orientation.Vertical)
+        self.tab_view = QTabWidget()
+        self.tab_view.addTab(self.imageContainer, "2D View")
+        self.V_splitter.addWidget(self.tab_view)
+        self.obj_view = ObjView()
+        # self.obj_view.setParent(self)
+        self.tab_view.addTab(self.obj_view, "3D View")
+        self.V_splitter.addWidget(self.textEdit)
+        self.V_splitter.setSizes([450, 150])
 
-        H_splitter = QSplitter(Qt.Horizontal)
+        print(self.obj_view.parentWidget())
+
+
+        H_splitter = QSplitter(Qt.Orientation.Horizontal)
 
         # H_splitter.addWidget(self.pixelList)
-        self.addDockWidget(Qt.LeftDockWidgetArea, self.label_selector_controller.label_selector_view)
-        self.addDockWidget(Qt.LeftDockWidgetArea, self.pixel_data_controller.starting_points_view)
-        self.addDockWidget(Qt.LeftDockWidgetArea, self.pixel_data_controller.rgb_view)
+        self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.label_selector_controller.label_selector_view)
+        self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.pixel_data_controller.starting_points_view)
+        self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.pixel_data_controller.rgb_view)
 
         # combine the two splitters
-        H_splitter.addWidget(V_splitter)
+        H_splitter.addWidget(self.V_splitter)
         H_splitter.setSizes([700])
 
         self.setCentralWidget(H_splitter)
@@ -158,7 +166,7 @@ class QImageViewer(QMainWindow):
 
 
     def open(self, file_name):
-        options = QFileDialog.Options()
+        options = QFileDialog.options()
         current_path = QDir.homePath()
 
         # fileName = QFileDialog.getOpenFileName(self, "Open File", QDir.currentPath())
@@ -198,6 +206,8 @@ class QImageViewer(QMainWindow):
 
             if not self.fitToWindowAct.isChecked():
                 self.fitToWidth()
+            self.pixel_grabber_worker.load_image(fileName)
+
 
     def zoomIn(self):
         self.scaleImage(1.25)
@@ -255,7 +265,6 @@ class QImageViewer(QMainWindow):
         self.fitToWindowAct = QAction("&Fit to Window", self, enabled=False, checkable=True, shortcut="Ctrl+F",
                                       triggered=self.fitToWindow)
         self.aboutAct = QAction("&About", self, triggered=self.about)
-        self.aboutQtAct = QAction("About &Qt", self, triggered=qApp.aboutQt)
 
     def createMenus(self):
         self.fileMenu = QMenu("&File", self)
@@ -272,7 +281,6 @@ class QImageViewer(QMainWindow):
 
         self.helpMenu = QMenu("&Help", self)
         self.helpMenu.addAction(self.aboutAct)
-        self.helpMenu.addAction(self.aboutQtAct)
 
         self.menuBar().addMenu(self.fileMenu)
         self.menuBar().addMenu(self.viewMenu)
@@ -310,11 +318,11 @@ if __name__ == '__main__':
     imageViewer.showFullScreen()
     imageViewer.showNormal()
 
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
 
     # credit for the code that inspired this goes to the following:
     #
-    # if you need 'Dual-Image' Synchronous Scrolling in the window by PyQt5 and Python 3
+    # if you need 'Dual-Image' Synchronous Scrolling in the window by PyQt6 and Python 3
     # please visit https://gist.github.com/acbetter/e7d0c600fdc0865f4b0ee05a17b858f2
     #
     # base on https://github.com/baoboa/pyqt5/blob/master/examples/widgets/imageviewer.py

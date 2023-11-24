@@ -30,6 +30,7 @@ class MainController:
         # you can assume that the current label selected is the one you should edit
         # first try to change the model if it errors then don't allow the change
         try:
+            print("old name", self.current_label, "new name", new_label_name)
             self._pixel_data_model.edit_label(self.current_label, new_label_name)
             self._pixel_data_controller.edit_label(new_label_name)
             self._label_selector_controller.edit_label(new_label_name)

@@ -1,6 +1,6 @@
 import time
 
-from PyQt5.QtCore import QObject, QThread, pyqtSignal, pyqtSlot
+from PyQt6.QtCore import QObject, QThread, pyqtSignal, pyqtSlot
 
 from MainScripts.PixelGrabber import PixelGrabber
 
@@ -60,18 +60,21 @@ class PixelGrabberWorker(QObject):
         # self.load_image_thread.quit()
 
     def grab_pixels(self, label, label_data):
+        # this is incredibly shitty! but i don't know how to fix it yet
         try:
             if self.grab_pixels_thread and self.grab_pixels_thread.isRunning():
-                # force kill the old thread
-
                 # If the thread is already running, stop it before starting a new one
                 # if you don't disconnect it no happy :(
                 try:
                     self.grab_pixels_thread.requestInterruption()
+                    self.grab_pixels_thread.wait(1)
                     self.grab_pixels_thread.disconnect()
+                    self.grab_pixels_thread.quit()
                 except Exception as e:
                     print(f"Error disconnecting thread, moving on: {str(e)}")
-                self.grab_pixels_thread.quit()
+                finally:
+                    self.grab_pixels_thread = QThread(self)
+            # self.grab_pixels_thread.quit()
 
             self.grab_pixels_thread.started.connect(partial(self._grab_pixels, label, label_data))
             # Start the thread

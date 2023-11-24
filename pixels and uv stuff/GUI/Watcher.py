@@ -21,7 +21,8 @@ class CodeChangeHandler(FileSystemEventHandler):
     def on_any_event(self, event):
         start = timer()
 
-        compile_ui = False
+        compile_ui = True
+
         if event.is_directory:
             return
         # I wish there was a way for a watcher to ignore anything in pycache
@@ -56,10 +57,10 @@ def convert_ui_files():
         input_path = os.path.join(ui_dir, ui_file)
         output_file = snake_to_title(os.path.splitext(ui_file)[0]) + ".py"
         output_path = os.path.join(generated_dir, output_file)
-        # Run the pyuic5 command to convert .ui to .py
-        pyuic5_command = f"pyuic5 {input_path} -o {output_path}"
+        # Run the pyuic6 command to convert .ui to .py
+        pyuic6_command = f"pyuic6 {input_path} -o {output_path}"
         try:
-            subprocess.run(pyuic5_command, shell=True, check=True)
+            subprocess.run(pyuic6_command, shell=True, check=True)
             print(f"Converted {ui_file} to {output_file}")
         except subprocess.CalledProcessError as e:
             print(f"Error converting {ui_file}: {e}")

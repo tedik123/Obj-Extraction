@@ -6,16 +6,23 @@
   <component name="ChangeListManager">
     <list default="true" id="4b5556dc-d59a-407d-9d84-b4c58a945a3c" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MainScripts/PixelGrabber.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainScripts/PixelGrabber.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/generated_design/generated/LabelSelector.py" beforeDir="false" afterPath="$PROJECT_DIR$/generated_design/generated/LabelSelector.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/generated_design/generated/RgbItem.py" beforeDir="false" afterPath="$PROJECT_DIR$/generated_design/generated/RgbItem.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/generated_design/generated/StartingPointItem.py" beforeDir="false" afterPath="$PROJECT_DIR$/generated_design/generated/StartingPointItem.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pixels and uv stuff/GUI/Base/LabelSelectorView.py" beforeDir="false" afterPath="$PROJECT_DIR$/pixels and uv stuff/GUI/Base/LabelSelectorView.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pixels and uv stuff/GUI/ImageContainerController.py" beforeDir="false" afterPath="$PROJECT_DIR$/pixels and uv stuff/GUI/ImageContainerController.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pixels and uv stuff/GUI/ImageContainerView.py" beforeDir="false" afterPath="$PROJECT_DIR$/pixels and uv stuff/GUI/ImageContainerView.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pixels and uv stuff/GUI/ImageViewer.py" beforeDir="false" afterPath="$PROJECT_DIR$/pixels and uv stuff/GUI/ImageViewer.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pixels and uv stuff/GUI/MainController.py" beforeDir="false" afterPath="$PROJECT_DIR$/pixels and uv stuff/GUI/MainController.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pixels and uv stuff/GUI/PixelData/PixelDataController.py" beforeDir="false" afterPath="$PROJECT_DIR$/pixels and uv stuff/GUI/PixelData/PixelDataController.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pixels and uv stuff/GUI/PixelData/PixelDataModel.py" beforeDir="false" afterPath="$PROJECT_DIR$/pixels and uv stuff/GUI/PixelData/PixelDataModel.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pixels and uv stuff/GUI/PixelData/PixelStartingPointItem.py" beforeDir="false" afterPath="$PROJECT_DIR$/pixels and uv stuff/GUI/PixelData/PixelStartingPointItem.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pixels and uv stuff/GUI/PixelData/RgbItem.py" beforeDir="false" afterPath="$PROJECT_DIR$/pixels and uv stuff/GUI/PixelData/RgbItem.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pixels and uv stuff/GUI/PixelData/RgbView.py" beforeDir="false" afterPath="$PROJECT_DIR$/pixels and uv stuff/GUI/PixelData/RgbView.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pixels and uv stuff/GUI/PixelData/StartingPointsView.py" beforeDir="false" afterPath="$PROJECT_DIR$/pixels and uv stuff/GUI/PixelData/StartingPointsView.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pixels and uv stuff/GUI/SubComponents/CustomDockWidget.py" beforeDir="false" afterPath="$PROJECT_DIR$/pixels and uv stuff/GUI/SubComponents/CustomDockWidget.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pixels and uv stuff/GUI/Watcher.py" beforeDir="false" afterPath="$PROJECT_DIR$/pixels and uv stuff/GUI/Watcher.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pixels and uv stuff/GUI/Workers/PixelGrabberWorker.py" beforeDir="false" afterPath="$PROJECT_DIR$/pixels and uv stuff/GUI/Workers/PixelGrabberWorker.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pixels and uv stuff/GUI/designer/starting_point_item.ui" beforeDir="false" afterPath="$PROJECT_DIR$/pixels and uv stuff/GUI/designer/starting_point_item.ui" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -44,22 +51,22 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;GUI&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PythonContentEntriesConfigurable&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "git-widget-placeholder": "GUI-tabs-3D",
+    "ignore.virus.scanning.warn.message": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\tedik\PycharmProjects\RandomScripts\pixels and uv stuff\GUI" />
@@ -67,7 +74,7 @@
       <recent name="C:\Users\tedik\PycharmProjects\RandomScripts\pixels and uv stuff\MainScripts" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.Watcher">
+  <component name="RunManager" selected="Python.ImageViewer">
     <configuration name="ImageViewer" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="RandomScripts" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -141,8 +148,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.Watcher" />
         <item itemvalue="Python.ImageViewer" />
+        <item itemvalue="Python.Watcher" />
         <item itemvalue="Python.Run_All" />
       </list>
     </recent_temporary>
@@ -160,7 +167,11 @@
       <workItem from="1699726253958" duration="15554000" />
       <workItem from="1699810325305" duration="9054000" />
       <workItem from="1700279397156" duration="9817000" />
-      <workItem from="1700327425097" duration="19865000" />
+      <workItem from="1700327425097" duration="23135000" />
+      <workItem from="1700412544569" duration="2231000" />
+      <workItem from="1700533465490" duration="593000" />
+      <workItem from="1700619595596" duration="589000" />
+      <workItem from="1700762830486" duration="15136000" />
     </task>
     <servers />
   </component>
@@ -183,8 +194,8 @@
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/RandomScripts$Watcher.coverage" NAME="Watcher Coverage Results" MODIFIED="1700356777623" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/pixels and uv stuff/GUI" />
+    <SUITE FILE_PATH="coverage/RandomScripts$Watcher.coverage" NAME="Watcher Coverage Results" MODIFIED="1700782009681" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/pixels and uv stuff/GUI" />
     <SUITE FILE_PATH="coverage/RandomScripts$Run_All.coverage" NAME="Run_All Coverage Results" MODIFIED="1700283430909" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/pixels and uv stuff" />
-    <SUITE FILE_PATH="coverage/RandomScripts$ImageViewer.coverage" NAME="ImageViewer Coverage Results" MODIFIED="1700355523534" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/pixels and uv stuff/GUI" />
+    <SUITE FILE_PATH="coverage/RandomScripts$ImageViewer.coverage" NAME="ImageViewer Coverage Results" MODIFIED="1700783885913" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/pixels and uv stuff/GUI" />
   </component>
 </project>

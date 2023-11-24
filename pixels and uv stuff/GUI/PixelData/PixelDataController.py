@@ -1,8 +1,8 @@
 from .PixelDataModel import PixelDataModel
 from .StartingPointsView import StartingPointsView
 from .RgbView import RgbView
-from PyQt5.QtGui import QColor
-from PyQt5.QtCore import QPoint
+from PyQt6.QtGui import QColor
+from PyQt6.QtCore import QPoint
 
 
 class PixelDataController:

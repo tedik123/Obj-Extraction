@@ -1,7 +1,7 @@
 from dataclasses import asdict
 
-from PyQt5.QtCore import QPoint
-from PyQt5.QtGui import QPixmap
+from PyQt6.QtCore import QPoint
+from PyQt6.QtGui import QPixmap
 
 from ImageContainerView import ImageContainerView
 from Workers.PixelGrabberWorker import PixelGrabberWorker
