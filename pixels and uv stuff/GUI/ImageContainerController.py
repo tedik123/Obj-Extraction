@@ -5,13 +5,14 @@ from PyQt6.QtGui import QPixmap
 
 from ImageContainerView import ImageContainerView
 from Workers.PixelGrabberWorker import PixelGrabberWorker
-
+from ObjView.ObjView import ObjView
 import json
 
 
 class ImageContainerController:
 
     def __init__(self, image_container_view: ImageContainerView, pixel_data_controller=None, pixel_data_model=None):
+        self.obj_view: ObjView | None = None
         self.pixel_grabber_worker: PixelGrabberWorker | None = None
         self.pixel_data_controller = pixel_data_controller
         # don't get confused this is actually just a QLabel!
@@ -24,6 +25,11 @@ class ImageContainerController:
         self.image_container_view.mouseLeftClick.connect(self.pixel_data_controller.handle_mouse_image_left_click)
         self.image_container_view.mouseRightClick.connect(self.pixel_data_controller.handle_mouse_image_right_click)
         self.create_pixel_data_event_connections()
+
+    def set_obj_view(self, obj_view):
+        self.obj_view: ObjView = obj_view
+        self.obj_view.attribute_data_loaded.connect(self.pixel_grabber_worker.save_attributes)
+        self.obj_view.triangle_selected.connect(self.pixel_grabber_worker.handle_triangle_selected)
 
     def set_image(self, image):
         self.image_container_view.setPixmap(QPixmap.fromImage(image))
@@ -48,7 +54,8 @@ class ImageContainerController:
     def set_pixel_grabber_work(self, pixel_grabber_worker: PixelGrabberWorker):
         self.pixel_grabber_worker = pixel_grabber_worker
         self.pixel_grabber_worker.draw_pixel_chunks.connect(self.image_container_view.draw_points)
+        self.pixel_grabber_worker.mark_point.connect(self.image_container_view.draw_point)
 
     # this is for when a label changes! we need to update the image view!
     def update_label_points(self, label):
-        self.image_container_view.draw_points(self.pixel_data_model.get_pixel_data_by_label(label), clear_old =True)
+        self.image_container_view.draw_points(self.pixel_data_model.get_pixel_data_by_label(label), clear_old=True)

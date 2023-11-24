@@ -256,7 +256,7 @@ class PixelGrabber:
         end = time.time()
         print(f"Full file PICKLE dump took {(end - start) / 60} minutes")
 
-    # reads in image data as a numpy array
+    # reads in image data as a numpy array, and returns the width and height of the image
     def read_in_image_data(self):
         # texture_file_path = "diffuse.jpg"
         start = time.perf_counter()
@@ -271,7 +271,7 @@ class PixelGrabber:
         # print(data[y][x])
         print(self.pixel_data.dtype)
         print(self.pixel_data.shape)
-        # return data
+        return self.max_width, self.max_height
 
     # this takes in a color that you want all your labels to accept, this is helpful if the label has some sort of
     # text in the center

@@ -71,6 +71,7 @@ class QImageViewer(QMainWindow):
     def createWidgets(self):
         self.pixel_data_controller = PixelDataController(self.label_model, StartingPointsView(), RgbView())
         self.label_selector_controller = LabelSelectorController(self.label_model, LabelSelectorView())
+        self.obj_view = ObjView()
         self.createAndSetImageContainerToController()
         self.main_controller = MainController(self.pixel_data_controller,
                                               self.label_selector_controller,
@@ -99,6 +100,7 @@ class QImageViewer(QMainWindow):
         self.image_container_controller = ImageContainerController(self.imageLabel, pixel_data_model=self.label_model)
         self.image_container_controller.set_pixel_data_controller(self.pixel_data_controller)
         self.image_container_controller.set_pixel_grabber_work(self.pixel_grabber_worker)
+        self.image_container_controller.set_obj_view(self.obj_view)
         # this is literally just for testing!
         self.imageLabel.mouseMovePixelColor.connect(self.changeTextColor)
 
@@ -115,7 +117,6 @@ class QImageViewer(QMainWindow):
         self.tab_view = QTabWidget()
         self.tab_view.addTab(self.imageContainer, "2D View")
         self.V_splitter.addWidget(self.tab_view)
-        self.obj_view = ObjView()
         # self.obj_view.setParent(self)
         self.tab_view.addTab(self.obj_view, "3D View")
         self.V_splitter.addWidget(self.textEdit)

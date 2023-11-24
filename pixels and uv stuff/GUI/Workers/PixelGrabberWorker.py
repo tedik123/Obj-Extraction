@@ -1,10 +1,13 @@
 import time
+from array import array
 
-from PyQt6.QtCore import QObject, QThread, pyqtSignal, pyqtSlot
+from PyQt6.QtCore import QObject, QThread, pyqtSignal, pyqtSlot, QByteArray, QPoint
 
 from MainScripts.PixelGrabber import PixelGrabber
 
 from functools import partial
+import shapely
+from MainScripts.UtilityFunctions import uvs_to_pixels
 
 
 # this class is a wrapper around pixel grabber to sync with pyqt5
@@ -15,9 +18,15 @@ class PixelGrabberWorker(QObject):
     finished = pyqtSignal()
     finished_loading_image = pyqtSignal()
     draw_pixel_chunks = pyqtSignal(list)
+    mark_point = pyqtSignal(QPoint)
 
     def __init__(self, pixel_model):
         super().__init__()
+        self.obj_attributes = None
+        self.geometry_buffer = None
+        self.geometry_float_values = None
+        self.image_width, self.image_height = 0, 0
+
         self.grabber = PixelGrabber(read_in_label_starts=False)
         self.pixel_model = pixel_model
         # need to pass in self or it will kill itself immediately(!)
@@ -54,7 +63,7 @@ class PixelGrabberWorker(QObject):
         print("wakey-wakey eggs and bakey")
         # Run the time-consuming operation in this method
         self.grabber.set_texture_file_path(file_name)
-        self.grabber.read_in_image_data()
+        self.image_width, self.image_height = self.grabber.read_in_image_data()
         self.finished_loading_image.emit()
         # need to explicitly kill it
         # self.load_image_thread.quit()
@@ -107,3 +116,39 @@ class PixelGrabberWorker(QObject):
             raise ValueError(
                 f"Pixels by labels {len(pixels_by_label[label])} does not match total pixels {total_pixels}")
         self.pixel_model.set_pixel_data_by_label(pixels_by_label)
+
+    def save_attributes(self, attributes):
+        print('saving attributes')
+        self.obj_attributes = attributes
+        data: QByteArray = self.obj_attributes[0].buffer().data()
+        self.geometry_float_values = array('f')
+        self.geometry_float_values.frombytes(data)
+
+    def handle_triangle_selected(self, triangle_data: dict):
+        print("woah, i got a triangle!", triangle_data)
+        points_per_triangle = 3
+        # https://stackoverflow.com/questions/46667975/qt3d-reading-raw-vertex-data-from-qgeometry?rq=3
+        for attribute in self.obj_attributes:
+            print(attribute.name())
+            if attribute.name() == "vertexTexCoord":
+                print(attribute.vertexBaseType())
+                uv_list = []
+                print("first value", self.geometry_float_values[0])
+                for vertex in ["v1", "v2", "v3"]:
+                    # bytestride is // 4 because bytestride is variable depending on the obj file
+                    # but 4 is the size of bytes which is fixed
+                    # why bytestride https://stackoverflow.com/questions/64546908/properties-of-the-stride-in-a-gltf-file
+                    # but basically since we converted this to an array of floats we need to multiply by the stride / memory
+                    # to get where the next vertex data starts
+                    vertexOffset = triangle_data[vertex] * (attribute.byteStride() // 4)
+                    # i think you need to divide the byteoffset by 4 here too for the same reason as above
+                    offset = vertexOffset + (attribute.byteOffset() // 4)
+                    # 2 because it's UV and this offers us a UVW which i don't think we care about at all
+                    print("sample", self.geometry_float_values[offset:offset + 2])
+                    # copy self.geometry_float_values to uv_list
+                    uv_list.append(self.geometry_float_values[offset:offset + 2])
+                # create triangle and we'll use the centroid to guess what they chose
+                triangle = shapely.Polygon(uv_list)
+                centroid = triangle.centroid
+                x, y = uvs_to_pixels(centroid.x, centroid.y, max_width=self.image_width, max_height=self.image_height)
+                self.mark_point.emit(QPoint(x, y))

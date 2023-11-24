@@ -21,7 +21,7 @@ class CodeChangeHandler(FileSystemEventHandler):
     def on_any_event(self, event):
         start = timer()
 
-        compile_ui = True
+        compile_ui = False
 
         if event.is_directory:
             return

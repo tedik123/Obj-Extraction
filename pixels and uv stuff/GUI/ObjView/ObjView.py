@@ -95,8 +95,12 @@ class WorkerThread(QThread):
 # this one looks like the most promising!
 # https://stackoverflow.com/questions/49944259/qobjectpicker-in-qt3d-and-setting-pointpicking-does-not-work?rq=3
 class ObjView(QWidget):
+    attribute_data_loaded = pyqtSignal(list)
+    triangle_selected = pyqtSignal(dict)
+
     def __init__(self):
         super().__init__()
+        self.attributes = None
         self.float_values = None
         self.raw_data = None
         self.anatomy_geometry = None
@@ -115,7 +119,6 @@ class ObjView(QWidget):
 
         self.initialiseCamera(self.view, self.scene)
         self.view.setRootEntity(self.scene)
-        self.view.mousePressEvent = self._mousePressEvent
 
         # later you need to attach it to the entity you want to pick from otherwise no bueno!
         self.picker = Qt3DRender.QObjectPicker()
@@ -132,7 +135,7 @@ class ObjView(QWidget):
 
         self.picker.setHoverEnabled(True)
         self.picker.setDragEnabled(True)
-        self.picker.moved.connect(self.mouse_event_thread)
+        self.picker.clicked.connect(self.mouse_event_thread)
         self.anatomyEntity.addComponent(self.picker)
         self.extracted_data_exists = False
         # self.show()
@@ -143,170 +146,42 @@ class ObjView(QWidget):
         self.worker_thread.start()
         # Add the task to the worker thread's queue
 
+    # this returns the attribute data
+    def get_attribute_data(self):
+        return self.attributes
+
 
     # if set to triangle picking the event will a QPickTriangleEvent!
-    def mouse_event(self, e: QPickTriangleEvent):
-        # local intersection is true to the entity and doesn't change if the entity's code doesn't change
-        # isn't affected by transforms or scaling (apparently)
-        print(e.localIntersection())
-        # Note: In the case of indexed rendering, the point indices are relative to the array of coordinates, not the array of indices.
-        try:
-            index = e.triangleIndex()
-            print('\nstart:')
-            print("index", index)
-            v1 = e.vertex1Index()
-            v2 = e.vertex2Index()
-            v3 = e.vertex3Index()
-        except Exception:
-            print("not a triangle")
-            return
-
-
-        geometry: QGeometry = self.anatomyMesh.geometry()
-        attributes = geometry.attributes()
-        print("default", QAttribute.defaultPositionAttributeName())
-        points_per_triangle = 3
-        # https://stackoverflow.com/questions/46667975/qt3d-reading-raw-vertex-data-from-qgeometry?rq=3
-        for attribute in attributes:
-            print(attribute.name())
-            if attribute.name() == "vertexPosition":
-                print(attribute.vertexBaseType())
-                # this is equal to 3
-                print("vertex size", attribute.vertexSize())
-                print("vertexPosition found!")
-                # why bytestride https://stackoverflow.com/questions/64546908/properties-of-the-stride-in-a-gltf-file
-                print("byte stride", attribute.byteStride())
-                print("byte offset", attribute.byteOffset())
-                # this is an array of mixed data not only points!
-                data: QByteArray = attribute.buffer().data()
-                print("buffer data length", len(data))
-
-                float_values = array('f')
-                float_values.frombytes(data)
-                print("first value", float_values[0])
-
-                print("arr len", len(float_values))
-
-                # vertexOffset = v1 * attribute.byteStride()
-                # bytestride is // 4 because bytestride is variable depending on the obj file
-                # but 4 is the size of bytes which is fixed
-                # look at "the why bytestride" comment for more
-                # but basically since we converted this to an array of floats we need to multiply by the stride / memory
-                # to get where the next vertex data starts
-                vertexOffset = v1 * (attribute.byteStride() // 4)
-                # i think you need to divide the byteoffset by 4 here too for the same reason as above
-                offset = vertexOffset + (attribute.byteOffset() // 4)
-                print("sample", float_values[offset:offset + points_per_triangle])
-                # multiply the offset index value by 2 and set it
-                float_values[offset] *= 2
-                float_values[offset + 1] *= 2
-                float_values[offset + 2] *= 2
-
-                # convert back to bytes and save it
-                bytes_array = float_values.tobytes()
-                geometry.attributes()[0].buffer().setData(bytes_array)
-
-        print("normal lookup", self.faces[index])
-        print("end\n")
-        # maybe don't use uvw?
-        # print(e.uvw())
-
-    def mouse_event_UV(self, e: QPickTriangleEvent):
-        if not self.extracted_data_exists:
-            self.extract_geometry_data_from_model()
-            self.extracted_data_exists = True
-        # local intersection is true to the entity and doesn't change if the entity's code doesn't change
-        # isn't affected by transforms or scaling (apparently)
-        print(e.localIntersection())
-        # Note: In the case of indexed rendering, the point indices are relative to the array of coordinates, not the array of indices.
-        try:
-            index = e.triangleIndex()
-            print('\nstart:')
-            print("index", index)
-            v1 = e.vertex1Index()
-            v2 = e.vertex2Index()
-            v3 = e.vertex3Index()
-
-        except Exception:
-            print("not a triangle")
-            return
-
-        geometry: QGeometry = self.anatomyMesh.geometry()
-        attributes = geometry.attributes()
-        points_per_triangle = 3
-        # https://stackoverflow.com/questions/46667975/qt3d-reading-raw-vertex-data-from-qgeometry?rq=3
-        for attribute in attributes:
-            print(attribute.name())
-            if attribute.name() == "vertexTexCoord":
-                print(attribute.vertexBaseType())
-                # this is equal to 3
-                print("vertex size", attribute.vertexSize())
-                print("vertexPosition found!")
-                # why bytestride https://stackoverflow.com/questions/64546908/properties-of-the-stride-in-a-gltf-file
-                print("byte stride", attribute.byteStride())
-                print("byte offset", attribute.byteOffset())
-
-                # bytestride is // 4 because bytestride is variable depending on the obj file
-                # but 4 is the size of bytes which is fixed
-                # look at "the why bytestride" comment for more
-                # but basically since we converted this to an array of floats we need to multiply by the stride / memory
-                # to get where the next vertex data starts
-                vertexOffset = v1 * (attribute.byteStride() // 4)
-                # i think you need to divide the byteoffset by 4 here too for the same reason as above
-                offset = vertexOffset + (attribute.byteOffset() // 4)
-                print("sample", self.float_values[offset:offset + points_per_triangle])
-                # multiply the offset index value by 2 and set it
-                self.float_values[offset] = 0
-                self.float_values[offset + 1] = 0
-                self.float_values[offset + 2] = 0
-
-                # convert back to bytes and save it
-                bytes_array = self.float_values.tobytes()
-                geometry.attributes()[0].buffer().setData(bytes_array)
-
-        print("end\n")
-        # maybe don't use uvw?
-        # print(e.uvw())'
-
     def mouse_event_thread(self, e:QPickTriangleEvent):
         print("thread")
         print()
         if not self.extracted_data_exists:
             self.extract_geometry_data_from_model()
             self.extracted_data_exists = True
-            self.create_worker_thread()
+            # self.create_worker_thread()
 
         print(e.localIntersection())
         try:
             # deep copy e QPickTriangle event
             task = {"index": e.triangleIndex(), "v1": e.vertex1Index(), "v2": e.vertex2Index(), "v3": e.vertex3Index()}
-            # deep copy event
-            # e_cp = copy.deepcopy(e)
-            # print(task)
-            self.worker_thread.add_task(task)
+            self.triangle_selected.emit(task)
         except Exception:
             print("not a triangle")
             return
         print("end\n")
 
 
-    def _mousePressEvent(self, event):
-        if event.button() == Qt.MouseButton.LeftButton:
-            print("hi")
-        Qt3DWindow.mousePressEvent(self.view, event)
-
     def extract_geometry_data_from_model(self):
         self.anatomy_geometry: QGeometry = self.anatomyMesh.geometry()
         self.attributes = self.anatomy_geometry.attributes()
         self.buffer = self.attributes[0].buffer()
-        self.buffer.destroyed.connect(lambda x: self.extract_geometry_data_from_model)
-
 
         # arbitrarily select the first one since it's the same buffer
         self.raw_data: QByteArray = self.buffer.data()
         self.float_values = array('f')
         # this is an array of mixed data not only points!
         self.float_values.frombytes(self.raw_data)
+        self.attribute_data_loaded.emit(self.attributes)
 
     def createScene(self):
         # Root entity.

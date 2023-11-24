@@ -3,6 +3,8 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/pixels and uv stuff/GUI/SubComponents" isTestSource="false" />
+      <excludeFolder url="file://$MODULE_DIR$/pixels and uv stuff/src/cmake-build-debug" />
+      <excludeFolder url="file://$MODULE_DIR$/pixels and uv stuff/src/pybind11" />
       <excludeFolder url="file://$MODULE_DIR$/venv" />
     </content>
     <orderEntry type="inheritedJdk" />

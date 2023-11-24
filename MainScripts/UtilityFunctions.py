@@ -2,7 +2,7 @@
 import math
 
 
-def convert_pixel_coords_to_uv( coords: dict, width, height):
+def convert_pixel_coords_to_uv(coords: dict, width, height):
     # u is width, v is height
     # coords tuple will be key
     uv_dict = {}
@@ -14,26 +14,27 @@ def convert_pixel_coords_to_uv( coords: dict, width, height):
         v = 1 - y / height
         uv_dict[coord] = (u, v)
     return uv_dict
+
+
 # we actually don't need to use this because in the end we only use pixels not uvs!
 # also the way it is now needs to be changed as it won't work with the updated version
-def convert_pixel_coords_to_uv_list( coords: list, width, height):
-        # u is width, v is height
-        uvs_list = []
-        for coord in coords:
-            x, y = coord
-            # r, g, b = rgb
-            u = x / width
-            # since 0, 0 is at the bottom left! very important
-            v = 1 - y / height
-            uvs_list.append([u, v])
-        return uvs_list
+def convert_pixel_coords_to_uv_list(coords: list, width, height):
+    # u is width, v is height
+    uvs_list = []
+    for coord in coords:
+        x, y = coord
+        # r, g, b = rgb
+        u = x / width
+        # since 0, 0 is at the bottom left! very important
+        v = 1 - y / height
+        uvs_list.append([u, v])
+    return uvs_list
 
 
-def uvs_to_pixels(u, v):
-    MAX_WIDTH = 4096
-    MAX_HEIGHT = 4096
-    # since pixels are only ints we need to floor or use ceiling
-    x = math.floor(u * MAX_WIDTH)
+def uvs_to_pixels(u, v, max_width=4096, max_height=4096):
+    # since pixels are only ints
+    # this was math.floor before so if you get an out of bounds...yikes
+    x = round(u * max_width)
     # since 0, 0 is at the bottom left! very important
-    y = math.floor((v - 1) * -MAX_HEIGHT)
+    y = round((v - 1) * -max_height)
     return x, y
