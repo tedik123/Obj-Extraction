@@ -41,11 +41,11 @@ class PixelDataController:
     def get_label(self):
         return self.current_label
 
-    def handle_mouse_image_left_click(self, q_point):
+    def add_selected_point(self, q_point):
         self.model.add_starting_point(self.current_label, q_point.x(), q_point.y())
         self.starting_points_view.add_item_to_vertical_layout(q_point)
 
-    def handle_mouse_image_right_click(self, q_color: QColor):
+    def add_selected_color(self, q_color: QColor):
         r, g, b, a = q_color.getRgb()
         self.model.add_rgb_value(self.current_label, r, g, b)
         self.rgb_view.add_item_to_vertical_layout(r, g, b)

@@ -22,8 +22,8 @@ class ImageContainerController:
 
     def set_pixel_data_controller(self, pixel_data_controller):
         self.pixel_data_controller = pixel_data_controller
-        self.image_container_view.mouseLeftClick.connect(self.pixel_data_controller.handle_mouse_image_left_click)
-        self.image_container_view.mouseRightClick.connect(self.pixel_data_controller.handle_mouse_image_right_click)
+        self.image_container_view.mouseLeftClick.connect(self.pixel_data_controller.add_selected_point)
+        self.image_container_view.mouseRightClick.connect(self.pixel_data_controller.add_selected_color)
         self.create_pixel_data_event_connections()
 
     def set_obj_view(self, obj_view):

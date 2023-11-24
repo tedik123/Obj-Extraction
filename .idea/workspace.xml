@@ -5,14 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4b5556dc-d59a-407d-9d84-b4c58a945a3c" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/RandomScripts.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/RandomScripts.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MainScripts/UtilityFunctions.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainScripts/UtilityFunctions.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pixels and uv stuff/GUI/ImageContainerController.py" beforeDir="false" afterPath="$PROJECT_DIR$/pixels and uv stuff/GUI/ImageContainerController.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pixels and uv stuff/GUI/ImageViewer.py" beforeDir="false" afterPath="$PROJECT_DIR$/pixels and uv stuff/GUI/ImageViewer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pixels and uv stuff/GUI/ObjView/ObjView.py" beforeDir="false" afterPath="$PROJECT_DIR$/pixels and uv stuff/GUI/ObjView/ObjView.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pixels and uv stuff/GUI/Watcher.py" beforeDir="false" afterPath="$PROJECT_DIR$/pixels and uv stuff/GUI/Watcher.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pixels and uv stuff/GUI/Workers/PixelGrabberWorker.py" beforeDir="false" afterPath="$PROJECT_DIR$/pixels and uv stuff/GUI/Workers/PixelGrabberWorker.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pixels and uv stuff/GUI/PixelData/PixelDataController.py" beforeDir="false" afterPath="$PROJECT_DIR$/pixels and uv stuff/GUI/PixelData/PixelDataController.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
