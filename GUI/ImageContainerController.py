@@ -1,7 +1,7 @@
 import time
 from dataclasses import asdict
 
-from PyQt6.QtCore import QPoint
+from PyQt6.QtCore import QPoint, QObject, pyqtSignal
 from PyQt6.QtGui import QPixmap
 
 from ImageContainerView import ImageContainerView
@@ -11,9 +11,10 @@ import json
 import sys
 import hashlib
 
-class ImageContainerController:
-
+class ImageContainerController(QObject):
+    hide_main_model_signal = pyqtSignal()
     def __init__(self, image_container_view: ImageContainerView, pixel_data_controller=None, pixel_data_model=None):
+        super().__init__()
         self.obj_view: ObjView | None = None
         self.pixel_grabber_worker: PixelGrabberWorker | None = None
         self.pixel_data_controller = pixel_data_controller
@@ -33,6 +34,7 @@ class ImageContainerController:
         self.obj_view.attribute_data_loaded.connect(self.pixel_grabber_worker.save_attributes)
         self.obj_view.triangle_selected.connect(self.pixel_grabber_worker.handle_triangle_selected)
         self.image_container_view.points_drawn.connect(self.obj_view.update_texture_with_image)
+        self.hide_main_model_signal.connect(self.obj_view.hide_main_model)
 
     def set_image(self, image, file_name):
         #FIXME this right here is why it's slow! it should be sending a signal not definitely controlling it here!!!
@@ -59,6 +61,9 @@ class ImageContainerController:
         #FIXME this right here is why it's slow! it should be sending a signal not definitely controlling it here!!!
         self.obj_view.set_obj_file(file_name)
         self.pixel_grabber_worker.set_obj_file(file_name, md5.hexdigest())
+
+    def hide_main_model(self):
+        self.hide_main_model_signal.emit()
 
     def create_pixel_data_event_connections(self):
         # self.image_container_view.mouseLeftClick.connect(self.handle_mouse_image_left_click)

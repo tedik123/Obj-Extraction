@@ -29,7 +29,7 @@ Home_Path = os.path.expanduser("~")
 class QImageViewer(QMainWindow):
     obj_file_loaded = pyqtSignal(str)
     image_loaded = pyqtSignal(str)
-
+    hide_main_model_signal = pyqtSignal()
     def __init__(self):
         super().__init__()
 
@@ -101,6 +101,8 @@ class QImageViewer(QMainWindow):
         self.image_container_controller.set_pixel_data_controller(self.pixel_data_controller)
         self.image_container_controller.set_pixel_grabber_work(self.pixel_grabber_worker)
         self.image_container_controller.set_obj_view(self.obj_view)
+        # self to image container
+        self.hide_main_model_signal.connect(self.image_container_controller.hide_main_model)
         # this is literally just for testing!
         self.imageLabel.mouseMovePixelColor.connect(self.changeTextColor)
 
@@ -268,6 +270,8 @@ class QImageViewer(QMainWindow):
                                       triggered=self.fitToWindow)
         self.aboutAct = QAction("&About", self, triggered=self.about)
 
+        self.hide_main_obj = QAction("&Hide Main Obj", self, shortcut="Ctrl+H", triggered=self.hide_main_model_signal.emit)
+
     def createMenus(self):
         self.fileMenu = QMenu("&File", self)
         self.fileMenu.addAction(self.openAct)
@@ -281,13 +285,17 @@ class QImageViewer(QMainWindow):
         self.viewMenu.addAction(self.fitToWidthAct)
         self.viewMenu.addSeparator()
         self.viewMenu.addAction(self.fitToWindowAct)
+        self.view3D = QMenu("&3D", self)
+        self.view3D.addAction(self.hide_main_obj)
 
         self.helpMenu = QMenu("&Help", self)
         self.helpMenu.addAction(self.aboutAct)
 
         self.menuBar().addMenu(self.fileMenu)
         self.menuBar().addMenu(self.viewMenu)
+        self.menuBar().addMenu(self.view3D)
         self.menuBar().addMenu(self.helpMenu)
+
 
     def updateActions(self):
         self.zoomInAct.setEnabled(not self.fitToWindowAct.isChecked())

@@ -100,6 +100,7 @@ class ObjView(QWidget):
 
     def __init__(self):
         super().__init__()
+        self.anatomyEntity: QEntity| None = None
         self.copied_camera = None
         self.camera = None
         self.extracted_data_exists = False
@@ -158,6 +159,10 @@ class ObjView(QWidget):
         self.worker_thread.finished.connect(lambda x: print("Oh, goodbye!"))
         self.worker_thread.start()
         # Add the task to the worker thread's queue
+
+    def hide_main_model(self):
+        if self.anatomyEntity:
+            self.anatomyEntity.setEnabled(not self.anatomyEntity.isEnabled())
 
     # this returns the attribute data
     def get_attribute_data(self):
