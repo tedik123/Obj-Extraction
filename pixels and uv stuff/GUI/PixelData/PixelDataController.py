@@ -41,7 +41,7 @@ class PixelDataController:
     def get_label(self):
         return self.current_label
 
-    def add_selected_point(self, q_point):
+    def add_selected_point(self, q_point: QPoint):
         self.model.add_starting_point(self.current_label, q_point.x(), q_point.y())
         self.starting_points_view.add_item_to_vertical_layout(q_point)
 

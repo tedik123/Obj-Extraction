@@ -31,9 +31,16 @@ class ImageContainerController:
         self.obj_view.attribute_data_loaded.connect(self.pixel_grabber_worker.save_attributes)
         self.obj_view.triangle_selected.connect(self.pixel_grabber_worker.handle_triangle_selected)
 
-    def set_image(self, image):
+    def set_image(self, image, file_name):
         self.image_container_view.setPixmap(QPixmap.fromImage(image))
         self.image_container_view.setQImage()
+        self.pixel_grabber_worker.load_image(file_name)
+        self.obj_view.set_texture_file(file_name)
+
+    def set_obj_file(self, file_name):
+        self.obj_view.set_obj_file(file_name)
+        # self.pixel_grabber_worker.load_obj_file()
+        pass
 
     def create_pixel_data_event_connections(self):
         # self.image_container_view.mouseLeftClick.connect(self.handle_mouse_image_left_click)
@@ -42,6 +49,7 @@ class ImageContainerController:
     def create_pixel_data_model_connections(self):
         self.pixel_data_model.point_updated.connect(self.handle_point_updated)
 
+    # this runs the pixel grabber eagerly on click/point update!
     def handle_point_updated(self):
         print("image container point update")
         # tell pixel grabber to run after getting the label from pixel data controller
@@ -55,6 +63,12 @@ class ImageContainerController:
         self.pixel_grabber_worker = pixel_grabber_worker
         self.pixel_grabber_worker.draw_pixel_chunks.connect(self.image_container_view.draw_points)
         self.pixel_grabber_worker.mark_point.connect(self.image_container_view.draw_point)
+        def add_point_and_color(point, color):
+            # order matters here if we add point first it'll eagerly run the search without our new color
+            self.pixel_data_controller.add_selected_color(color)
+            self.pixel_data_controller.add_selected_point(point)
+        self.pixel_grabber_worker.point_on_model_chosen.connect(add_point_and_color)
+        # add another connection
 
     # this is for when a label changes! we need to update the image view!
     def update_label_points(self, label):

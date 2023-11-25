@@ -9,6 +9,8 @@ from functools import partial
 import shapely
 from MainScripts.UtilityFunctions import uvs_to_pixels
 
+from PyQt5.QtGui import QColor
+
 
 # this class is a wrapper around pixel grabber to sync with pyqt5
 # it should provide async behavior to help with loading and stuff
@@ -18,7 +20,10 @@ class PixelGrabberWorker(QObject):
     finished = pyqtSignal()
     finished_loading_image = pyqtSignal()
     draw_pixel_chunks = pyqtSignal(list)
+    # these are both for when something on the 3d model is chosen
+    # mark_point marks it and is mostly for testing, point_on_model_chosen is for the actual product
     mark_point = pyqtSignal(QPoint)
+    point_on_model_chosen = pyqtSignal(QPoint, QColor)
 
     def __init__(self, pixel_model):
         super().__init__()
@@ -67,6 +72,9 @@ class PixelGrabberWorker(QObject):
         self.finished_loading_image.emit()
         # need to explicitly kill it
         # self.load_image_thread.quit()
+
+    def load_obj_file(self, file_name):
+        self.obj_view
 
     def grab_pixels(self, label, label_data):
         # this is incredibly shitty! but i don't know how to fix it yet
@@ -127,6 +135,8 @@ class PixelGrabberWorker(QObject):
     def handle_triangle_selected(self, triangle_data: dict):
         print("woah, i got a triangle!", triangle_data)
         points_per_triangle = 3
+        # warning keep in mind we have e.index that can help us find the face in our own custom data
+
         # https://stackoverflow.com/questions/46667975/qt3d-reading-raw-vertex-data-from-qgeometry?rq=3
         for attribute in self.obj_attributes:
             print(attribute.name())
@@ -151,4 +161,11 @@ class PixelGrabberWorker(QObject):
                 triangle = shapely.Polygon(uv_list)
                 centroid = triangle.centroid
                 x, y = uvs_to_pixels(centroid.x, centroid.y, max_width=self.image_width, max_height=self.image_height)
-                self.mark_point.emit(QPoint(x, y))
+                point = QPoint(x, y)
+                self.mark_point.emit(point)
+                # then let's add the point to list and rgb_to_list
+                # first let's get the rgb, fortunately pixel_grabber stores that for us in pixel_data
+                # important notice the lookup is backwards! y,x instead of x,y
+                r, g, b = self.grabber.pixel_data[y][x]
+                color = QColor(r, g, b)
+                self.point_on_model_chosen.emit(point, color)

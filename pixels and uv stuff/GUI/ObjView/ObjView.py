@@ -8,10 +8,10 @@ from PyQt6.Qt3DCore import QEntity, QTransform, QGeometry, QBuffer, QAttribute
 from PyQt6 import QtOpenGL
 from PyQt6 import Qt3DInput
 from PyQt6.Qt3DExtras import Qt3DWindow, QOrbitCameraController, \
-    QTextureMaterial
+    QTextureMaterial, QPhongMaterial
 from PyQt6.Qt3DInput import QMouseDevice, QMouseHandler
 from PyQt6.Qt3DRender import QTextureLoader, QRayCaster, QScreenRayCaster, QPickingSettings, QPickEvent, \
-    QPickTriangleEvent, QMesh
+    QPickTriangleEvent, QMesh, QCamera
 from PyQt6.QtGui import QVector3D, QColor
 from PyQt6.QtWidgets import QWidget, QHBoxLayout
 from PyQt6 import Qt3DRender
@@ -100,23 +100,35 @@ class ObjView(QWidget):
 
     def __init__(self):
         super().__init__()
+        self.copied_camera = None
+        self.camera = None
+        self.extracted_data_exists = False
+        self.picker = None
+        self.scene = None
+        self.texture_file = None
+        self.obj_file = None
         self.attributes = None
         self.float_values = None
         self.raw_data = None
         self.anatomy_geometry = None
         self.view = Qt3DWindow()
         self.setMouseTracking(True)
-        self.view.defaultFrameGraph().setClearColor(QColor(0, 0, 0))
+        self.view.defaultFrameGraph().setClearColor(QColor(20, 20, 20))
         self.container = self.createWindowContainer(self.view)
 
         self.faces = read_geometry_faces("wahtever")
 
-        self.scene = self.createScene()
         # I don't know why, but you need to add it to the layout for it to be rendered.
         self.layout = QHBoxLayout()
         self.layout.addWidget(self.container)
         self.setLayout(self.layout)
 
+        self.setup_3d_view()
+
+        # self.show()
+
+    def setup_3d_view(self):
+        self.scene = self.createScene()
         self.initialiseCamera(self.view, self.scene)
         self.view.setRootEntity(self.scene)
 
@@ -138,7 +150,6 @@ class ObjView(QWidget):
         self.picker.clicked.connect(self.mouse_event_thread)
         self.anatomyEntity.addComponent(self.picker)
         self.extracted_data_exists = False
-        # self.show()
 
     def create_worker_thread(self):
         self.worker_thread = WorkerThread(self.anatomy_geometry, self.float_values)
@@ -150,9 +161,28 @@ class ObjView(QWidget):
     def get_attribute_data(self):
         return self.attributes
 
+    def set_texture_file(self, file_path):
+        # current_directory = QDir.currentPath()
+        # file_path = QDir(current_directory).filePath("../obj textures/diffuse.jpg")
+        old_texture_file = self.texture_file
+        self.texture_file = file_path
+        if old_texture_file:
+            self.anatomyTextureLoader.setSource(QUrl.fromLocalFile(self.texture_file))
+            self.anatomyMaterial.setTexture(self.anatomyTextureLoader)
+            # self.anatomyMesh.setTexture(self.texture_file)
+
+    def set_obj_file(self, file_path):
+        # Get the current directory
+        # current_directory = QDir.currentPath()
+        # file_path = QDir(current_directory).filePath("../obj files/anatomy.obj")
+        print("file path", file_path)
+        self.obj_file = file_path
+
+        self.setup_3d_view()
+
 
     # if set to triangle picking the event will a QPickTriangleEvent!
-    def mouse_event_thread(self, e:QPickTriangleEvent):
+    def mouse_event_thread(self, e: QPickTriangleEvent):
         print("thread")
         print()
         if not self.extracted_data_exists:
@@ -170,7 +200,6 @@ class ObjView(QWidget):
             return
         print("end\n")
 
-
     def extract_geometry_data_from_model(self):
         self.anatomy_geometry: QGeometry = self.anatomyMesh.geometry()
         self.attributes = self.anatomy_geometry.attributes()
@@ -187,44 +216,83 @@ class ObjView(QWidget):
         # Root entity.
         rootEntity = QEntity()
 
+
         self.anatomyEntity = QEntity(rootEntity)
         self.anatomyMesh = QMesh(rootEntity)
 
         self.anatomy_scale = QTransform()
         self.anatomy_scale.setScale3D(QVector3D(5, 5, 5))
-
-        # self.anatomyMesh.setSource(QUrl.fromLocalFile(QDir.currentPath() + "/anatomy.OBJ"))
-        # Get the current directory
-        current_directory = QDir.currentPath()
-        file_path = QDir(current_directory).filePath("../obj files/anatomy.obj")
-        print("file path",file_path)
-        self.anatomyMesh.setSource(QUrl.fromLocalFile(file_path))
-
-        # this also needs to be set to root entity so the matrix transformation can be applied as you move around
-        anatomyTextureLoader = QTextureLoader(rootEntity)
-        anatomyMaterial = QTextureMaterial(rootEntity)
-        print("texture path",QDir(current_directory).filePath("../obj textures/diffuse.jpg"))
-        anatomyTextureLoader.setSource(QUrl.fromLocalFile(QDir(current_directory).filePath("../obj textures/diffuse.jpg")))
-        anatomyMaterial.setTexture(anatomyTextureLoader)
+        if self.obj_file:
+            self.anatomyMesh.setSource(QUrl.fromLocalFile(self.obj_file))
+        if self.texture_file:
+            self.anatomyMaterial = QTextureMaterial(rootEntity)
+            # this also needs to be set to root entity so the matrix transformation can be applied as you move around
+            self.anatomyTextureLoader = QTextureLoader(rootEntity)
+            self.anatomyTextureLoader.setSource(QUrl.fromLocalFile(self.texture_file))
+            self.anatomyMaterial.setTexture(self.anatomyTextureLoader)
+        else:
+            self.anatomyMaterial = QPhongMaterial(rootEntity)
+            self.anatomyMaterial.setDiffuse(QColor(0, 255, 0))
+            self.anatomyMaterial.setAmbient(QColor(255, 0, 0))
+            self.anatomyMaterial.setSpecular(QColor(0, 0, 255))
+            self.anatomyMaterial.setShininess(100)
 
         self.anatomyEntity.addComponent(self.anatomyMesh)
-
         self.anatomyEntity.addComponent(self.anatomy_scale)
-        self.anatomyEntity.addComponent(anatomyMaterial)
-        # anatomyEntity.addComponent(lightEntity)
-        # anatomyEntity.addComponent(material)
-
+        self.anatomyEntity.addComponent(self.anatomyMaterial)
         return rootEntity
 
-    def initialiseCamera(self, view, scene):
-        # Camera.
-        self.camera = view.camera()
+    def set_camera_position(self):
         self.camera.lens().setPerspectiveProjection(45.0, 16.0 / 9.0, 0.1, 1000.0)
         self.camera.setPosition(QVector3D(0.0, 5, 15.0))
         self.camera.setViewCenter(QVector3D(0.0, 5.5, 0.0))
 
+    def deep_copy_camera(self, original_camera):
+        self.copied_camera = QCamera()
+        self.copied_camera.setAspectRatio(original_camera.aspectRatio())
+        self.copied_camera.setBottom(original_camera.bottom())
+        self.copied_camera.setExposure(original_camera.exposure())
+        self.copied_camera.setFarPlane(original_camera.farPlane())
+        self.copied_camera.setFieldOfView(original_camera.fieldOfView())
+        self.copied_camera.setLeft(original_camera.left())
+        self.copied_camera.setNearPlane(original_camera.nearPlane())
+        self.copied_camera.setPosition(original_camera.position())
+        self.copied_camera.setProjectionMatrix(original_camera.projectionMatrix())
+        self.copied_camera.setProjectionType(original_camera.projectionType())
+        self.copied_camera.setRight(original_camera.right())
+        self.copied_camera.setTop(original_camera.top())
+        self.copied_camera.setUpVector(original_camera.upVector())
+        self.copied_camera.setViewCenter(original_camera.viewCenter())
+        return self.copied_camera
+
+    def reset_camera(self):
+        self.camera.setAspectRatio(self.copied_camera.aspectRatio())
+        self.camera.setBottom(self.copied_camera.bottom())
+        self.camera.setExposure(self.copied_camera.exposure())
+        self.camera.setFarPlane(self.copied_camera.farPlane())
+        self.camera.setFieldOfView(self.copied_camera.fieldOfView())
+        self.camera.setLeft(self.copied_camera.left())
+        self.camera.setNearPlane(self.copied_camera.nearPlane())
+        self.camera.setPosition(self.copied_camera.position())
+        self.camera.setProjectionMatrix(self.copied_camera.projectionMatrix())
+        self.camera.setProjectionType(self.copied_camera.projectionType())
+        self.camera.setRight(self.copied_camera.right())
+        self.camera.setTop(self.copied_camera.top())
+        self.camera.setUpVector(self.copied_camera.upVector())
+        self.camera.setViewCenter(self.copied_camera.viewCenter())
+
+
+    def initialiseCamera(self, view, scene):
+        self.camera: QCamera = view.camera()
+        self.set_camera_position()
+        if not self.copied_camera:
+            self.deep_copy_camera(self.camera)
+        else:
+            self.reset_camera()
         # For camera controls.
         camController = QOrbitCameraController(scene)
-        camController.setLinearSpeed(25.0)
+        camController.setLinearSpeed(15.0)
+
+        print("acceleration", camController.acceleration())
         camController.setLookSpeed(150.0)
         camController.setCamera(self.camera)

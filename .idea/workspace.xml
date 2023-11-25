@@ -7,7 +7,10 @@
     <list default="true" id="4b5556dc-d59a-407d-9d84-b4c58a945a3c" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pixels and uv stuff/GUI/ImageContainerController.py" beforeDir="false" afterPath="$PROJECT_DIR$/pixels and uv stuff/GUI/ImageContainerController.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pixels and uv stuff/GUI/ImageViewer.py" beforeDir="false" afterPath="$PROJECT_DIR$/pixels and uv stuff/GUI/ImageViewer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pixels and uv stuff/GUI/ObjView/ObjView.py" beforeDir="false" afterPath="$PROJECT_DIR$/pixels and uv stuff/GUI/ObjView/ObjView.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pixels and uv stuff/GUI/PixelData/PixelDataController.py" beforeDir="false" afterPath="$PROJECT_DIR$/pixels and uv stuff/GUI/PixelData/PixelDataController.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pixels and uv stuff/GUI/Workers/PixelGrabberWorker.py" beforeDir="false" afterPath="$PROJECT_DIR$/pixels and uv stuff/GUI/Workers/PixelGrabberWorker.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -48,7 +51,7 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -157,6 +160,7 @@
       <workItem from="1700533465490" duration="593000" />
       <workItem from="1700619595596" duration="589000" />
       <workItem from="1700762830486" duration="15136000" />
+      <workItem from="1700860348662" duration="10455000" />
     </task>
     <servers />
   </component>
@@ -179,7 +183,7 @@
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/RandomScripts$Watcher.coverage" NAME="Watcher Coverage Results" MODIFIED="1700802706901" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/pixels and uv stuff/GUI" />
+    <SUITE FILE_PATH="coverage/RandomScripts$Watcher.coverage" NAME="Watcher Coverage Results" MODIFIED="1700860811173" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/pixels and uv stuff/GUI" />
     <SUITE FILE_PATH="coverage/RandomScripts$Run_All.coverage" NAME="Run_All Coverage Results" MODIFIED="1700283430909" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/pixels and uv stuff" />
     <SUITE FILE_PATH="coverage/RandomScripts$ImageViewer.coverage" NAME="ImageViewer Coverage Results" MODIFIED="1700794022333" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/pixels and uv stuff/GUI" />
   </component>

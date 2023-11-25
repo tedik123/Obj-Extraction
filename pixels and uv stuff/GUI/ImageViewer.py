@@ -27,6 +27,8 @@ Home_Path = os.path.expanduser("~")
 
 
 class QImageViewer(QMainWindow):
+    obj_file_loaded = pyqtSignal(str)
+    image_loaded = pyqtSignal(str)
 
     def __init__(self):
         super().__init__()
@@ -66,7 +68,7 @@ class QImageViewer(QMainWindow):
         self.resize(1200, 800)
 
         # WARNING This is just for testing!
-        self.set_default_image()
+        self.set_default_img_and_obj()
 
     def createWidgets(self):
         self.pixel_data_controller = PixelDataController(self.label_model, StartingPointsView(), RgbView())
@@ -139,19 +141,21 @@ class QImageViewer(QMainWindow):
         self.setCentralWidget(H_splitter)
 
     def listopen(self):
-        self.open("list")
+        self.open_image("list")
 
     # this is just for testing remove later!
-    def set_default_image(self):
-        fileName = "C:/Users/tedik/Downloads/frog_state.png"
-        fileName = "C:/Users/tedik/PycharmProjects/RandomScripts/pixels and uv stuff/obj textures/diffuse.jpg"
-        if fileName:
-            image = QImage(fileName)
+    def set_default_img_and_obj(self):
+        # fileName = "C:/Users/tedik/Downloads/frog_state.png"
+        image_file_name = "C:/Users/tedik/PycharmProjects/RandomScripts/pixels and uv stuff/obj textures/diffuse.jpg"
+        obj_file_name = "C:/Users/tedik/Desktop/ecorche-male-musclenames-anatomy/source/zipEXCHANGE2/objEXCHANGE.OBJ"
+        if image_file_name:
+            image = QImage(image_file_name)
             if image.isNull():
-                QMessageBox.information(self, "Image Viewer", "Cannot load %s." % fileName)
+                QMessageBox.information(self, "Image Viewer", "Cannot load %s." % image_file_name)
                 return
-            self.setWindowTitle("Image Viewer : " + fileName)
-            self.image_container_controller.set_image(image)
+            self.setWindowTitle("Image Viewer : " + image_file_name)
+            self.image_container_controller.set_image(image, image_file_name)
+            self.image_container_controller.set_obj_file(obj_file_name)
 
             self.scaleFactor = 1.0
 
@@ -163,27 +167,13 @@ class QImageViewer(QMainWindow):
 
             if not self.fitToWindowAct.isChecked():
                 self.fitToWidth()
-            self.pixel_grabber_worker.load_image(fileName)
 
-
-    def open(self, file_name):
-        options = QFileDialog.options()
+    def open_image(self, file_name):
+        file_dialog = QFileDialog()
+        options = file_dialog.options()
         current_path = QDir.homePath()
-
-        # fileName = QFileDialog.getOpenFileName(self, "Open File", QDir.currentPath())
-        try:
-            if file_name == "list":
-                file_name = self.fileList.currentItem().text()
-                # print('List File Select ', file_name)
-                file_name = os.path.join(current_path, self.fileList.currentItem().text())
-            else:
-                file_name = Home_Path
-                fileName, _ = QFileDialog.getOpenFileName(self, 'File Dialog - Select Image File Name', file_name,
-                                                          'Images (*.png *.jpeg *.jpg *.bmp *.gif)', options=options)
-        except:
-            # print('Error File Select ', file_name)
-            file_name = Home_Path
-            fileName, _ = QFileDialog.getOpenFileName(self, 'File Dialog - Select Image File Name', file_name,
+        file_name = Home_Path
+        fileName, _ = QFileDialog.getOpenFileName(self, 'File Dialog - Select Image File Name', file_name,
                                                       'Images (*.png *.jpeg *.jpg *.bmp *.gif)', options=options)
         print("FILE NAME", fileName)
         if file_name != Home_Path:
@@ -195,8 +185,7 @@ class QImageViewer(QMainWindow):
                 QMessageBox.information(self, "Image Viewer", "Cannot load %s." % fileName)
                 return
             self.setWindowTitle("Image Viewer : " + fileName)
-            self.imageLabel.setPixmap(QPixmap.fromImage(image))
-            self.imageLabel.setQImage()
+            self.image_container_controller.set_image(image, fileName)
 
             self.scaleFactor = 1.0
 
@@ -207,8 +196,21 @@ class QImageViewer(QMainWindow):
 
             if not self.fitToWindowAct.isChecked():
                 self.fitToWidth()
-            self.pixel_grabber_worker.load_image(fileName)
+            # fixme this should be sending a signal
 
+    def open_obj_file(self, file_name):
+        file_dialog = QFileDialog()
+        options = file_dialog.options()
+        current_path = QDir.homePath()
+        file_name = Home_Path
+        fileName, _ = QFileDialog.getOpenFileName(self, 'File Dialog - Select Obj File', file_name,
+                                                      '3D (*.obj *.OBJ)', options=options)
+        if file_name != Home_Path:
+            fileName = file_name
+
+        if fileName:
+            print("obj file bname?", fileName)
+            self.image_container_controller.set_obj_file(fileName)
 
     def zoomIn(self):
         self.scaleImage(1.25)
@@ -257,7 +259,8 @@ class QImageViewer(QMainWindow):
                           )
 
     def createActions(self):
-        self.openAct = QAction("&Open...", self, shortcut="Ctrl+O", triggered=self.open)
+        self.openAct = QAction("&Open Texture...", self, shortcut="Ctrl+O", triggered=self.open_image)
+        self.openObj = QAction("&Open Obj...", self, shortcut="Ctrl+3", triggered=self.open_obj_file)
         self.exitAct = QAction("E&xit", self, shortcut="Ctrl+Q", triggered=self.close)
         self.zoomInAct = QAction("Zoom &In (25%)", self, shortcut="Ctrl++", enabled=False, triggered=self.zoomIn)
         self.zoomOutAct = QAction("Zoom &Out (25%)", self, shortcut="Ctrl+-", enabled=False, triggered=self.zoomOut)
@@ -270,6 +273,7 @@ class QImageViewer(QMainWindow):
     def createMenus(self):
         self.fileMenu = QMenu("&File", self)
         self.fileMenu.addAction(self.openAct)
+        self.fileMenu.addAction(self.openObj)
         self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.exitAct)
         self.viewMenu = QMenu("&View", self)
