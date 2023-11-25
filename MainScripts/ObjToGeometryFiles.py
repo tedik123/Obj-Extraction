@@ -1,11 +1,13 @@
 import json
+import os
 import time
 import pickle
 
 
 class ObjToGeometryFiles:
-    def __init__(self, obj_file_path):
+    def __init__(self, obj_file_path, file_path_prefix= ""):
         self.obj_file_path = obj_file_path
+        self.file_path_prefix = file_path_prefix
         # set to None so values start at 1 instead of 0 like normal
         self.vertices = [None]
         self.normals = [None]
@@ -36,6 +38,7 @@ class ObjToGeometryFiles:
         #     "f 327474/1 327511/1 332053/1",
         #     "f 327155/1 325600/1 325103/1",
         # ]
+        start =  time.time()
         with open(self.obj_file_path) as fh:
             for line in fh:
                 # print()
@@ -54,6 +57,8 @@ class ObjToGeometryFiles:
                     # ignores EOF, and comments, might need to fix later to remember the name?
                     case _:
                         continue
+        end = time.time()
+        print(f"Read in and conversion of OBJ file took {(end - start)} seconds")
         # print(self.vertices)
         # print(self.uvs)
         # print(self.faces)
@@ -209,9 +214,10 @@ class ObjToGeometryFiles:
             print("Finished writing normals data!")
 
     def write_binary_file(self, output_file_name, data):
-        print("FIX ME")
-        # with open("outputs/" + output_file_name + ".bin", 'wb') as fp:
-        #     pickle.dump(data, fp)
+        if not os.path.exists(self.file_path_prefix+"outputs"):
+            os.makedirs(self.file_path_prefix+"outputs")
+        with open(self.file_path_prefix+"outputs/" + output_file_name + ".bin", 'wb') as fp:
+            pickle.dump(data, fp)
 
 
 if __name__ == "__main__":

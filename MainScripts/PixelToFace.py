@@ -139,6 +139,7 @@ class PixelToFace:
     # builds a tree of all the triangles that make up the obj file for faster search
     def build_str_tree(self, save_tree_on_build=True):
         print("Building STR Tree!")
+        start_time = time.time()
         triangle_list = []
         node_capacity = 10
         # we'll store the full object (Triangle Class) here in parallel
@@ -158,15 +159,18 @@ class PixelToFace:
             # self.triangle_data.append(triangle)
         self.str_tree = STRtree(triangle_list, node_capacity)
         print("Finished building STR TREE")
+        end_time = time.time()
+        print(f"Building STR tree took {(end_time - start_time)} seconds")
         if save_tree_on_build:
             print("current working directory", os.getcwd())
             # check if directory exists, if not create it
-            if not os.path.exists("outputs"):
-                os.makedirs("outputs")
+            if not os.path.exists(self.file_path_prefix+"outputs"):
+                os.makedirs(self.file_path_prefix+"outputs")
             print("Saving STR related Data")
             with open(self.file_path_prefix + "outputs/STRtree.bin", "wb") as f:
                 print("Writing STR tree binary")
                 pickle.dump(self.str_tree, f)
+
         print(self.str_tree)
 
     # searches the STR tree for the targets given!
