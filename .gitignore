@@ -1,5 +1,7 @@
 *.json
 *.bin
+*.obj
+*.OBJ
 !starts/*.json
 !outputs/.gitkeep
 outputs/OBJ files/*

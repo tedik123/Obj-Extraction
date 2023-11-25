@@ -5,12 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4b5556dc-d59a-407d-9d84-b4c58a945a3c" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/GUI/Workers/PixelGrabberWorker.py" beforeDir="false" afterPath="$PROJECT_DIR$/GUI/Workers/PixelGrabberWorker.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/GUI/Workers/PixelToFaceWorker.py" beforeDir="false" afterPath="$PROJECT_DIR$/GUI/Workers/PixelToFaceWorker.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MainScripts/PixelIndexer.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainScripts/PixelIndexer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MainScripts/PixelToFace.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainScripts/PixelToFace.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/outputs/latest_points.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/outputs/latest_points.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -208,7 +203,7 @@
       <workItem from="1700762830486" duration="15136000" />
       <workItem from="1700860348662" duration="20065000" />
       <workItem from="1700887557116" duration="14546000" />
-      <workItem from="1700936262910" duration="10298000" />
+      <workItem from="1700936262910" duration="10481000" />
     </task>
     <servers />
   </component>
