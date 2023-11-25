@@ -1,3 +1,4 @@
+import time
 from dataclasses import asdict
 
 from PyQt6.QtCore import QPoint
@@ -7,7 +8,8 @@ from ImageContainerView import ImageContainerView
 from Workers.PixelGrabberWorker import PixelGrabberWorker
 from ObjView.ObjView import ObjView
 import json
-
+import sys
+import hashlib
 
 class ImageContainerController:
 
@@ -33,14 +35,30 @@ class ImageContainerController:
         self.image_container_view.points_drawn.connect(self.obj_view.update_texture_with_image)
 
     def set_image(self, image, file_name):
+        #FIXME this right here is why it's slow! it should be sending a signal not definitely controlling it here!!!
         self.image_container_view.setPixmap(QPixmap.fromImage(image))
         self.image_container_view.setQImage()
         self.pixel_grabber_worker.load_image(file_name)
         self.obj_view.set_texture_file(file_name)
 
     def set_obj_file(self, file_name):
+        # we're gonna do some hashing rq, this will be used to see if we've seen this file before!
+        BUF_SIZE = 65536  # let's read stuff in 64kb chunks!
+        start = time.time()
+        md5 = hashlib.md5()
+        with open(file_name, 'rb') as f:
+            while True:
+                data = f.read(BUF_SIZE)
+                if not data:
+                    break
+                md5.update(data)
+        print("MD5: {0}".format(md5.hexdigest()))
+        end = time.time()
+        print("Hashing took: ", end - start)
+        self.pixel_data_model.set_obj_file_hash(md5.hexdigest())
+        #FIXME this right here is why it's slow! it should be sending a signal not definitely controlling it here!!!
         self.obj_view.set_obj_file(file_name)
-        self.pixel_grabber_worker.set_obj_file(file_name)
+        self.pixel_grabber_worker.set_obj_file(file_name, md5.hexdigest())
 
     def create_pixel_data_event_connections(self):
         # self.image_container_view.mouseLeftClick.connect(self.handle_mouse_image_left_click)

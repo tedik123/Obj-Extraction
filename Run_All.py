@@ -88,7 +88,8 @@ if __name__ == "__main__":
         #  to save the pixels by label
         # you can specify an output file name as an argument if you want (optional)
         output_file_name = "pixels_by_labels"
-        futures = [executor.submit(save_pixels_by_labels, pixel_grabber.pixels_by_label, output_file_name)]
+        directory = base_obj_file_path.split("/")[1]
+        futures = [executor.submit(save_pixels_by_labels, pixel_grabber.pixels_by_label, directory, output_file_name)]
 
         # pixel_grabber.save_pixels_by_labels() # run for better print statements without process pool
 

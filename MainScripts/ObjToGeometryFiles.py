@@ -5,9 +5,10 @@ import pickle
 
 
 class ObjToGeometryFiles:
-    def __init__(self, obj_file_path, file_path_prefix= ""):
+    def __init__(self, obj_file_path, file_path_prefix= "", directory = ""):
         self.obj_file_path = obj_file_path
         self.file_path_prefix = file_path_prefix
+        self.directory = directory
         # set to None so values start at 1 instead of 0 like normal
         self.vertices = [None]
         self.normals = [None]
@@ -132,7 +133,7 @@ class ObjToGeometryFiles:
 
     # stores the vertices making up each face in the right format
     def create_and_save_face_data(self):
-        output_file_name = "geometry_files/geometry_faces"
+        output_file_name = "geometry_faces"
         self.face_data = {"faces": []}
         for face in self.faces_data:
             vertex_data = \
@@ -155,7 +156,7 @@ class ObjToGeometryFiles:
         print("Finished writing face data!")
 
     def create_and_save_uv_data(self):
-        output_file_name = "geometry_files/geometry_uvs"
+        output_file_name = "geometry_uvs"
         self.uvs_data = {"uvs": []}
         for face in self.faces_data:
             uv_format = \
@@ -191,7 +192,7 @@ class ObjToGeometryFiles:
         print("Finished writing uv data!")
 
     def create_and_save_normal_data(self):
-        output_file_name = "geometry_files/geometry_normals"
+        output_file_name = "geometry_normals"
         self.normals_data = {"normals": []}
         # just checking if the first one has normals if it does then it's good enough ig
         if len(self.faces_data[0]["normals"]) > 1:
@@ -214,9 +215,13 @@ class ObjToGeometryFiles:
             print("Finished writing normals data!")
 
     def write_binary_file(self, output_file_name, data):
-        if not os.path.exists(self.file_path_prefix+"outputs"):
-            os.makedirs(self.file_path_prefix+"outputs")
-        with open(self.file_path_prefix+"outputs/" + output_file_name + ".bin", 'wb') as fp:
+        if self.directory != "":
+            output_dir = f"{self.file_path_prefix}outputs/{self.directory}/geometry_files"
+        else:
+            output_dir = f"{self.file_path_prefix}outputs/geometry_files"
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+        with open(output_dir + "/" + output_file_name + ".bin", 'wb') as fp:
             pickle.dump(data, fp)
 
 

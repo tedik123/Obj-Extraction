@@ -23,12 +23,15 @@ class LabelData:
 
 class PixelDataModel(QObject):
     point_updated = pyqtSignal()
+    # this is used for when the pixelgrabber updates the pixel list
+    new_pixels_added = pyqtSignal(str, list)
 
     def __init__(self):
         super().__init__()
         # dict of labeldata
         self.label_data: dict[str, LabelData] = {}
         self.pixel_data_by_label: dict[str, List[List[int]]] = {}
+        self.obj_file_hash = ""
 
     def get_abr(self, name):
         return self.label_data[name].abr
@@ -52,8 +55,8 @@ class PixelDataModel(QObject):
 
     def set_pixel_data_by_label(self, pixels_by_label: dict[str, List[List[int]]]):
         for label, pixels in pixels_by_label.items():
-            print(type(pixels))
             self.pixel_data_by_label[label] = pixels
+            self.new_pixels_added.emit(label, pixels)
 
     def get_pixel_data_by_label(self, label):
         if label not in self.pixel_data_by_label:
@@ -105,3 +108,13 @@ class PixelDataModel(QObject):
 
     def get_label_data(self, label):
         return self.label_data[label]
+
+    def set_obj_file_hash(self, hash_str):
+        self.obj_file_hash = hash_str
+
+    def get_obj_file_hash(self):
+        return self.obj_file_hash
+
+    # simply adds the obj_file_hash/ in front of your label
+    def get_file_path_suffix(self, label):
+        return f"{self.obj_file_hash}/{label}"

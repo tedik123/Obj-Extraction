@@ -181,6 +181,7 @@ class ObjView(QWidget):
         # i don't know if it's okay to just overwrite it but if we don't the image fails to update after the first time
         # i assume under the hood it's just comparing the url and if it hasn't changed it won't update.... not sure
         self.anatomyTextureLoader = QTextureLoader()
+        self.texture_file = file_path
         self.anatomyTextureLoader.setSource(QUrl.fromLocalFile(file_path))
         self.anatomyMaterial.setTexture(self.anatomyTextureLoader)
 
@@ -228,8 +229,6 @@ class ObjView(QWidget):
     def createScene(self):
         # Root entity.
         rootEntity = QEntity()
-
-
         self.anatomyEntity = QEntity(rootEntity)
         self.anatomyMesh = QMesh(rootEntity)
 
@@ -293,7 +292,6 @@ class ObjView(QWidget):
         self.camera.setTop(self.copied_camera.top())
         self.camera.setUpVector(self.copied_camera.upVector())
         self.camera.setViewCenter(self.copied_camera.viewCenter())
-
 
     def initialiseCamera(self, view, scene):
         self.camera: QCamera = view.camera()
