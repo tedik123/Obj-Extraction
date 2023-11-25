@@ -1,23 +1,22 @@
 *.json
 *.bin
-!pixels and uv stuff/starts/*.json
-!pixels and uv stuff/outputs/.gitkeep
-pixels and uv stuff/outputs/OBJ files/*
-!pixels and uv stuff/outputs/OBJ files/.gitkeep
-pixels and uv stuff/outputs/*.png
+!starts/*.json
+!outputs/.gitkeep
+outputs/OBJ files/*
+outputs/OBJ files/.gitkeep
+outputs/*.png
 **/__pycache__/**
-/pixels and uv stuff/obj files/**
-/pixels and uv stuff/obj files/*
-!/pixels and uv stuff/obj files/.gitkeep
-/pixels and uv stuff/obj textures/**
-/pixels and uv stuff/obj textures/*
-!/pixels and uv stuff/obj textures/.gitkeep
+obj files/**
+obj files/*
+!obj files/.gitkeep
+obj textures/**
+obj textures/*
+!obj textures/.gitkeep
 #
-pixels and uv stuff/outputs/geometry_files/*
-!pixels and uv stuff/outputs/geometry_files/.gitkeep
+outputs/geometry_files/*
+!outputs/geometry_files/.gitkeep
 
-pixels and uv stuff/obj files/**
-!pixels and uv stuff/obj files/.gitkeep
+
 /__pycache__
 __pycache__
 **venv**

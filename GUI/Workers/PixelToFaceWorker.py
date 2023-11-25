@@ -22,11 +22,12 @@ class PixelToFaceWorker(QObject):
         self.obj_to_geometry_files.read_in_OBJ_file()
         self.obj_to_geometry_files.insert_face_data()
         self.obj_to_geometry_files.create_geometry_files()
-        self.create_pixel_to_face()
+        # cause we're in GUI we want to go UP one directory
+        self.create_pixel_to_face("../")
 
-    def create_pixel_to_face(self):
+    def create_pixel_to_face(self, file_path_prefix=""):
         print("creating pixel to face!")
-        self.pixel_to_face = PixelToFace(disable_target_pixels_load=True)
+        self.pixel_to_face = PixelToFace(disable_target_pixels_load=True, file_path_prefix=file_path_prefix)
         # we know geometry stuff is loaded in here by this point
         self.pixel_to_face.pass_in_geometry_data(self.obj_to_geometry_files.face_data,
                                                  self.obj_to_geometry_files.normals_data,

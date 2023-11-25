@@ -16,7 +16,7 @@ from obj_helper_functions import pixel_coords_to_uv as pixel_coords_to_uv_c
 class PixelToFace:
 
     def __init__(self, target_file_path=None, max_width=None, max_height=None, preload_STRtree=False, save_normals=True,
-                 save_uvs=True, disable_target_pixels_load=False):
+                 save_uvs=True, disable_target_pixels_load=False, file_path_prefix=""):
         # these are all arrays!!!!!!!!!
         # this is unused but i'll keep it ig?
         self.target_file_path = target_file_path
@@ -33,6 +33,8 @@ class PixelToFace:
         self.normals = None
         self.uvs = None
         self.str_tree: STRtree = None
+
+        self.file_path_prefix = file_path_prefix
 
         self.max_width = max_width
         self.max_height = max_height
@@ -81,7 +83,7 @@ class PixelToFace:
         #     data = file.read()
         # self.faces = json.loads(data)['faces']
         print("Loading in faces")
-        with open(f'{self.json_data_directory}/geometry_faces.bin', 'rb') as file:
+        with open(f'{self.file_path_prefix}{self.json_data_directory}/geometry_faces.bin', 'rb') as file:
             self.faces = pickle.load(file)["faces"]
 
     def read_in_normals(self):
@@ -91,7 +93,7 @@ class PixelToFace:
                 # with open(f'{self.json_data_directory}/geometry_normals.json', 'r') as file:
                 #     data = file.read()
                 # self.normals = json.loads(data)['normals']
-                with open(f'{self.json_data_directory}/geometry_normals.bin', 'rb') as file:
+                with open(f'{self.file_path_prefix}{self.json_data_directory}/geometry_normals.bin', 'rb') as file:
                     self.normals = pickle.load(file)["normals"]
             except FileNotFoundError:
                 print("Couldn't find geometry normals file, ignoring it!")
@@ -103,7 +105,7 @@ class PixelToFace:
         # with open(f'{self.json_data_directory}/geometry_uvs.json', 'r') as file:
         #     data = file.read()
         # self.uvs = json.loads(data)['uvs']
-        with open(f'{self.json_data_directory}/geometry_uvs.bin', 'rb') as file:
+        with open(f'{self.file_path_prefix}{self.json_data_directory}/geometry_uvs.bin', 'rb') as file:
             self.uvs = pickle.load(file)["uvs"]
 
     def read_in_target_pixels(self):
@@ -116,7 +118,7 @@ class PixelToFace:
         # print(f"Reading JSON file took {(end - start)} seconds")
 
         start = time.time()
-        with open("../pixels and uv stuff/outputs/pixels_by_labels.bin", 'rb') as file:
+        with open(self.file_path_prefix + "outputs/pixels_by_labels.bin", 'rb') as file:
             self.target_pixels_by_name = pickle.load(file)
         end = time.time()
         print(f"Reading PICKLE file took {(end - start)} seconds")
@@ -131,7 +133,7 @@ class PixelToFace:
 
     def read_in_str_tree(self):
         print("Reading in STR tree")
-        with open("../pixels and uv stuff/outputs/STRtree.bin", "rb") as f:
+        with open(self.file_path_prefix + "outputs/STRtree.bin", "rb") as f:
             self.str_tree = pickle.load(f)
 
     # builds a tree of all the triangles that make up the obj file for faster search
@@ -162,7 +164,7 @@ class PixelToFace:
             if not os.path.exists("outputs"):
                 os.makedirs("outputs")
             print("Saving STR related Data")
-            with open("outputs/STRtree.bin", "wb") as f:
+            with open(self.file_path_prefix + "outputs/STRtree.bin", "wb") as f:
                 print("Writing STR tree binary")
                 pickle.dump(self.str_tree, f)
         print(self.str_tree)
@@ -217,7 +219,7 @@ class PixelToFace:
 
         start = time.time()
         print("Creating faces found by labels pickle file!")
-        with open('outputs/faces_found_by_labels.bin', 'wb') as fp:
+        with open(self.file_path_prefix + 'outputs/faces_found_by_labels.bin', 'wb') as fp:
             print("labels faces length", len(self.label_faces))
             pickle.dump(self.label_faces, fp)
         end = time.time()

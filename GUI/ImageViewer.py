@@ -48,8 +48,6 @@ class QImageViewer(QMainWindow):
         self.pixel_grabber_worker_thread = QThread()
         self.pixel_grabber_worker.moveToThread(self.pixel_grabber_worker_thread)
         self.pixel_grabber_worker_thread.start()
-        file_name = "C:/Users/tedik/PycharmProjects/RandomScripts/pixels and uv stuff/obj textures/diffuse.jpg"
-        self.pixel_grabber_worker.finished_loading_image.connect(partial(print, f"finished loading {file_name}"))
 
         self.textEdit = None
         self.imageContainer = None
@@ -146,7 +144,7 @@ class QImageViewer(QMainWindow):
     # this is just for testing remove later!
     def set_default_img_and_obj(self):
         # fileName = "C:/Users/tedik/Downloads/frog_state.png"
-        image_file_name = "C:/Users/tedik/PycharmProjects/RandomScripts/pixels and uv stuff/obj textures/diffuse.jpg"
+        image_file_name = "C:/Users/tedik/PycharmProjects/RandomScripts/obj textures/diffuse.jpg"
         obj_file_name = "C:/Users/tedik/Desktop/ecorche-male-musclenames-anatomy/source/zipEXCHANGE2/objEXCHANGE.OBJ"
         if image_file_name:
             image = QImage(image_file_name)
