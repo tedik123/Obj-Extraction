@@ -3,19 +3,38 @@ import pickle
 import time
 from collections import OrderedDict
 
+import os
+
 
 class PixelIndexer:
 
-    def __init__(self, label_names, faces_found_by_label=None, save_normals=False, save_uvs=False):
+    def __init__(self, label_names=None,
+                 faces_found_by_label=None,
+                 save_normals=False,
+                 save_uvs=False,
+                 read_in_faces_found_file=True
+                 ):
+        self.output_path = 'outputs/'
         self.faces_found_file_path = 'outputs/faces_found_by_labels'
         self.faces_found_by_labels = None
-        if faces_found_by_label is None:
+        if faces_found_by_label is None and read_in_faces_found_file:
             self.read_in_faces_found_by_labels(True)
         else:
             self.faces_found_by_labels = faces_found_by_label
         self.label_names = label_names
         self.save_normals = save_normals
         self.save_uvs = save_uvs
+
+    def set_label_names(self, label_names: list):
+        self.label_names = label_names
+
+    def set_faces_found_by_labels(self, faces_found_by_labels: dict):
+        self.faces_found_by_labels = faces_found_by_labels
+
+
+    def set_output_path(self, directory):
+        self.output_path = '../outputs/' + directory + "/"
+        self.faces_found_file_path = self.output_path + "faces_found_by_labels"
 
     def read_in_faces_found_by_labels(self, read_binary=False):
         print("Reading in faces by labels")
@@ -110,7 +129,11 @@ class PixelIndexer:
                         uvs_index_tuples, uvs_map):
         # https://en.wikipedia.org/wiki/Wavefront_.obj_file
         label_name_stripped = str(label_name).replace(" ", "")
-        with open(f'outputs/OBJ files/{label_name}.obj', 'w') as file:
+        # check if directory exists, if not create it
+        if not os.path.exists(f'{self.output_path}OBJ files/'):
+            os.makedirs(f'{self.output_path}OBJ files/')
+
+        with open(f'{self.output_path}OBJ files/{label_name}.obj', 'w') as file:
             print(f"Writing {label_name}.obj file!")
             file.write("#Custom Object for fun-times-saga2\n")
             # .obj files don't allow spaces for names!

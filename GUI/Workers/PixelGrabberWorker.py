@@ -10,6 +10,8 @@ import shapely
 from MainScripts.UtilityFunctions import uvs_to_pixels
 
 from PyQt6.QtGui import QColor
+
+from .PixelIndexerWorker import PixelIndexerWorker
 from .PixelToFaceWorker import PixelToFaceWorker
 
 
@@ -27,7 +29,6 @@ class PixelGrabberWorker(QObject):
     point_on_model_chosen = pyqtSignal(QPoint, QColor)
     obj_file_chosen = pyqtSignal(str, str)
 
-
     def __init__(self, pixel_model):
         super().__init__()
         self.pixel_model = pixel_model
@@ -38,12 +39,21 @@ class PixelGrabberWorker(QObject):
         self.image_width, self.image_height = 0, 0
         # pixel grabber work
         self.grabber = PixelGrabber(read_in_label_starts=False)
+
+        # build pixel indexer first since it's independent of everything else
+        self.pixel_indexer = PixelIndexerWorker()
+        self.pixel_indexer_thread = QThread()
+        self.pixel_indexer.moveToThread(self.pixel_indexer_thread)
+        # add connections here
+        self.pixel_indexer_thread.start()
+
         # face worker established
         self.face_finder = PixelToFaceWorker()
         self.face_finder_thread = QThread()
         self.face_finder.moveToThread(self.face_finder_thread)
         self.face_finder_connections()
         self.face_finder_thread.start()
+
 
         # need to pass in self or it will kill itself immediately(!)
         self.load_image_thread: QThread | None = QThread(self)
@@ -55,6 +65,7 @@ class PixelGrabberWorker(QObject):
         # child to parent connections
         self.face_finder.finished_building_tree.connect(lambda: print("FINISHED LOADING STR TREE!"))
         # other connections
+        self.face_finder.finished_finding_faces.connect(self.pixel_indexer.set_faces_found_by_labels)
         self.finished_loading_image.connect(self.face_finder.set_max_width_and_height)
         self.pixel_model.new_pixels_added.connect(self.face_finder.search_for_new_pixels)
 
@@ -103,8 +114,10 @@ class PixelGrabberWorker(QObject):
     def set_obj_file(self, file_name, hash_str):
         print('set obj file')
         self.grabber.set_output_directory(hash_str)
+        self.pixel_indexer.set_output_directory(hash_str)
         # emit the signal for self.face_finder instead of calling the function directly or else bad :( and sad
         self.obj_file_chosen.emit(file_name, hash_str)
+
     def grab_pixels(self, label, label_data):
         # this is incredibly shitty! but i don't know how to fix it yet
         try:

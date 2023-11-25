@@ -241,7 +241,8 @@ class PixelToFace:
                     if index == thread_count - 1:
                         print("I'm the last one! Building up index list!")
                         # this is a list and we only have one value so we grab the first one
-                        key, value = next(iter(result.items()))
+                        key, value = next(iter(prev_results.items()))
+                        print("value", type(value), value.shape)
                         self.get_geometries_by_index_list(self.label_faces, key, value)
 
                 thread_end_time = time.time()
