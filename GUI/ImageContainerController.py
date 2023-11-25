@@ -30,6 +30,7 @@ class ImageContainerController:
         self.obj_view: ObjView = obj_view
         self.obj_view.attribute_data_loaded.connect(self.pixel_grabber_worker.save_attributes)
         self.obj_view.triangle_selected.connect(self.pixel_grabber_worker.handle_triangle_selected)
+        self.image_container_view.points_drawn.connect(self.obj_view.update_texture_with_image)
 
     def set_image(self, image, file_name):
         self.image_container_view.setPixmap(QPixmap.fromImage(image))
@@ -40,7 +41,6 @@ class ImageContainerController:
     def set_obj_file(self, file_name):
         self.obj_view.set_obj_file(file_name)
         self.pixel_grabber_worker.set_obj_file(file_name)
-
 
     def create_pixel_data_event_connections(self):
         # self.image_container_view.mouseLeftClick.connect(self.handle_mouse_image_left_click)
@@ -63,13 +63,17 @@ class ImageContainerController:
         self.pixel_grabber_worker = pixel_grabber_worker
         self.pixel_grabber_worker.draw_pixel_chunks.connect(self.image_container_view.draw_points)
         self.pixel_grabber_worker.mark_point.connect(self.image_container_view.draw_point)
+
         def add_point_and_color(point, color):
             # order matters here if we add point first it'll eagerly run the search without our new color
             self.pixel_data_controller.add_selected_color(color)
             self.pixel_data_controller.add_selected_point(point)
+
         self.pixel_grabber_worker.point_on_model_chosen.connect(add_point_and_color)
         # add another connection
 
     # this is for when a label changes! we need to update the image view!
     def update_label_points(self, label):
-        self.image_container_view.draw_points(self.pixel_data_model.get_pixel_data_by_label(label), clear_old=True)
+        # for efficiency purposes this should be a signal later but whatever
+        self.image_container_view.draw_points(self.pixel_data_model.get_pixel_data_by_label(label), True,
+                                              clear_old=True)

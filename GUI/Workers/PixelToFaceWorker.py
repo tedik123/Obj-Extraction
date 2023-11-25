@@ -5,6 +5,8 @@ from MainScripts.ObjToGeometryFiles import ObjToGeometryFiles
 
 from PyQt6.QtCore import pyqtSignal
 
+from PyQt5.QtCore import QThread
+
 
 class PixelToFaceWorker(QObject):
     # this is used to load and create them, once it's done we should redirect to create the actual pixeltoface

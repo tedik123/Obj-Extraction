@@ -11,8 +11,8 @@ from PyQt6.Qt3DExtras import Qt3DWindow, QOrbitCameraController, \
     QTextureMaterial, QPhongMaterial
 from PyQt6.Qt3DInput import QMouseDevice, QMouseHandler
 from PyQt6.Qt3DRender import QTextureLoader, QRayCaster, QScreenRayCaster, QPickingSettings, QPickEvent, \
-    QPickTriangleEvent, QMesh, QCamera
-from PyQt6.QtGui import QVector3D, QColor
+    QPickTriangleEvent, QMesh, QCamera, QTextureImage, QAbstractTexture
+from PyQt6.QtGui import QVector3D, QColor, QImage
 from PyQt6.QtWidgets import QWidget, QHBoxLayout
 from PyQt6 import Qt3DRender
 from PyQt6.QtCore import QUrl, QDir, QSize, Qt, QByteArray, pyqtSignal, QThread
@@ -113,9 +113,11 @@ class ObjView(QWidget):
         self.anatomy_geometry = None
         self.view = Qt3DWindow()
         self.setMouseTracking(True)
+        self.view.setCursor(Qt.CursorShape.PointingHandCursor)
         self.view.defaultFrameGraph().setClearColor(QColor(20, 20, 20))
         self.container = self.createWindowContainer(self.view)
 
+        # todo remove later
         self.faces = read_geometry_faces("wahtever")
 
         # I don't know why, but you need to add it to the layout for it to be rendered.
@@ -170,6 +172,17 @@ class ObjView(QWidget):
             self.anatomyTextureLoader.setSource(QUrl.fromLocalFile(self.texture_file))
             self.anatomyMaterial.setTexture(self.anatomyTextureLoader)
             # self.anatomyMesh.setTexture(self.texture_file)
+
+    # this is for the drawing it updates the image textrue
+    def update_texture_with_image(self):
+        print("Updating texture on 3D with new point data!")
+        current_directory = QDir.currentPath()
+        file_path = QDir(current_directory).filePath("../outputs/latest_points.jpg")
+        # i don't know if it's okay to just overwrite it but if we don't the image fails to update after the first time
+        # i assume under the hood it's just comparing the url and if it hasn't changed it won't update.... not sure
+        self.anatomyTextureLoader = QTextureLoader()
+        self.anatomyTextureLoader.setSource(QUrl.fromLocalFile(file_path))
+        self.anatomyMaterial.setTexture(self.anatomyTextureLoader)
 
     def set_obj_file(self, file_path):
         # Get the current directory

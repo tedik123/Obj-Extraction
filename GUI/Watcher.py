@@ -7,13 +7,13 @@ from timeit import default_timer as timer
 from datetime import timedelta
 
 MAIN_PYTHON_FILE_NAME = "ImageViewer.py"
-VENV_PATH = "../../venv/Scripts/python.exe"
+VENV_PATH = "../venv/Scripts/python.exe"
 
 # Define the input and output directories
 ui_dir = "designer"
-generated_dir = "../../generated_design/generated"
+generated_dir = "../generated_design/generated"
 
-DIRECTORY_TO_WATCH = "../../pixels and uv stuff/GUI"
+DIRECTORY_TO_WATCH = "../GUI"
 PROCESS = None
 
 

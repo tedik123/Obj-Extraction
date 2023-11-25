@@ -1,9 +1,10 @@
+import time
 import typing
 from typing import Optional
 
 from PyQt6 import QtCore, QtGui
 from PyQt6.QtCore import Qt, QPoint, QObject, pyqtSignal, QPointF
-from PyQt6.QtGui import QColor, QPalette, QPainter, QPixmap
+from PyQt6.QtGui import QColor, QPalette, QPainter, QPixmap, QImage
 from PyQt6.QtWidgets import QLabel, QApplication
 
 
@@ -15,6 +16,7 @@ class ImageContainerView(QLabel):
     mouseMovePixelColor = pyqtSignal(QPoint, QColor)
     mouseLeftClick = pyqtSignal(QPoint)
     mouseRightClick = pyqtSignal(QColor)
+    points_drawn = pyqtSignal()
 
     # this might be useful?
     # https://stackoverflow.com/questions/69869064/how-to-get-pixel-location-and-draw-a-dot-on-that-location-using-pyqt5
@@ -23,7 +25,7 @@ class ImageContainerView(QLabel):
         QLabel.__init__(self, *args, **kwargs)
         # self.setAcceptHoverEvents(True)
         self.setMouseTracking(True)
-        self.QImage = None
+        self.QImage: QImage | None = None
         self.point_set = None
         # self.mouseMoveEvent()
         self.setBackgroundRole(QPalette.ColorRole.Base)
@@ -132,7 +134,7 @@ class ImageContainerView(QLabel):
         painter.end()
         self.setPixmap(pixmap)
 
-    def draw_points(self, points, clear_old=False):
+    def draw_points(self, points, is_final_chunk = True, clear_old=False):
         if clear_old:
             self.point_set = None
             self.setPixmap(self.pixmap().copy())
@@ -159,3 +161,8 @@ class ImageContainerView(QLabel):
         painter.end()
         self.setPixmap(pixmap)
         self.parentWidget().update()
+        if is_final_chunk:
+            # save the QImage to the outputs directory
+            pixmap.toImage().save("../outputs/latest_points.jpg")
+            # send the latest view of the image
+            self.points_drawn.emit()

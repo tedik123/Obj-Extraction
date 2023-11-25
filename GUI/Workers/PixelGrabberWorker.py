@@ -19,7 +19,7 @@ from .PixelToFaceWorker import PixelToFaceWorker
 class PixelGrabberWorker(QObject):
     finished = pyqtSignal()
     finished_loading_image = pyqtSignal()
-    draw_pixel_chunks = pyqtSignal(list)
+    draw_pixel_chunks = pyqtSignal(list, bool)
     # these are both for when something on the 3d model is chosen
     # mark_point marks it and is mostly for testing, point_on_model_chosen is for the actual product
     mark_point = pyqtSignal(QPoint)
@@ -135,8 +135,12 @@ class PixelGrabberWorker(QObject):
         total_pixels = 0
         for label, pixels in pixels_by_label.items():
             pixels = [pixels[i:i + chunk_size] for i in range(0, len(pixels), chunk_size)]
-            for chunk in pixels:
-                self.draw_pixel_chunks.emit(chunk)
+            total_length = len(pixels)
+            is_final_chunk = False
+            for index, chunk in enumerate(pixels):
+                if total_length - index == 1:
+                    is_final_chunk = True
+                self.draw_pixel_chunks.emit(chunk, is_final_chunk)
                 time.sleep(pause_time)
                 total_pixels += len(chunk)
         if len(pixels_by_label[label]) != total_pixels:
