@@ -1,6 +1,7 @@
 import concurrent.futures
 
 import json
+import os
 import time
 
 from PIL import Image
@@ -14,9 +15,10 @@ from obj_helper_functions import pixel_coords_to_uv as pixel_coords_to_uv_c
 
 class PixelToFace:
 
-    def __init__(self, target_file_path, max_width, max_height, preload_STRtree=False, save_normals=True,
+    def __init__(self, target_file_path=None, max_width=None, max_height=None, preload_STRtree=False, save_normals=True,
                  save_uvs=True, disable_target_pixels_load=False):
         # these are all arrays!!!!!!!!!
+        # this is unused but i'll keep it ig?
         self.target_file_path = target_file_path
 
         # where all the json files are for the geometry faces and uvs
@@ -49,8 +51,8 @@ class PixelToFace:
             futures = []
             if not disable_target_pixels_load:
                 target_pixel_future = executor.submit(self.read_in_target_pixels)
-            # set the callback to run convert pixels, since it's dependent
-            # target_pixel_future.add_done_callback(lambda future: executor.submit(self.convert_pixels_to_points))
+                # set the callback to run convert pixels, since it's dependent
+                # target_pixel_future.add_done_callback(lambda future: executor.submit(self.convert_pixels_to_points))
                 futures.append(target_pixel_future)
 
             # the only time you wouldn't preload STR tree is if you're passing it in and creating new geometry files
@@ -68,6 +70,10 @@ class PixelToFace:
 
         # this is data for the STR tree
         self.triangle_data = []
+
+    def set_max_width_and_height(self, max_width: int, max_height: int):
+        self.max_width = max_width
+        self.max_height = max_height
 
     def read_in_faces(self):
         # print("Loading in faces")
@@ -115,7 +121,7 @@ class PixelToFace:
         end = time.time()
         print(f"Reading PICKLE file took {(end - start)} seconds")
 
-    def pass_in_geometry_data(self,  faces, normals, uvs):
+    def pass_in_geometry_data(self, faces, normals, uvs):
         self.faces = faces["faces"]
         self.normals = normals["normals"]
         self.uvs = uvs["uvs"]
@@ -129,7 +135,7 @@ class PixelToFace:
             self.str_tree = pickle.load(f)
 
     # builds a tree of all the triangles that make up the obj file for faster search
-    def build_str_tree(self):
+    def build_str_tree(self, save_tree_on_build=True):
         print("Building STR Tree!")
         triangle_list = []
         node_capacity = 10
@@ -150,10 +156,15 @@ class PixelToFace:
             # self.triangle_data.append(triangle)
         self.str_tree = STRtree(triangle_list, node_capacity)
         print("Finished building STR TREE")
-        print("Saving STR related Data")
-        with open("outputs/STRtree.bin", "wb") as f:
-            print("Writing STR tree binary")
-            pickle.dump(self.str_tree, f)
+        if save_tree_on_build:
+            print("current working directory", os.getcwd())
+            # check if directory exists, if not create it
+            if not os.path.exists("outputs"):
+                os.makedirs("outputs")
+            print("Saving STR related Data")
+            with open("outputs/STRtree.bin", "wb") as f:
+                print("Writing STR tree binary")
+                pickle.dump(self.str_tree, f)
         print(self.str_tree)
 
     # searches the STR tree for the targets given!
@@ -433,6 +444,7 @@ def split_dict(dictionary: dict, n: int):
 def get_image_dimensions(texture_file):
     img = Image.open(texture_file)
     return img.size
+
 
 if __name__ == "__main__":
     max_width, max_height = 4096, 4096

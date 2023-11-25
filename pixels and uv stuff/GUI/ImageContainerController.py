@@ -39,8 +39,8 @@ class ImageContainerController:
 
     def set_obj_file(self, file_name):
         self.obj_view.set_obj_file(file_name)
-        # self.pixel_grabber_worker.load_obj_file()
-        pass
+        self.pixel_grabber_worker.set_obj_file(file_name)
+
 
     def create_pixel_data_event_connections(self):
         # self.image_container_view.mouseLeftClick.connect(self.handle_mouse_image_left_click)

@@ -9,8 +9,8 @@ from functools import partial
 import shapely
 from MainScripts.UtilityFunctions import uvs_to_pixels
 
-from PyQt5.QtGui import QColor
-
+from PyQt6.QtGui import QColor
+from .PixelToFaceWorker import PixelToFaceWorker
 
 # this class is a wrapper around pixel grabber to sync with pyqt5
 # it should provide async behavior to help with loading and stuff
@@ -24,19 +24,35 @@ class PixelGrabberWorker(QObject):
     # mark_point marks it and is mostly for testing, point_on_model_chosen is for the actual product
     mark_point = pyqtSignal(QPoint)
     point_on_model_chosen = pyqtSignal(QPoint, QColor)
+    obj_file_chosen = pyqtSignal(str)
 
     def __init__(self, pixel_model):
         super().__init__()
+        self.pixel_model = pixel_model
+        # defaults
         self.obj_attributes = None
         self.geometry_buffer = None
         self.geometry_float_values = None
         self.image_width, self.image_height = 0, 0
-
+        # pixel grabber work
         self.grabber = PixelGrabber(read_in_label_starts=False)
-        self.pixel_model = pixel_model
+        # face worker established
+        self.face_finder = PixelToFaceWorker()
+        self.face_finder_thread = QThread()
+        self.face_finder.moveToThread(self.face_finder_thread)
+        self.face_finder_connections()
+        self.face_finder_thread.start()
+
         # need to pass in self or it will kill itself immediately(!)
         self.load_image_thread: QThread | None = QThread(self)
         self.grab_pixels_thread: QThread | None = QThread(self)
+
+    def face_finder_connections(self):
+        # parent to child connections
+        self.obj_file_chosen.connect(self.face_finder.set_obj_file)
+        # child to parent connections
+        self.face_finder.finished_building_tree.connect(lambda: print("FINISHED LOADING STR TREE!"))
+
 
     def load_image(self, file_name):
         # maybe i don't need a dangling thread if load image is only called sometimes
@@ -70,11 +86,14 @@ class PixelGrabberWorker(QObject):
         self.grabber.set_texture_file_path(file_name)
         self.image_width, self.image_height = self.grabber.read_in_image_data()
         self.finished_loading_image.emit()
+
         # need to explicitly kill it
         # self.load_image_thread.quit()
 
-    def load_obj_file(self, file_name):
-        self.obj_view
+    def set_obj_file(self, file_name):
+        print('set obj file')
+        # emit the signal for self.face_finder instead of calling the function directly or else bad :( and sad
+        self.obj_file_chosen.emit(file_name)
 
     def grab_pixels(self, label, label_data):
         # this is incredibly shitty! but i don't know how to fix it yet

@@ -116,11 +116,14 @@ class ObjToGeometryFiles:
         # print(self.faces_data[0]["uvs"])
 
     # here it splits the faces, normals, and uvs into seperate files
-    def create_json_files(self):
+    def create_geometry_files(self):
+        start = time.time()
         # I can probably create threads for this by saving it to a class variable instead of going linearly
         self.create_and_save_face_data()
         self.create_and_save_uv_data()
         self.create_and_save_normal_data()
+        end = time.time()
+        print(f"Writing geometry files took {(end - start)} seconds")
 
     # stores the vertices making up each face in the right format
     def create_and_save_face_data(self):
@@ -206,8 +209,9 @@ class ObjToGeometryFiles:
             print("Finished writing normals data!")
 
     def write_binary_file(self, output_file_name, data):
-        with open("outputs/" + output_file_name + ".bin", 'wb') as fp:
-            pickle.dump(data, fp)
+        print("FIX ME")
+        # with open("outputs/" + output_file_name + ".bin", 'wb') as fp:
+        #     pickle.dump(data, fp)
 
 
 if __name__ == "__main__":
@@ -216,7 +220,7 @@ if __name__ == "__main__":
     obj_to_json = ObjToGeometryFiles(base_obj_file_path)
     obj_to_json.read_in_OBJ_file()
     obj_to_json.insert_face_data()
-    obj_to_json.create_json_files()
+    obj_to_json.create_geometry_files()
 
     end = time.time()
     print()
