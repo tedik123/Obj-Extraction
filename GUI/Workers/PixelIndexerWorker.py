@@ -1,11 +1,15 @@
 from PyQt6.QtCore import QObject
 from MainScripts.PixelIndexer import PixelIndexer
 
+from PyQt6.QtCore import pyqtSignal
+
 
 class PixelIndexerWorker(QObject):
+    indexed_faces_finished = pyqtSignal(list)
+
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.pixel_indexer = PixelIndexer(read_in_faces_found_file=False)
+        self.pixel_indexer = PixelIndexer(save_uvs=True, read_in_faces_found_file=False)
 
     def set_output_directory(self, directory):
         self.pixel_indexer.set_output_path(directory)
@@ -18,4 +22,8 @@ class PixelIndexerWorker(QObject):
         self.pixel_indexer.set_faces_found_by_labels(faces_found_by_labels)
         self.set_label_names(list(faces_found_by_labels.keys()))
         # then we can run the indexer?
-        self.pixel_indexer.create_indexed_faces()
+        new_obj_file_list = self.pixel_indexer.create_indexed_faces()
+        # signal that we finished
+        print("INDEXED FACES FINISHED!", new_obj_file_list)
+
+        self.indexed_faces_finished.emit(new_obj_file_list)

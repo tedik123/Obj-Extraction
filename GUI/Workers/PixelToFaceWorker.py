@@ -23,7 +23,8 @@ class PixelToFaceWorker(QObject):
     def set_obj_file(self, obj_file_path, hash_str):
         file_path_prefix = "../"
         directory = hash_str
-        self.obj_to_geometry_files = ObjToGeometryFiles(obj_file_path, file_path_prefix=file_path_prefix, directory=directory)
+        self.obj_to_geometry_files = ObjToGeometryFiles(obj_file_path, file_path_prefix=file_path_prefix,
+                                                        directory=directory)
         self.obj_to_geometry_files.read_in_OBJ_file()
         self.obj_to_geometry_files.insert_face_data()
         self.obj_to_geometry_files.create_geometry_files()
@@ -41,8 +42,8 @@ class PixelToFaceWorker(QObject):
         # fixme for development this do be real nice
         preload_str_tree = True
 
-
-        self.pixel_to_face = PixelToFace(preload_STRtree=preload_str_tree, disable_target_pixels_load=True,
+        self.pixel_to_face = PixelToFace(save_uvs=True, preload_STRtree=preload_str_tree,
+                                         disable_target_pixels_load=True,
                                          file_path_prefix=file_path_prefix, directory=directory)
         # we know geometry stuff is loaded in here by this point
         self.pixel_to_face.pass_in_geometry_data(self.obj_to_geometry_files.face_data,

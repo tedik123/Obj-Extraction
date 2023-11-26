@@ -100,7 +100,9 @@ class ObjView(QWidget):
 
     def __init__(self):
         super().__init__()
-        self.anatomyEntity: QEntity| None = None
+        self.rootEntity = None
+        self.original_texture_file = None
+        self.anatomyEntity: QEntity | None = None
         self.copied_camera = None
         self.camera = None
         self.extracted_data_exists = False
@@ -118,11 +120,13 @@ class ObjView(QWidget):
         self.view.defaultFrameGraph().setClearColor(QColor(20, 20, 20))
         self.container = self.createWindowContainer(self.view)
 
+        self.obj_list = []
         # todo remove later
         self.faces = read_geometry_faces("wahtever")
 
         # I don't know why, but you need to add it to the layout for it to be rendered.
         self.layout = QHBoxLayout()
+        self.layout.setContentsMargins(0, 0, 0, 0)
         self.layout.addWidget(self.container)
         self.setLayout(self.layout)
 
@@ -134,7 +138,6 @@ class ObjView(QWidget):
         self.scene = self.createScene()
         self.initialiseCamera(self.view, self.scene)
         self.view.setRootEntity(self.scene)
-
         # later you need to attach it to the entity you want to pick from otherwise no bueno!
         self.picker = Qt3DRender.QObjectPicker()
         # you need(!) to grab the already created render settings or you'll have weird behavior
@@ -148,6 +151,8 @@ class ObjView(QWidget):
             QPickingSettings.PickResultMode.NearestPick)
         picking_settings.setWorldSpaceTolerance(.1)
 
+        # warning this might cause issues we should only
+        #  add it to the new component not create new events everytime
         self.picker.setHoverEnabled(True)
         self.picker.setDragEnabled(True)
         self.picker.clicked.connect(self.mouse_event_thread)
@@ -173,10 +178,18 @@ class ObjView(QWidget):
         # file_path = QDir(current_directory).filePath("../obj textures/diffuse.jpg")
         old_texture_file = self.texture_file
         self.texture_file = file_path
+        self.original_texture_file = file_path
         if old_texture_file:
             self.anatomyTextureLoader.setSource(QUrl.fromLocalFile(self.texture_file))
             self.anatomyMaterial.setTexture(self.anatomyTextureLoader)
-            # self.anatomyMesh.setTexture(self.texture_file)
+        # this is to override the phong texture
+        elif self.anatomyMesh:
+            print("resetting texture entirely!")
+            self.anatomyTextureLoader = QTextureLoader()
+            self.anatomyTextureLoader.setSource(QUrl.fromLocalFile(self.texture_file))
+            self.anatomyMaterial = QTextureMaterial(self.scene)
+            self.anatomyMaterial.setTexture(self.anatomyTextureLoader)
+            self.anatomyEntity.addComponent(self.anatomyMaterial)
 
     # this is for the drawing it updates the image textrue
     def update_texture_with_image(self):
@@ -196,9 +209,7 @@ class ObjView(QWidget):
         # file_path = QDir(current_directory).filePath("../obj files/anatomy.obj")
         print("file path", file_path)
         self.obj_file = file_path
-
         self.setup_3d_view()
-
 
     # if set to triangle picking the event will a QPickTriangleEvent!
     def mouse_event_thread(self, e: QPickTriangleEvent):
@@ -257,6 +268,10 @@ class ObjView(QWidget):
         self.anatomyEntity.addComponent(self.anatomyMesh)
         self.anatomyEntity.addComponent(self.anatomy_scale)
         self.anatomyEntity.addComponent(self.anatomyMaterial)
+        # do i really need to be doing it this way?
+        if self.obj_list:
+            self.handle_obj_creation(rootEntity)
+
         return rootEntity
 
     def set_camera_position(self):
@@ -312,3 +327,35 @@ class ObjView(QWidget):
         print("acceleration", camController.acceleration())
         camController.setLookSpeed(150.0)
         camController.setCamera(self.camera)
+
+    def handle_new_obj_files_created(self, file_list):
+        print("new obj files received", file_list)
+        self.obj_list = file_list
+        # i can't find a graceful way to load the scene with new entities, so we go again! and destroy everything!
+        self.setup_3d_view()
+        # self.handle_obj_creation(self.rootEntity)
+        # let's rush this we'll just assume the list is unique everytime!
+        # self.file_list = file_list
+
+    def handle_obj_creation(self, root_entity):
+        current_directory = QDir.currentPath()
+        for file in self.obj_list:
+            # file = "C:/Users/tedik/PycharmProjects/RandomScripts/outputs/7895733e723b427615c61a5a503240c1/OBJ files/Your Label.obj"
+            # load in the obj file and set the texture to the original
+            entity = QEntity(root_entity)
+            mesh = QMesh(root_entity)
+            scale = QTransform(root_entity)
+            scale.setScale3D(QVector3D(5.0, 5.0, 5.0))
+            file_path = QDir(current_directory).filePath(file)
+            mesh.setSource(QUrl.fromLocalFile(file_path))
+            # the material is already loaded
+            material = QTextureMaterial(root_entity)
+            texture_loader = QTextureLoader(root_entity)
+            texture_loader.setSource(QUrl.fromLocalFile(self.original_texture_file))
+            material.setTexture(texture_loader)
+            entity.addComponent(mesh)
+            entity.addComponent(scale)
+            entity.addComponent(material)
+        self.view.requestUpdate()
+
+        print(f"Added {len(self.obj_list)} new entities")

@@ -51,6 +51,7 @@ class PixelIndexer:
 
     def create_indexed_faces(self):
         print("Starting indexing of faces!")
+        file_list = []
         if self.label_names:
             labels_to_do = {}
             for label in self.label_names:
@@ -82,9 +83,12 @@ class PixelIndexer:
                 indexed_uvs_list, uvs_map = self.create_indexed_list(uvs)
                 uvs_index_tuples = self.format_indices(indexed_uvs_list)
             # then write to file!
-            self.create_obj_file(label_name, vertex_map, vertex_index_tuples,
+            file_name = self.create_obj_file(label_name, vertex_map, vertex_index_tuples,
                                  normal_map, normal_index_tuples,
                                  uvs_index_tuples, uvs_map)
+            file_list.append(file_name)
+        print("file list before sending", file_list)
+        return file_list
 
     # FIXME this is the bottleneck to this code!
     def create_indexed_list(self, geometry_list):
@@ -132,8 +136,8 @@ class PixelIndexer:
         # check if directory exists, if not create it
         if not os.path.exists(f'{self.output_path}OBJ files/'):
             os.makedirs(f'{self.output_path}OBJ files/')
-
-        with open(f'{self.output_path}OBJ files/{label_name}.obj', 'w') as file:
+        file_name = f'{self.output_path}OBJ files/{label_name}.obj'
+        with open(file_name, 'w') as file:
             print(f"Writing {label_name}.obj file!")
             file.write("#Custom Object for fun-times-saga2\n")
             # .obj files don't allow spaces for names!
@@ -180,6 +184,7 @@ class PixelIndexer:
                     file.write(f'f {vertex_tuple[0]} {vertex_tuple[1]} {vertex_tuple[2]}\n')
 
             print(f"Finished writing {label_name}.obj file!")
+        return file_name
 
 
 if __name__ == "__main__":

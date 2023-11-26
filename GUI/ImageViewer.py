@@ -30,6 +30,7 @@ class QImageViewer(QMainWindow):
     obj_file_loaded = pyqtSignal(str)
     image_loaded = pyqtSignal(str)
     hide_main_model_signal = pyqtSignal()
+    reset_camera_signal = pyqtSignal()
     def __init__(self):
         super().__init__()
 
@@ -66,7 +67,7 @@ class QImageViewer(QMainWindow):
         self.resize(1200, 800)
 
         # WARNING This is just for testing!
-        self.set_default_img_and_obj()
+        # self.set_default_img_and_obj()
 
     def createWidgets(self):
         self.pixel_data_controller = PixelDataController(self.label_model, StartingPointsView(), RgbView())
@@ -103,6 +104,7 @@ class QImageViewer(QMainWindow):
         self.image_container_controller.set_obj_view(self.obj_view)
         # self to image container
         self.hide_main_model_signal.connect(self.image_container_controller.hide_main_model)
+        self.reset_camera_signal.connect(self.image_container_controller.reset_camera)
         # this is literally just for testing!
         self.imageLabel.mouseMovePixelColor.connect(self.changeTextColor)
 
@@ -271,7 +273,7 @@ class QImageViewer(QMainWindow):
         self.aboutAct = QAction("&About", self, triggered=self.about)
 
         self.hide_main_obj = QAction("&Hide Main Obj", self, shortcut="Ctrl+H", triggered=self.hide_main_model_signal.emit)
-
+        self.reset_camera = QAction("&Reset Camera", self, shortcut="Ctrl+R", triggered=self.reset_camera_signal.emit)
     def createMenus(self):
         self.fileMenu = QMenu("&File", self)
         self.fileMenu.addAction(self.openAct)
@@ -287,6 +289,7 @@ class QImageViewer(QMainWindow):
         self.viewMenu.addAction(self.fitToWindowAct)
         self.view3D = QMenu("&3D", self)
         self.view3D.addAction(self.hide_main_obj)
+        self.view3D.addAction(self.reset_camera)
 
         self.helpMenu = QMenu("&Help", self)
         self.helpMenu.addAction(self.aboutAct)

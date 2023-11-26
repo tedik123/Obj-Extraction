@@ -29,6 +29,7 @@ class PixelGrabberWorker(QObject):
     point_on_model_chosen = pyqtSignal(QPoint, QColor)
     obj_file_chosen = pyqtSignal(str, str)
 
+    new_obj_files_created = pyqtSignal(list)
     def __init__(self, pixel_model):
         super().__init__()
         self.pixel_model = pixel_model
@@ -54,7 +55,6 @@ class PixelGrabberWorker(QObject):
         self.face_finder_connections()
         self.face_finder_thread.start()
 
-
         # need to pass in self or it will kill itself immediately(!)
         self.load_image_thread: QThread | None = QThread(self)
         self.grab_pixels_thread: QThread | None = QThread(self)
@@ -64,6 +64,8 @@ class PixelGrabberWorker(QObject):
         self.obj_file_chosen.connect(self.face_finder.set_obj_file)
         # child to parent connections
         self.face_finder.finished_building_tree.connect(lambda: print("FINISHED LOADING STR TREE!"))
+        self.pixel_indexer.indexed_faces_finished.connect(self.new_obj_files_created.emit)
+
         # other connections
         self.face_finder.finished_finding_faces.connect(self.pixel_indexer.set_faces_found_by_labels)
         self.finished_loading_image.connect(self.face_finder.set_max_width_and_height)
