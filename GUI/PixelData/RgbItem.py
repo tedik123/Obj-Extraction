@@ -1,8 +1,8 @@
-from PyQt5.QtGui import QColor
-from PyQt5.QtWidgets import QWidget, QColorDialog
+from PyQt6.QtGui import QColor
+from PyQt6.QtWidgets import QWidget, QColorDialog
 
 from generated_design import Ui_RgbItem
-from PyQt5.QtCore import QPoint, pyqtSignal
+from PyQt6.QtCore import QPoint, pyqtSignal
 
 
 class RgbItem(QWidget, Ui_RgbItem):

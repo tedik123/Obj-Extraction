@@ -1,4 +1,5 @@
 import json
+import os
 import pickle
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
@@ -27,6 +28,7 @@ class PixelGrabber:
 
     def __init__(self, texture_file_path=None, label_names=None, pixel_deviation=0, read_in_label_starts=True):
         # def __init__(self):
+        self.output_dir_path = 'outputs/'
         self.pixel_deviation = pixel_deviation
         self.enable_default_color_range = True
 
@@ -47,6 +49,11 @@ class PixelGrabber:
 
     def set_texture_file_path(self, texture_file_path: str):
         self.texture_file = texture_file_path
+
+
+    # takes in a directory name and appends it to the 'outputs/' path
+    def set_output_directory(self, directory_name):
+        self.output_dir_path = 'outputs/' + directory_name + "/"
 
     def read_in_label_starts(self):
         print("Loading in label starts...")
@@ -236,27 +243,30 @@ class PixelGrabber:
 
     def save_pixels_by_labels(self, output_file_name='pixels_by_labels.json'):
         print("SAVING PIXELS OR TRYING TO WHO KNOWS")
-        start = time.time()
-        with open("outputs/" + output_file_name, 'w') as fp:
-            # uvs_list = list(uv_dict.values())
-            # print("uvs_list", len(uvs_list))
-            print("length of pixels by labels", len(self.pixels_by_label))
-            json.dump(self.pixels_by_label, fp)
-            print("Finished saving pixels by labels json file.")
-            fp.flush()
-        end = time.time()
-        print(f"Full file JSON dump took {(end - start) / 60} minutes")
+        # start = time.time()
+        # with open(self.output_dir_path + output_file_name, 'w') as fp:
+        #     # uvs_list = list(uv_dict.values())
+        #     # print("uvs_list", len(uvs_list))
+        #     print("length of pixels by labels", len(self.pixels_by_label))
+        #     json.dump(self.pixels_by_label, fp)
+        #     print("Finished saving pixels by labels json file.")
+        #     fp.flush()
+        # end = time.time()
+        # print(f"Full file JSON dump took {(end - start) / 60} minutes")
 
         start = time.time()
         print("Creating faces found by labels pickle file!")
+        # check if directory path exists else create it
+        if not os.path.exists(self.output_dir_path):
+            os.makedirs(self.output_dir_path)
 
-        with open("outputs/" + f"{output_file_name}.bin", 'wb') as f:
-            print("Writing STR tree binary")
+        with open(self.output_dir_path + f"{output_file_name}.bin", 'wb') as f:
+            print(f"Writing pixels by label binary to {self.output_dir_path}{output_file_name}.bin")
             pickle.dump(self.pixels_by_label, f)
         end = time.time()
         print(f"Full file PICKLE dump took {(end - start) / 60} minutes")
 
-    # reads in image data as a numpy array
+    # reads in image data as a numpy array, and returns the width and height of the image
     def read_in_image_data(self):
         # texture_file_path = "diffuse.jpg"
         start = time.perf_counter()
@@ -271,7 +281,7 @@ class PixelGrabber:
         # print(data[y][x])
         print(self.pixel_data.dtype)
         print(self.pixel_data.shape)
-        # return data
+        return self.max_width, self.max_height
 
     # this takes in a color that you want all your labels to accept, this is helpful if the label has some sort of
     # text in the center
@@ -364,7 +374,7 @@ class PixelGrabber:
         print("Finished saving change pixel test image.", flush=True)
 
 
-def save_pixels_by_labels(pixels_by_label, output_file_name='pixels_by_labels'):
+def save_pixels_by_labels(pixels_by_label,output_path, output_file_name='pixels_by_labels'):
     print("Saving pixels by labels", flush=True)
     # start = time.time()
     # with open("outputs/" + output_file_name + ".json", 'w') as fp:
@@ -380,7 +390,9 @@ def save_pixels_by_labels(pixels_by_label, output_file_name='pixels_by_labels'):
 
     start = time.time()
     print("Creating faces found by labels pickle file!")
-    with open("outputs/" + f"{output_file_name}.bin", 'wb') as f:
+    if not os.path.exists(output_path):
+        os.makedirs(output_path)
+    with open(output_path + f"{output_file_name}.bin", 'wb') as f:
         print("Writing label binary")
         pickle.dump(pixels_by_label, f, protocol=pickle.HIGHEST_PROTOCOL)
     end = time.time()
@@ -423,7 +435,7 @@ if __name__ == "__main__":
     # to save the pixels by label
     # you can specify an output file name as an argument if you want (optional)
     output_file_name = "pixels_by_labels.json"
-    futures = [executor.submit(save_pixels_by_labels, pixel_grabber.pixels_by_label, output_file_name)]
+    futures = [executor.submit(save_pixels_by_labels, pixel_grabber.pixels_by_label,pixel_grabber.output_dir_path, output_file_name)]
     # pixel_grabber.save_pixels_by_labels() # run for better print statements without process pool
 
     # if you are testing, you can visualize the changes with the change_pixels_test

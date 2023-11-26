@@ -1,5 +1,5 @@
-from PyQt5.QtCore import Qt, QPoint
-from PyQt5.QtWidgets import QScrollArea, QWidget, QVBoxLayout, QDockWidget
+from PyQt6.QtCore import Qt, QPoint
+from PyQt6.QtWidgets import QScrollArea, QWidget, QVBoxLayout, QDockWidget
 from abc import ABC, abstractmethod
 
 
@@ -8,7 +8,7 @@ class CustomDockWidget(QDockWidget):
         super().__init__(parent)
         # TODO remove this? or make it so you can scale it?
         self.setMinimumSize(400, 300)
-        self.setFeatures(QDockWidget.AllDockWidgetFeatures)
+        # self.setFeatures(QDockWidget.DockWidgetFeature.AllDockWidgetFeatures)
         self.setWindowTitle(title)
         self.setStyleSheet("QDockWidget { font-family: 'Roboto Lt'; font-size: 12pt; }")
 
@@ -19,7 +19,7 @@ class CustomDockWidget(QDockWidget):
         # set the scroll area so it vertically allows for scrolling
         self.scrollArea.setWidgetResizable(True)
         # self.scrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
-        self.scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
         self.vertical_layout = QVBoxLayout()
         self.main_widget.setLayout(self.vertical_layout)

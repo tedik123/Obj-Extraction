@@ -1,10 +1,11 @@
+import time
 import typing
 from typing import Optional
 
-from PyQt5 import QtCore, QtGui
-from PyQt5.QtCore import Qt, QPoint, QObject, pyqtSignal
-from PyQt5.QtGui import QColor, QPalette, QPainter, QPixmap
-from PyQt5.QtWidgets import QLabel, QApplication
+from PyQt6 import QtCore, QtGui
+from PyQt6.QtCore import Qt, QPoint, QObject, pyqtSignal, QPointF
+from PyQt6.QtGui import QColor, QPalette, QPainter, QPixmap, QImage
+from PyQt6.QtWidgets import QLabel, QApplication
 
 
 # https://gist.github.com/acbetter/32c575803ec361c3e82064e60db4e3e0
@@ -15,6 +16,7 @@ class ImageContainerView(QLabel):
     mouseMovePixelColor = pyqtSignal(QPoint, QColor)
     mouseLeftClick = pyqtSignal(QPoint)
     mouseRightClick = pyqtSignal(QColor)
+    points_drawn = pyqtSignal()
 
     # this might be useful?
     # https://stackoverflow.com/questions/69869064/how-to-get-pixel-location-and-draw-a-dot-on-that-location-using-pyqt5
@@ -23,10 +25,10 @@ class ImageContainerView(QLabel):
         QLabel.__init__(self, *args, **kwargs)
         # self.setAcceptHoverEvents(True)
         self.setMouseTracking(True)
-        self.QImage = None
+        self.QImage: QImage | None = None
         self.point_set = None
         # self.mouseMoveEvent()
-        self.setBackgroundRole(QPalette.Base)
+        self.setBackgroundRole(QPalette.ColorRole.Base)
         self.setScaledContents(True)
         # self.log = log
 
@@ -46,20 +48,20 @@ class ImageContainerView(QLabel):
         color = QColor(self.QImage.pixel(point.x(), point.y()))
         print("Pressed!", color.getRgb(), point)
         r, g, b, a = color.getRgb()
-        if event.button() == Qt.LeftButton:
+        if event.button() == Qt.MouseButton.LeftButton:
             self.mouseLeftClick.emit(point)
             self.draw_point(point)
 
-        if event.button() == Qt.MiddleButton:
+        if event.button() == Qt.MouseButton.MiddleButton:
             print("Middle button pressed")
-        if event.button() == Qt.RightButton:
+        if event.button() == Qt.MouseButton.RightButton:
             print("Right button pressed")
             self.mouseRightClick.emit(color)
         super().mousePressEvent(event)
 
     # this is the hover mouse event
     def enterEvent(self, event):
-        QApplication.setOverrideCursor(Qt.CrossCursor)
+        QApplication.setOverrideCursor(Qt.CursorShape.CrossCursor)
         super().enterEvent(event)
 
     def leaveEvent(self, event):
@@ -70,7 +72,9 @@ class ImageContainerView(QLabel):
     def getMousePositionOnImage(self, pos) -> QtCore.QPoint or None:
         # https://stackoverflow.com/questions/59611751/pyqt5-image-coordinates
         # consider the widget contents margins
+        # contentsRect = QtCore.QRectF(self.contentsRect())
         contentsRect = QtCore.QRectF(self.contentsRect())
+        pos = QPointF(pos)
         if pos not in contentsRect:
             # outside widget margins, ignore!
             return
@@ -96,15 +100,15 @@ class ImageContainerView(QLabel):
             pixmapRect = QtCore.QRectF(pixmapRect)
 
             # the pixmap is not left aligned, align it correctly
-            if align & QtCore.Qt.AlignRight:
+            if align & QtCore.Qt.AlignmentFlag.AlignRight:
                 pixmapRect.moveRight(contentsRect.x() + contentsRect.width())
-            elif align & QtCore.Qt.AlignHCenter:
+            elif align & QtCore.Qt.AlignmentFlag.AlignHCenter:
                 pixmapRect.moveLeft(contentsRect.center().x() - pixmapRect.width() / 2)
             # the pixmap is not top aligned (note that the default for QLabel is
-            # Qt.AlignVCenter, the vertical center)
-            if align & QtCore.Qt.AlignBottom:
+            # Qt.AlignmentFlag.AlignVCenter, the vertical center)
+            if align & QtCore.Qt.AlignmentFlag.AlignBottom:
                 pixmapRect.moveBottom(contentsRect.y() + contentsRect.height())
-            elif align & QtCore.Qt.AlignVCenter:
+            elif align & QtCore.Qt.AlignmentFlag.AlignVCenter:
                 pixmapRect.moveTop(contentsRect.center().y() - pixmapRect.height() / 2)
 
             if not pos in pixmapRect:
@@ -121,7 +125,7 @@ class ImageContainerView(QLabel):
     def draw_point(self, point):
         pixmap = self.pixmap().copy()
         painter = QPainter(pixmap)
-        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         painter.setBrush(QtGui.QColor("black"))
         length = 10
         rect = QtCore.QRect(10, 10, length, length)
@@ -130,7 +134,7 @@ class ImageContainerView(QLabel):
         painter.end()
         self.setPixmap(pixmap)
 
-    def draw_points(self, points, clear_old=False):
+    def draw_points(self, points, is_final_chunk = True, clear_old=False):
         if clear_old:
             self.point_set = None
             self.setPixmap(self.pixmap().copy())
@@ -138,7 +142,7 @@ class ImageContainerView(QLabel):
         else:
             pixmap = self.pixmap().copy()
         painter = QPainter(pixmap)
-        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         painter.setBrush(QtGui.QColor("black"))
 
         # check which points are new
@@ -157,3 +161,8 @@ class ImageContainerView(QLabel):
         painter.end()
         self.setPixmap(pixmap)
         self.parentWidget().update()
+        if is_final_chunk:
+            # save the QImage to the outputs directory
+            pixmap.toImage().save("../outputs/latest_points.jpg")
+            # send the latest view of the image
+            self.points_drawn.emit()

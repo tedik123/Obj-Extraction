@@ -1,4 +1,4 @@
-from PyQt5.QtCore import pyqtSignal
+from PyQt6.QtCore import pyqtSignal
 
 # I do this ugliness because pycharm intellisense is just not working :( and i want intellisense
 try:

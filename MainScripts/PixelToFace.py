@@ -1,8 +1,10 @@
 import concurrent.futures
 
 import json
+import os
 import time
 
+import numpy as np
 from PIL import Image
 
 from .Triangles import Triangle
@@ -14,14 +16,21 @@ from obj_helper_functions import pixel_coords_to_uv as pixel_coords_to_uv_c
 
 class PixelToFace:
 
-    def __init__(self, target_file_path, max_width, max_height, preload_STRtree=False, save_normals=True,
-                 save_uvs=True, disable_target_pixels_load=False):
+    def __init__(self, target_file_path=None, max_width=None, max_height=None, preload_STRtree=False, save_normals=True,
+                 save_uvs=True, disable_target_pixels_load=False, file_path_prefix="", directory=""):
         # these are all arrays!!!!!!!!!
+        # this is unused but i'll keep it ig?
         self.target_file_path = target_file_path
 
         # where all the json files are for the geometry faces and uvs
         # self.json_data_directory = "geometry_files/"
-        self.json_data_directory = "outputs/geometry_files"
+        if directory == "":
+            self.geometry_data_directory = "outputs/geometry_files"
+            self.output_path = "outputs"
+        else:
+            self.geometry_data_directory = f"outputs/{directory}/geometry_files"
+            self.output_path = f"outputs/{directory}"
+
 
         self.save_normals = save_normals
         self.save_uvs = save_uvs
@@ -31,6 +40,8 @@ class PixelToFace:
         self.normals = None
         self.uvs = None
         self.str_tree: STRtree = None
+
+        self.file_path_prefix = file_path_prefix
 
         self.max_width = max_width
         self.max_height = max_height
@@ -49,8 +60,8 @@ class PixelToFace:
             futures = []
             if not disable_target_pixels_load:
                 target_pixel_future = executor.submit(self.read_in_target_pixels)
-            # set the callback to run convert pixels, since it's dependent
-            # target_pixel_future.add_done_callback(lambda future: executor.submit(self.convert_pixels_to_points))
+                # set the callback to run convert pixels, since it's dependent
+                # target_pixel_future.add_done_callback(lambda future: executor.submit(self.convert_pixels_to_points))
                 futures.append(target_pixel_future)
 
             # the only time you wouldn't preload STR tree is if you're passing it in and creating new geometry files
@@ -69,13 +80,18 @@ class PixelToFace:
         # this is data for the STR tree
         self.triangle_data = []
 
+    def set_max_width_and_height(self, max_width: int, max_height: int):
+        print("SETTING MAX WIDTH AND HEIGHT", self.max_width, self.max_height)
+        self.max_width = max_width
+        self.max_height = max_height
+
     def read_in_faces(self):
         # print("Loading in faces")
         # with open(f'{self.json_data_directory}/geometry_faces.json', 'r') as file:
         #     data = file.read()
         # self.faces = json.loads(data)['faces']
         print("Loading in faces")
-        with open(f'{self.json_data_directory}/geometry_faces.bin', 'rb') as file:
+        with open(f'{self.file_path_prefix}{self.geometry_data_directory}/geometry_faces.bin', 'rb') as file:
             self.faces = pickle.load(file)["faces"]
 
     def read_in_normals(self):
@@ -85,7 +101,7 @@ class PixelToFace:
                 # with open(f'{self.json_data_directory}/geometry_normals.json', 'r') as file:
                 #     data = file.read()
                 # self.normals = json.loads(data)['normals']
-                with open(f'{self.json_data_directory}/geometry_normals.bin', 'rb') as file:
+                with open(f'{self.file_path_prefix}{self.geometry_data_directory}/geometry_normals.bin', 'rb') as file:
                     self.normals = pickle.load(file)["normals"]
             except FileNotFoundError:
                 print("Couldn't find geometry normals file, ignoring it!")
@@ -97,7 +113,7 @@ class PixelToFace:
         # with open(f'{self.json_data_directory}/geometry_uvs.json', 'r') as file:
         #     data = file.read()
         # self.uvs = json.loads(data)['uvs']
-        with open(f'{self.json_data_directory}/geometry_uvs.bin', 'rb') as file:
+        with open(f'{self.file_path_prefix}{self.geometry_data_directory}/geometry_uvs.bin', 'rb') as file:
             self.uvs = pickle.load(file)["uvs"]
 
     def read_in_target_pixels(self):
@@ -110,12 +126,12 @@ class PixelToFace:
         # print(f"Reading JSON file took {(end - start)} seconds")
 
         start = time.time()
-        with open("../pixels and uv stuff/outputs/pixels_by_labels.bin", 'rb') as file:
+        with open(self.file_path_prefix + f"{self.output_path}/pixels_by_labels.bin", 'rb') as file:
             self.target_pixels_by_name = pickle.load(file)
         end = time.time()
         print(f"Reading PICKLE file took {(end - start)} seconds")
 
-    def pass_in_geometry_data(self,  faces, normals, uvs):
+    def pass_in_geometry_data(self, faces, normals, uvs):
         self.faces = faces["faces"]
         self.normals = normals["normals"]
         self.uvs = uvs["uvs"]
@@ -125,12 +141,13 @@ class PixelToFace:
 
     def read_in_str_tree(self):
         print("Reading in STR tree")
-        with open("../pixels and uv stuff/outputs/STRtree.bin", "rb") as f:
+        with open(self.file_path_prefix + f"{self.output_path}/STRtree.bin", "rb") as f:
             self.str_tree = pickle.load(f)
 
     # builds a tree of all the triangles that make up the obj file for faster search
-    def build_str_tree(self):
+    def build_str_tree(self, save_tree_on_build=True):
         print("Building STR Tree!")
+        start_time = time.time()
         triangle_list = []
         node_capacity = 10
         # we'll store the full object (Triangle Class) here in parallel
@@ -150,14 +167,23 @@ class PixelToFace:
             # self.triangle_data.append(triangle)
         self.str_tree = STRtree(triangle_list, node_capacity)
         print("Finished building STR TREE")
-        print("Saving STR related Data")
-        with open("outputs/STRtree.bin", "wb") as f:
-            print("Writing STR tree binary")
-            pickle.dump(self.str_tree, f)
+        end_time = time.time()
+        print(f"Building STR tree took {(end_time - start_time)} seconds")
+        if save_tree_on_build:
+            print("current working directory", os.getcwd())
+            # check if directory exists, if not create it
+            if not os.path.exists(self.file_path_prefix + "outputs"):
+                os.makedirs(self.file_path_prefix + "outputs")
+            print("Saving STR related Data")
+            with open(self.file_path_prefix + f"{self.output_path}/STRtree.bin", "wb") as f:
+                print("Writing STR tree binary")
+                pickle.dump(self.str_tree, f)
+
         print(self.str_tree)
 
     # searches the STR tree for the targets given!
-    def find_faces_of_targets(self, thread_count: int = None):
+    # if save_output is true, then it will save the results into outputs/faces_found_by_labels.bin
+    def find_faces_of_targets(self, save_output=True, thread_count: int = None):
         if not thread_count:
             thread_count = cpu_count() - 1
         print(f"Using {thread_count} threads to query tree!")
@@ -168,14 +194,25 @@ class PixelToFace:
         # process_result = Queue()
 
         print("Beginning search process")
+        # let's handle the case you pass in a single large label
+        is_single_large_label = False
+        if len(self.target_pixels_by_name.keys()) == 1:
+            key, value = next(iter(self.target_pixels_by_name.items()))
+            # and let's also check if it is large otherwise not worth spinning up a thread, let's say 1000 items
+            if len(value) > 1000:
+                is_single_large_label = True
 
         # STR load stuff if not in memory
         if self.str_tree is None:
             # TODO i could move these reads and writes to their own function
             self.read_in_str_tree()
-        # convert all points to Point objects
-        # self.convert_pixels_to_points()
-        work_by_thread = split_dict(self.target_pixels_by_name, thread_count)
+        # this handles if there is more than one label
+        if is_single_large_label:
+            # thread count is used to determine the amount of chunks
+            work_by_thread = split_single_large_dict(self.target_pixels_by_name, thread_count)
+            prev_results = None
+        else:
+            work_by_thread = split_dict(self.target_pixels_by_name, thread_count)
         start = time.time()
         print("Creating threads")
         results = []
@@ -187,13 +224,27 @@ class PixelToFace:
 
             # take them as they finish instead of waiting around
             # https://stackoverflow.com/questions/52082665/store-results-threadpoolexecutor
-            for future in concurrent.futures.as_completed(futures):
+            for index, future in enumerate(concurrent.futures.as_completed(futures)):
                 thread_start_time = time.time()
                 result = future.result()
                 # results.append(future.result())
                 print("finished")
-                for name, indices in result.items():
-                    self.get_geometries_by_index_list(self.label_faces, name, indices)
+                if not is_single_large_label:
+                    for name, indices in result.items():
+                        self.get_geometries_by_index_list(self.label_faces, name, indices)
+                else:
+                    # result will just be a single key value pair
+                    if prev_results is None:
+                        prev_results = result
+                    else:
+                        prev_results = merge_dicts(result, prev_results)
+                    if index == thread_count - 1:
+                        print("I'm the last one! Building up index list!")
+                        # this is a list and we only have one value so we grab the first one
+                        key, value = next(iter(prev_results.items()))
+                        print("value", type(value), value.shape)
+                        self.get_geometries_by_index_list(self.label_faces, key, value)
+
                 thread_end_time = time.time()
                 time_for_indexing += thread_end_time - thread_start_time
             print("TIME FOR INDEXING ALL GEOMETRIES", time_for_indexing)
@@ -204,13 +255,15 @@ class PixelToFace:
         end = time.time()
         print(f"Threading task took {(end - start) / 60} minutes")
 
-        start = time.time()
-        print("Creating faces found by labels pickle file!")
-        with open('outputs/faces_found_by_labels.bin', 'wb') as fp:
-            print("labels faces length", len(self.label_faces))
-            pickle.dump(self.label_faces, fp)
-        end = time.time()
-        print(f"Full file PICKLE dump took {(end - start) / 60} minutes")
+        if save_output:
+            start = time.time()
+            print("Creating faces found by labels pickle file!")
+            with open(self.file_path_prefix + f'{self.output_path}/faces_found_by_labels.bin', 'wb') as fp:
+                print("labels faces length", len(self.label_faces))
+                pickle.dump(self.label_faces, fp)
+            end = time.time()
+            print(f"Full file PICKLE dump took {(end - start) / 60} minutes")
+        return self.label_faces
 
     # converts all target points to Point objects
     # FIXME this is a huge bottleneck!!!!
@@ -241,6 +294,7 @@ class PixelToFace:
         for label_name, targets in target_pixels_by_name.items():
             # pixels_to_find_count += len(targets)
             # store the list returned
+            # print("max width and height", self.max_height, self.max_width)
             uv_list = pixel_coords_to_uv_c(targets, self.max_width, self.max_height)
             target_points = Points(uv_list)
             label_indexes[label_name] = self.str_tree.nearest(target_points)
@@ -359,6 +413,48 @@ def isPtInTriangle(p, p0, p1, p2):
     return False
 
 
+def merge_dicts(dict1, dict2):
+    merged_dict = {}
+    # the problem is that i think it returns like a numpy array? but the lengths are different so you can't simply add them together?
+    # i'm not sure but ithink that's it
+    for key in dict1.keys() | dict2.keys():
+        # the values ig are returned as a numpy array, notice it's in a tuple! idk why that's needed
+        merged_dict[key] = np.concatenate((dict1.get(key, []), dict2.get(key, [])))
+    return merged_dict
+
+
+def split_single_large_dict(dictionary: dict, chunk_count: int):
+    # this gets the first value (and there should only be one)
+    key, value = next(iter(dictionary.items()))
+
+    def split_list_into_chunks(lst, num_chunks):
+        avg_chunk_size = len(lst) // num_chunks
+        remainder = len(lst) % num_chunks
+
+        chunks = []
+        start_index = 0
+
+        for i in range(num_chunks):
+            end_index = start_index + avg_chunk_size + (1 if i < remainder else 0)
+            chunks.append(lst[start_index:end_index])
+            start_index = end_index
+
+        return chunks
+
+    # split big dict into smaller dicts
+    chunked_list = split_list_into_chunks(value, chunk_count)
+    print("Chunked list size", len(chunked_list))
+    small_dict_list = []
+    for chunk in chunked_list:
+        print("type of chunk", type(chunk))
+        small_dict_list.append({key: chunk})
+    print("PRINTING SPLIT", len(small_dict_list))
+    for current in small_dict_list:
+        key, value = next(iter(current.items()))
+        print(key, len(value))
+    return small_dict_list
+
+
 # returns a list of dictionaries that are roughly split evenly
 def split_dict_simple(dictionary, n):
     # there has to be a more efficient way to split a dict!
@@ -433,6 +529,7 @@ def split_dict(dictionary: dict, n: int):
 def get_image_dimensions(texture_file):
     img = Image.open(texture_file)
     return img.size
+
 
 if __name__ == "__main__":
     max_width, max_height = 4096, 4096

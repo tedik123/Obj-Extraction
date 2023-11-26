@@ -5,7 +5,7 @@ from os import listdir
 from os.path import isfile, join
 from MainScripts.PixelToFace import PixelToFace
 from MainScripts.PixelGrabber import PixelGrabber
-from MainScripts import PixelIndexer
+from MainScripts.PixelIndexer import PixelIndexer
 from MainScripts.PixelGrabber import save_pixels_by_labels
 from MainScripts.ObjToGeometryFiles import ObjToGeometryFiles
 from MainScripts.PixelToFace import get_image_dimensions
@@ -48,7 +48,7 @@ if __name__ == "__main__":
     THREAD_COUNT = None
 
     # if you only want to run certain scripts you can change accordingly here
-    RUN_PIXEL_GRABBER = True
+    RUN_PIXEL_GRABBER = False
     RUN_PIXEL_TO_FACE = True
     RUN_PIXEL_INDEXER = True
 
@@ -88,7 +88,8 @@ if __name__ == "__main__":
         #  to save the pixels by label
         # you can specify an output file name as an argument if you want (optional)
         output_file_name = "pixels_by_labels"
-        futures = [executor.submit(save_pixels_by_labels, pixel_grabber.pixels_by_label, output_file_name)]
+        directory = base_obj_file_path.split("/")[1]
+        futures = [executor.submit(save_pixels_by_labels, pixel_grabber.pixels_by_label, directory, output_file_name)]
 
         # pixel_grabber.save_pixels_by_labels() # run for better print statements without process pool
 
@@ -116,7 +117,7 @@ if __name__ == "__main__":
             obj_to_json = ObjToGeometryFiles(base_obj_file_path)
             obj_to_json.read_in_OBJ_file()
             obj_to_json.insert_face_data()
-            obj_to_json.create_json_files()
+            obj_to_json.create_geometry_files()
             end = time.time()
             print()
             print(f"Finished creating geometries...Took {end - start} seconds")

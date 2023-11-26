@@ -1,6 +1,6 @@
-from PyQt5.QtWidgets import QWidget
+from PyQt6.QtWidgets import QWidget
 
-from PyQt5.QtCore import QPoint, pyqtSignal
+from PyQt6.QtCore import QPoint, pyqtSignal
 
 from generated_design import Ui_StartingPointItem
 

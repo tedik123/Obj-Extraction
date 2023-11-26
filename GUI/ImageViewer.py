@@ -2,12 +2,12 @@ import sys
 import os
 from functools import partial
 
-from PyQt5.QtCore import Qt, QDir, pyqtSignal, QObject, QPoint, QThread
-from PyQt5.QtGui import QImage, QPixmap, QPalette, QPainter, QColor
-from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
-from PyQt5.QtWidgets import QLabel, QSizePolicy, QScrollArea, QMessageBox, QMainWindow, QMenu, QAction, \
-    QGraphicsPixmapItem, QWidget, QVBoxLayout, QSpacerItem, QBoxLayout
-from PyQt5.QtWidgets import QApplication, qApp, QFileDialog, QListWidget, QSplitter, QTextEdit, QFileSystemModel
+from PyQt6.QtCore import Qt, QDir, pyqtSignal, QObject, QPoint, QThread
+from PyQt6.QtGui import QImage, QPixmap, QPalette, QPainter, QColor, QAction
+from PyQt6.QtPrintSupport import QPrintDialog, QPrinter
+from PyQt6.QtWidgets import QLabel, QSizePolicy, QScrollArea, QMessageBox, QMainWindow, QMenu, \
+    QGraphicsPixmapItem, QWidget, QVBoxLayout, QSpacerItem, QBoxLayout, QTabWidget
+from PyQt6.QtWidgets import QApplication,  QFileDialog, QListWidget, QSplitter, QTextEdit
 
 from PIL import Image
 
@@ -22,16 +22,20 @@ from PixelData.PixelDataModel import PixelDataModel
 from PixelData.RgbView import RgbView
 from ImageContainerController import ImageContainerController
 from Workers.PixelGrabberWorker import PixelGrabberWorker
-
+from ObjView.ObjView import ObjView
 Home_Path = os.path.expanduser("~")
 
 
 class QImageViewer(QMainWindow):
-
+    obj_file_loaded = pyqtSignal(str)
+    image_loaded = pyqtSignal(str)
+    hide_main_model_signal = pyqtSignal()
+    reset_camera_signal = pyqtSignal()
     def __init__(self):
         super().__init__()
 
         # TO BE CREATED
+        self.obj_view = None
         self.main_controller = None
         self.pixel_data_controller = None
         self.label_selector_controller = None
@@ -45,8 +49,6 @@ class QImageViewer(QMainWindow):
         self.pixel_grabber_worker_thread = QThread()
         self.pixel_grabber_worker.moveToThread(self.pixel_grabber_worker_thread)
         self.pixel_grabber_worker_thread.start()
-        file_name = "C:/Users/tedik/PycharmProjects/RandomScripts/pixels and uv stuff/obj textures/diffuse.jpg"
-        self.pixel_grabber_worker.finished_loading_image.connect(partial(print, f"finished loading {file_name}"))
 
         self.textEdit = None
         self.imageContainer = None
@@ -65,11 +67,12 @@ class QImageViewer(QMainWindow):
         self.resize(1200, 800)
 
         # WARNING This is just for testing!
-        self.set_default_image()
+        # self.set_default_img_and_obj()
 
     def createWidgets(self):
         self.pixel_data_controller = PixelDataController(self.label_model, StartingPointsView(), RgbView())
         self.label_selector_controller = LabelSelectorController(self.label_model, LabelSelectorView())
+        self.obj_view = ObjView()
         self.createAndSetImageContainerToController()
         self.main_controller = MainController(self.pixel_data_controller,
                                               self.label_selector_controller,
@@ -91,13 +94,17 @@ class QImageViewer(QMainWindow):
 
     def createAndSetImageContainerToController(self):
         self.imageContainer = QScrollArea()
-        self.imageContainer.setBackgroundRole(QPalette.Dark)
+        self.imageContainer.setBackgroundRole(QPalette.ColorRole.Dark)
         self.imageLabel = ImageContainerView()
         self.imageContainer.setWidget(self.imageLabel)
         self.imageContainer.setVisible(False)
         self.image_container_controller = ImageContainerController(self.imageLabel, pixel_data_model=self.label_model)
         self.image_container_controller.set_pixel_data_controller(self.pixel_data_controller)
         self.image_container_controller.set_pixel_grabber_work(self.pixel_grabber_worker)
+        self.image_container_controller.set_obj_view(self.obj_view)
+        # self to image container
+        self.hide_main_model_signal.connect(self.image_container_controller.hide_main_model)
+        self.reset_camera_signal.connect(self.image_container_controller.reset_camera)
         # this is literally just for testing!
         self.imageLabel.mouseMovePixelColor.connect(self.changeTextColor)
 
@@ -110,39 +117,47 @@ class QImageViewer(QMainWindow):
         self.textEdit.setStyleSheet("background-color: rgb(%d, %d, %d); font-size: 20px" % (color.red(), color.green(), color.blue()))
 
     def createLayouts(self):
-        V_splitter = QSplitter(Qt.Vertical)
-        # V_splitter.addWidget(self.imageName)
-        V_splitter.addWidget(self.imageContainer)
-        V_splitter.addWidget(self.textEdit)
-        V_splitter.setSizes([450, 150])
+        self.V_splitter = QSplitter(Qt.Orientation.Vertical)
+        self.tab_view = QTabWidget()
+        self.tab_view.addTab(self.imageContainer, "2D View")
+        self.V_splitter.addWidget(self.tab_view)
+        # self.obj_view.setParent(self)
+        self.tab_view.addTab(self.obj_view, "3D View")
+        self.V_splitter.addWidget(self.textEdit)
+        self.V_splitter.setSizes([450, 150])
 
-        H_splitter = QSplitter(Qt.Horizontal)
+        print(self.obj_view.parentWidget())
+
+
+        H_splitter = QSplitter(Qt.Orientation.Horizontal)
 
         # H_splitter.addWidget(self.pixelList)
-        self.addDockWidget(Qt.LeftDockWidgetArea, self.label_selector_controller.label_selector_view)
-        self.addDockWidget(Qt.LeftDockWidgetArea, self.pixel_data_controller.starting_points_view)
-        self.addDockWidget(Qt.LeftDockWidgetArea, self.pixel_data_controller.rgb_view)
+        self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.label_selector_controller.label_selector_view)
+        self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.pixel_data_controller.starting_points_view)
+        self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.pixel_data_controller.rgb_view)
 
         # combine the two splitters
-        H_splitter.addWidget(V_splitter)
+        H_splitter.addWidget(self.V_splitter)
         H_splitter.setSizes([700])
 
         self.setCentralWidget(H_splitter)
 
     def listopen(self):
-        self.open("list")
+        self.open_image("list")
 
     # this is just for testing remove later!
-    def set_default_image(self):
-        fileName = "C:/Users/tedik/Downloads/frog_state.png"
-        fileName = "C:/Users/tedik/PycharmProjects/RandomScripts/pixels and uv stuff/obj textures/diffuse.jpg"
-        if fileName:
-            image = QImage(fileName)
+    def set_default_img_and_obj(self):
+        # fileName = "C:/Users/tedik/Downloads/frog_state.png"
+        image_file_name = "C:/Users/tedik/PycharmProjects/RandomScripts/obj textures/diffuse.jpg"
+        obj_file_name = "C:/Users/tedik/Desktop/ecorche-male-musclenames-anatomy/source/zipEXCHANGE2/objEXCHANGE.OBJ"
+        if image_file_name:
+            image = QImage(image_file_name)
             if image.isNull():
-                QMessageBox.information(self, "Image Viewer", "Cannot load %s." % fileName)
+                QMessageBox.information(self, "Image Viewer", "Cannot load %s." % image_file_name)
                 return
-            self.setWindowTitle("Image Viewer : " + fileName)
-            self.image_container_controller.set_image(image)
+            self.setWindowTitle("Image Viewer : " + image_file_name)
+            self.image_container_controller.set_image(image, image_file_name)
+            self.image_container_controller.set_obj_file(obj_file_name)
 
             self.scaleFactor = 1.0
 
@@ -154,27 +169,13 @@ class QImageViewer(QMainWindow):
 
             if not self.fitToWindowAct.isChecked():
                 self.fitToWidth()
-            self.pixel_grabber_worker.load_image(fileName)
 
-
-    def open(self, file_name):
-        options = QFileDialog.Options()
+    def open_image(self, file_name):
+        file_dialog = QFileDialog()
+        options = file_dialog.options()
         current_path = QDir.homePath()
-
-        # fileName = QFileDialog.getOpenFileName(self, "Open File", QDir.currentPath())
-        try:
-            if file_name == "list":
-                file_name = self.fileList.currentItem().text()
-                # print('List File Select ', file_name)
-                file_name = os.path.join(current_path, self.fileList.currentItem().text())
-            else:
-                file_name = Home_Path
-                fileName, _ = QFileDialog.getOpenFileName(self, 'File Dialog - Select Image File Name', file_name,
-                                                          'Images (*.png *.jpeg *.jpg *.bmp *.gif)', options=options)
-        except:
-            # print('Error File Select ', file_name)
-            file_name = Home_Path
-            fileName, _ = QFileDialog.getOpenFileName(self, 'File Dialog - Select Image File Name', file_name,
+        file_name = Home_Path
+        fileName, _ = QFileDialog.getOpenFileName(self, 'File Dialog - Select Image File Name', file_name,
                                                       'Images (*.png *.jpeg *.jpg *.bmp *.gif)', options=options)
         print("FILE NAME", fileName)
         if file_name != Home_Path:
@@ -186,8 +187,7 @@ class QImageViewer(QMainWindow):
                 QMessageBox.information(self, "Image Viewer", "Cannot load %s." % fileName)
                 return
             self.setWindowTitle("Image Viewer : " + fileName)
-            self.imageLabel.setPixmap(QPixmap.fromImage(image))
-            self.imageLabel.setQImage()
+            self.image_container_controller.set_image(image, fileName)
 
             self.scaleFactor = 1.0
 
@@ -198,6 +198,21 @@ class QImageViewer(QMainWindow):
 
             if not self.fitToWindowAct.isChecked():
                 self.fitToWidth()
+            # fixme this should be sending a signal
+
+    def open_obj_file(self, file_name):
+        file_dialog = QFileDialog()
+        options = file_dialog.options()
+        current_path = QDir.homePath()
+        file_name = Home_Path
+        fileName, _ = QFileDialog.getOpenFileName(self, 'File Dialog - Select Obj File', file_name,
+                                                      '3D (*.obj *.OBJ)', options=options)
+        if file_name != Home_Path:
+            fileName = file_name
+
+        if fileName:
+            print("obj file bname?", fileName)
+            self.image_container_controller.set_obj_file(fileName)
 
     def zoomIn(self):
         self.scaleImage(1.25)
@@ -246,7 +261,8 @@ class QImageViewer(QMainWindow):
                           )
 
     def createActions(self):
-        self.openAct = QAction("&Open...", self, shortcut="Ctrl+O", triggered=self.open)
+        self.openAct = QAction("&Open Texture...", self, shortcut="Ctrl+O", triggered=self.open_image)
+        self.openObj = QAction("&Open Obj...", self, shortcut="Ctrl+3", triggered=self.open_obj_file)
         self.exitAct = QAction("E&xit", self, shortcut="Ctrl+Q", triggered=self.close)
         self.zoomInAct = QAction("Zoom &In (25%)", self, shortcut="Ctrl++", enabled=False, triggered=self.zoomIn)
         self.zoomOutAct = QAction("Zoom &Out (25%)", self, shortcut="Ctrl+-", enabled=False, triggered=self.zoomOut)
@@ -255,11 +271,13 @@ class QImageViewer(QMainWindow):
         self.fitToWindowAct = QAction("&Fit to Window", self, enabled=False, checkable=True, shortcut="Ctrl+F",
                                       triggered=self.fitToWindow)
         self.aboutAct = QAction("&About", self, triggered=self.about)
-        self.aboutQtAct = QAction("About &Qt", self, triggered=qApp.aboutQt)
 
+        self.hide_main_obj = QAction("&Hide Main Obj", self, shortcut="Ctrl+H", triggered=self.hide_main_model_signal.emit)
+        self.reset_camera = QAction("&Reset Camera", self, shortcut="Ctrl+R", triggered=self.reset_camera_signal.emit)
     def createMenus(self):
         self.fileMenu = QMenu("&File", self)
         self.fileMenu.addAction(self.openAct)
+        self.fileMenu.addAction(self.openObj)
         self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.exitAct)
         self.viewMenu = QMenu("&View", self)
@@ -269,14 +287,18 @@ class QImageViewer(QMainWindow):
         self.viewMenu.addAction(self.fitToWidthAct)
         self.viewMenu.addSeparator()
         self.viewMenu.addAction(self.fitToWindowAct)
+        self.view3D = QMenu("&3D", self)
+        self.view3D.addAction(self.hide_main_obj)
+        self.view3D.addAction(self.reset_camera)
 
         self.helpMenu = QMenu("&Help", self)
         self.helpMenu.addAction(self.aboutAct)
-        self.helpMenu.addAction(self.aboutQtAct)
 
         self.menuBar().addMenu(self.fileMenu)
         self.menuBar().addMenu(self.viewMenu)
+        self.menuBar().addMenu(self.view3D)
         self.menuBar().addMenu(self.helpMenu)
+
 
     def updateActions(self):
         self.zoomInAct.setEnabled(not self.fitToWindowAct.isChecked())
@@ -310,11 +332,11 @@ if __name__ == '__main__':
     imageViewer.showFullScreen()
     imageViewer.showNormal()
 
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
 
     # credit for the code that inspired this goes to the following:
     #
-    # if you need 'Dual-Image' Synchronous Scrolling in the window by PyQt5 and Python 3
+    # if you need 'Dual-Image' Synchronous Scrolling in the window by PyQt6 and Python 3
     # please visit https://gist.github.com/acbetter/e7d0c600fdc0865f4b0ee05a17b858f2
     #
     # base on https://github.com/baoboa/pyqt5/blob/master/examples/widgets/imageviewer.py

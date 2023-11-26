@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import QComboBox, QLineEdit
-from PyQt5.QtCore import QPoint, pyqtSignal, Qt
+from PyQt6.QtWidgets import QComboBox, QLineEdit
+from PyQt6.QtCore import QPoint, pyqtSignal, Qt
 
 # I do this ugliness because pycharm intellisense is just not working :( and i want intellisense
 try:
@@ -20,7 +20,7 @@ class LabelSelectorView(CustomDockWidget, Ui_LabelSelector):
     def __init__(self) -> None:
         super().__init__(title="Label Selection")
         self.setMinimumSize(400, 125)
-        self.scrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.scrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setupUi(self.scrollArea)
 
         # naughty naught override, but oh well can't get it to work otherwise
@@ -66,7 +66,7 @@ class LabelSelectorView(CustomDockWidget, Ui_LabelSelector):
         self.set_name_input(text)
 
     def drop_down_key_press_event(self, event):
-        if event.key() == Qt.Key_Return:
+        if event.key() == Qt.Key.Key_Return:
             self.on_dropdown_return_pressed()
             return
         else:
@@ -78,7 +78,7 @@ class LabelSelectorView(CustomDockWidget, Ui_LabelSelector):
             self.new_label_added.emit(text)
 
     def name_input_key_event(self, event):
-        if event.key() == Qt.Key_Return:
+        if event.key() == Qt.Key.Key_Return:
             self.on_name_input_return_pressed()
             return
         else:
@@ -90,7 +90,7 @@ class LabelSelectorView(CustomDockWidget, Ui_LabelSelector):
         self.edited_label.emit(text)
 
     def abr_input_key_event(self, event):
-        if event.key() == Qt.Key_Return:
+        if event.key() == Qt.Key.Key_Return:
             self.on_abr_input_return_pressed()
             return
         else:

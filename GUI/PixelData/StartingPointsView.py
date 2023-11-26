@@ -1,4 +1,4 @@
-from PyQt5.QtCore import QPoint, pyqtSignal
+from PyQt6.QtCore import QPoint, pyqtSignal
 
 from .PixelStartingPointItem import PixelStartingPointItem
 from SubComponents import CustomDockWidget
