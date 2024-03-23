@@ -1,5 +1,7 @@
 import sys
 import os
+# import qdarkstyle
+
 from functools import partial
 
 from PyQt6.QtCore import Qt, QDir, pyqtSignal, QObject, QPoint, QThread
@@ -67,7 +69,7 @@ class QImageViewer(QMainWindow):
         self.resize(1200, 800)
 
         # WARNING This is just for testing!
-        # self.set_default_img_and_obj()
+        self.set_default_img_and_obj()
 
     def createWidgets(self):
         self.pixel_data_controller = PixelDataController(self.label_model, StartingPointsView(), RgbView())
@@ -325,7 +327,9 @@ class QImageViewer(QMainWindow):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     imageViewer = QImageViewer()
+    # app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt6())
     imageViewer.show()
+
     # this awkwardness forces it to appear on the non-main monitor
     LEFT_MONITOR = app.screens()[-1]
     imageViewer.windowHandle().setScreen(LEFT_MONITOR)

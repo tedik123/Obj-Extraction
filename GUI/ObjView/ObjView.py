@@ -213,6 +213,13 @@ class ObjView(QWidget):
 
     # if set to triangle picking the event will a QPickTriangleEvent!
     def mouse_event_thread(self, e: QPickTriangleEvent):
+        # check if button was e was left click
+        if e.button() != QPickEvent.Buttons.LeftButton:
+            print('ignore', e.button())
+            return
+        if not self.texture_file:
+            print("no texture file, ignoring")
+            return
         print("thread")
         print()
         if not self.extracted_data_exists:

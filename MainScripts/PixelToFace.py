@@ -81,7 +81,7 @@ class PixelToFace:
         self.triangle_data = []
 
     def set_max_width_and_height(self, max_width: int, max_height: int):
-        print("SETTING MAX WIDTH AND HEIGHT", self.max_width, self.max_height)
+        print("SETTING MAX WIDTH AND HEIGHT", max_width, max_height)
         self.max_width = max_width
         self.max_height = max_height
 

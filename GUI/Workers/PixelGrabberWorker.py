@@ -144,13 +144,19 @@ class PixelGrabberWorker(QObject):
             print(f"Error in grabbing pixels from image: {str(e)}")
         # no need for cleanup because pyqt handles it for you?
 
-    def _grab_pixels(self, label, label_data, chunk_size=None):
+    def _grab_pixels(self, label, label_data, chunk_size=None, disableDelay=True):
         # self.grabber.label_data = {label: label_data}
         # creates the range of acceptable colors by label, in this case just white basically
         # set white as the default acceptable colors
         formatted_data = {label: label_data}
 
         pixels_by_label = self.grabber.run_pixel_grabber(label_data=formatted_data, thread_count=1)
+
+        if disableDelay:
+            for label, pixels in pixels_by_label.items():
+                self.draw_pixel_chunks.emit(pixels, True)
+            self.pixel_model.set_pixel_data_by_label(pixels_by_label)
+            return
 
         pause_time = .05
         if not chunk_size:

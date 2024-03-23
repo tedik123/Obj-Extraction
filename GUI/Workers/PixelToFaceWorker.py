@@ -32,15 +32,15 @@ class PixelToFaceWorker(QObject):
         self.create_pixel_to_face(file_path_prefix, hash_str)
 
     def set_max_width_and_height(self, width, height):
-        print("getting called to set")
+        print("getting called to set", width, height)
+        self.max_width, self.max_height = width, height
         if self.pixel_to_face:
             self.pixel_to_face.set_max_width_and_height(width, height)
-            self.max_width, self.max_height = width, height
 
     def create_pixel_to_face(self, file_path_prefix, directory):
         print("creating pixel to face!")
         # fixme for development this do be real nice
-        preload_str_tree = True
+        preload_str_tree = False
 
         self.pixel_to_face = PixelToFace(save_uvs=True, preload_STRtree=preload_str_tree,
                                          disable_target_pixels_load=True,
@@ -49,6 +49,7 @@ class PixelToFaceWorker(QObject):
         self.pixel_to_face.pass_in_geometry_data(self.obj_to_geometry_files.face_data,
                                                  self.obj_to_geometry_files.normals_data,
                                                  self.obj_to_geometry_files.uvs_data)
+        print("pre-check max width", self.max_width, self.max_height)
         if self.max_width and self.max_height:
             self.pixel_to_face.set_max_width_and_height(self.max_width, self.max_height)
 
