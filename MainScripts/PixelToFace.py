@@ -1,8 +1,12 @@
 import concurrent.futures
+import itertools
 
 import json
+import math
 import os
 import time
+from concurrent.futures._base import Future
+from typing import List
 
 import numpy as np
 from PIL import Image
@@ -31,7 +35,6 @@ class PixelToFace:
             self.geometry_data_directory = f"outputs/{directory}/geometry_files"
             self.output_path = f"outputs/{directory}"
 
-
         self.save_normals = save_normals
         self.save_uvs = save_uvs
         # These must be defined first or the threads won't like it
@@ -45,6 +48,9 @@ class PixelToFace:
 
         self.max_width = max_width
         self.max_height = max_height
+
+        # this is where the pixel coord to triangle lookup is
+        self.pixel_to_triangle_lookup = None
 
         # FIXME I could use async for these tasks so the load is faster
         # self.read_in_faces()
@@ -285,22 +291,11 @@ class PixelToFace:
     # returns only the indexes associated with each face
     def str_query_thread(self, target_pixels_by_name: dict, thread_count):
         label_indexes = {}
-        print(f"Thread {thread_count + 1} is searching points for targets of {len(list(target_pixels_by_name.keys()))}")
-        # missed_values = 0
-        # pixels_to_find_count = 0
-        # one idea here would be to combine all the targets in one giant list and save the length associated
-        # with each label and then slice it out when it returns that way more time is spent in C code rather than
-        # python code? maybe...
+        print(f"Thread {thread_count} is searching points for targets of {len(list(target_pixels_by_name.keys()))}")
         for label_name, targets in target_pixels_by_name.items():
-            # pixels_to_find_count += len(targets)
-            # store the list returned
-            # print("max width and height", self.max_height, self.max_width)
             uv_list = pixel_coords_to_uv_c(targets, self.max_width, self.max_height)
             target_points = Points(uv_list)
             label_indexes[label_name] = self.str_tree.nearest(target_points)
-
-        # print(f"Missed {round((missed_values / pixels_to_find_count) * 100, 2)}% of target pixels.")
-        # print(f"Missed {missed_values} out of {pixels_to_find_count}, could not find their matching faces.")
         return label_indexes
 
     def test_pixel_to_coords(self):
@@ -353,6 +348,59 @@ class PixelToFace:
             label_faces[label_name] = {"vertices": face_results, "normals": normals_result}
         else:
             label_faces[label_name] = {"vertices": face_results}
+
+    def build_pixel_to_triangle_lookup(self, max_width, max_height, thread_count: int = None, load_in_STR_file=False):
+        """ Takes in the max width and height of the image
+             and returns a dictionary of pixels mapping to triangle indexes
+             load_in_STR_file will read in the file if needed
+             thread_count is the number of threads to use
+             if thread_count is None, it will guess the number of threads using cpu_count - 1
+         """
+        if load_in_STR_file:
+            self.read_in_str_tree()
+
+        if not thread_count:
+            thread_count = cpu_count() - 1
+
+        # build all possible pixel coordinates FOLLOWING (X, Y) pattern!
+        coords_list = []
+        for x in range(max_width):
+            for y in range(max_height):
+                coords_list.append((x, y))
+
+        indexes_by_pixel = {}
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=thread_count) as executor:
+            futures: List[Future] = []
+            # split into threads chunks
+            chunks = np.array_split(coords_list, thread_count)
+
+            for i, chunk in enumerate(chunks):
+                futures.append(executor.submit(self.str_query_thread, {"pixels": chunk}, i))
+
+            # keep a global count
+            count = 0
+            for thread_num, future in enumerate(futures):
+                current_indexes_by_pixel = future.result()["pixels"]
+
+                for index, triangle_index_found in enumerate(current_indexes_by_pixel):
+                    # indexes_by_pixel[coords_list[index + offset]] = triangle_index_found
+                    indexes_by_pixel[coords_list[count]] = triangle_index_found
+                    count += 1
+                print(f"Thread {thread_num} finished")
+
+        # FROM THE IMAGE ADD ALL PIXELS TO THE STR QUERY THEN BUILD A DICT MAPPING PIXEL -> INDEX
+        print("Indexes by pixel", len(indexes_by_pixel), len(coords_list), "difference:",
+              len(indexes_by_pixel) - len(coords_list))
+        print("COUNT", count)
+        if len(indexes_by_pixel) != len(coords_list):
+            raise ValueError("Missed some pixels")
+        print("single pixel", coords_list[0])
+
+        return indexes_by_pixel
+
+    def set_pixel_to_triangle_lookup(self, lookup):
+        self.pixel_to_triangle_lookup = lookup
 
 
 def pixel_coords_to_uv(pixel_list, max_width, max_height):

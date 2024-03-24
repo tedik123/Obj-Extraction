@@ -48,7 +48,7 @@ if __name__ == "__main__":
     THREAD_COUNT = None
 
     # if you only want to run certain scripts you can change accordingly here
-    RUN_PIXEL_GRABBER = False
+    RUN_PIXEL_GRABBER = True
     RUN_PIXEL_TO_FACE = True
     RUN_PIXEL_INDEXER = True
 
@@ -136,6 +136,8 @@ if __name__ == "__main__":
                                          preload_STRtree=preload_STRtree,
                                          save_normals=SAVE_NORMALS, save_uvs=SAVE_UVS, disable_target_pixels_load=True)
             pixel_to_faces.pass_in_target_pixels(pixel_grabber.pixels_by_label)
+            # pixel_to_faces.build_pixel_to_triangle_lookup(texture_max_width, texture_max_height)
+            # raise Exception("SUCCESS")
         else:
             pixel_to_faces = PixelToFace(TARGET_FILE, texture_max_width, texture_max_height,
                                          preload_STRtree=preload_STRtree,
