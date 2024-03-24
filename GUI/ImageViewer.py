@@ -151,7 +151,8 @@ class QImageViewer(QMainWindow):
     def set_default_img_and_obj(self):
         # fileName = "C:/Users/tedik/Downloads/frog_state.png"
         image_file_name = "C:/Users/tedik/PycharmProjects/RandomScripts/obj textures/diffuse.jpg"
-        obj_file_name = "C:/Users/tedik/Desktop/ecorche-male-musclenames-anatomy/source/zipEXCHANGE2/objEXCHANGE.OBJ"
+        # obj_file_name = "C:/Users/tedik/Desktop/ecorche-male-musclenames-anatomy/source/zipEXCHANGE2/objEXCHANGE.OBJ"
+        obj_file_name = "C:/Users/tedik/PycharmProjects/RandomScripts/obj files/decimated_model.obj"
         if image_file_name:
             image = QImage(image_file_name)
             if image.isNull():

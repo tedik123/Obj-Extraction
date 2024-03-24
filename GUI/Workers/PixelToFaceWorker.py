@@ -55,6 +55,13 @@ class PixelToFaceWorker(QObject):
 
         if not preload_str_tree:
             self.pixel_to_face.build_str_tree()
+            # coords_to_face_indexes = self.pixel_to_face.build_pixel_to_triangle_lookup(self.max_width, self.max_height)
+            # IMPORTANT REMOVE AFTER TESTING !!!
+            self.pixel_to_face.set_max_width_and_height(4096, 4096)
+            # we're having issues with max width and height not being set yet :(
+            coords_to_face_indexes = self.pixel_to_face.build_pixel_to_triangle_lookup(4096, 4096)
+
+            self.pixel_to_face.set_pixel_to_triangle_lookup(coords_to_face_indexes)
         self.str_tree_loaded = True
         self.finished_building_tree.emit()
 
@@ -67,7 +74,9 @@ class PixelToFaceWorker(QObject):
             return
         self.pixel_to_face.pass_in_target_pixels({label: pixels})
         # 1 thread because we'll only be searching for one a time anyways
-
+        # why the fuck is this breaking here but not in run all :((((((
+        print("PIXELS", len(pixels), pixels[0])
+        self.pixel_to_face.find_faces_of_target_pixel_to_triangle_lookup(pixels)
         faces_by_label = self.pixel_to_face.find_faces_of_targets(save_output=False, thread_count=5)
         print(len(faces_by_label))
         key, value = next(iter(faces_by_label.items()))

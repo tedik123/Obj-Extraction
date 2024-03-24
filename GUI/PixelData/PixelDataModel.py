@@ -13,7 +13,7 @@ class LabelData:
     label: str = "test"
     starting_points: List[List[int]] = field(default_factory=list)
     acceptable_colors_rgb: List[List[int]] = field(default_factory=list)
-    pixel_deviation: int = 3
+    # pixel_deviation: int = 3
     min_X: List[int] = field(default_factory=list)
     max_X: List[int] = field(default_factory=list)
     min_Y: List[int] = field(default_factory=list)

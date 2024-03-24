@@ -259,7 +259,7 @@ class PixelToFace:
         #     for name, indices in result.items():
         #         self.get_geometries_by_index_list(self.label_faces, name, indices)
         end = time.time()
-        print(f"Threading task took {(end - start) / 60} minutes")
+        print(f"Threading task for finding faces only took {(end - start) / 60} minutes ({end - start} seconds)")
 
         if save_output:
             start = time.time()
@@ -270,6 +270,18 @@ class PixelToFace:
             end = time.time()
             print(f"Full file PICKLE dump took {(end - start) / 60} minutes")
         return self.label_faces
+
+
+    def find_faces_of_target_pixel_to_triangle_lookup(self, target_pixels_list):
+        start = time.time()
+        self.label_faces = {}
+        indices = []
+        for pixel_coord in target_pixels_list:
+            indices.append(self.pixel_to_triangle_lookup[pixel_coord])
+        self.get_geometries_by_index_list(self.label_faces, "whatever", indices)
+
+        end = time.time()
+        print(f"Full search using find_faces_of_target_pixel_to_triangle_lookup took {(end - start) / 60} minutes ({end - start} seconds)")
 
     # converts all target points to Point objects
     # FIXME this is a huge bottleneck!!!!

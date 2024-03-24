@@ -337,6 +337,9 @@ class ObjView(QWidget):
 
     def handle_new_obj_files_created(self, file_list):
         print("new obj files received", file_list)
+        # return  # this is for testing so it doesn't crash
+        # warning i think there's a problem here where it's trying to read a new file with the same name
+        #  as before so it kills itself
         self.obj_list = file_list
         # i can't find a graceful way to load the scene with new entities, so we go again! and destroy everything!
         self.setup_3d_view()
